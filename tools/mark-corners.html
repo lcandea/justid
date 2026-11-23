@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Dev tool (not deployed). Same policy as the app: the photos never leave the browser. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Mark card corners (detector benchmark)</title>
+<style>
+  body { margin: 0; padding: 16px; font-family: system-ui, sans-serif; background: #f3f1ec; color: #0d0d0c; }
+  main { max-width: 1100px; margin: 0 auto; display: grid; gap: 12px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  #wrap { background: #0d0d0c; padding: 8px; border-radius: 8px; min-height: 200px; }
+  #crop { display: block; margin: 0 auto; }
+  p { margin: 0; line-height: 1.4; }
+  code { font-family: ui-monospace, monospace; }
+  button, label.b { font: 600 15px system-ui, sans-serif; padding: 10px 14px; min-height: 44px; border: 2px solid #0d0d0c; border-radius: 8px; background: #fff; color: #0d0d0c; cursor: pointer; }
+  .primary { background: #d7ff3a; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Mark card corners</h1>
+  <p>Ground truth for <code>npm run bench-detect</code> with real photos. Put the photos in <code>tests/private/</code>
+    (git-ignored, never committed), pick them here, drag the 4 corners onto the card's real corners
+    (the rounded corner's virtual tip), then download <code>photos.js</code> into <code>tests/private/</code>.
+    Orientation doesn't matter. Nothing leaves the browser.</p>
+  <div class="bar">
+    <label class="b">Pick photos <input id="files" type="file" accept="image/*" multiple hidden></label>
+    <code id="status"></code>
+  </div>
+  <div id="wrap"><canvas id="crop"></canvas></div>
+  <div class="bar">
+    <button id="prev" type="button">← Previous</button>
+    <button id="det" type="button">Auto-detect again</button>
+    <button id="skip" type="button">No card / skip</button>
+    <button id="next" class="primary" type="button">Save and next →</button>
+    <button id="save" type="button">Download photos.js</button>
+  </div>
+  <p id="note"></p>
+</main>
+<script type="module" src="mark-corners.js"></script>
+</body>
+</html>

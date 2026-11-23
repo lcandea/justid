@@ -51,6 +51,7 @@ There are no framework and no dependencies. JSDoc with `// @ts-check` gives the 
 - The browser tests run on three projects: desktop Chrome, Android (Pixel 7) Chrome and iPhone 13 (WebKit). Locally the Chrome projects use your installed Chrome. WebKit needs `npx playwright install webkit` once. CI installs both.
 - Use `isMobile`, not the project name, for phone-only branches in tests.
 - The tests check behaviour, layout and overflow, not pixels. Look at real phones (especially iPhone Safari) after visual changes.
+- **Card detector** (`core/detect.js` → `card-match.js` → `refine.js`): `npm run bench-detect` prints accuracy, failures and time per photo over synthetic scenes (`tests/e2e/fixtures/bench.js`, built from the specimen pictures) in Chrome, WebKit and Chrome with 4× CPU throttling (phone-ish). Measure before and after any detector change. Real photos never go in the repo: put them in `tests/private/` (git-ignored), mark their corners with `tools/mark-corners.html` (served by `npm run serve`), and the benchmark adds them.
 - Guard tests worth knowing: `privacy.test.mjs` (CSP, no network APIs in shipped code except names inside locale text, no external resources, build script folder list), `architecture.test.mjs` (core/ui), `locales.test.mjs` (same keys in both languages, every used key exists), `templates.test.mjs` (templates are pure data).
 
 ## Adding things

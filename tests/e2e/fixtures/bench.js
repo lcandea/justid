@@ -1,6 +1,7 @@
 // Detector benchmark: the synthetic scenes of scenes.js plus harder ones built from the official
 // specimen pictures (templates/ref). Run with `npm run bench-detect` (tools/bench-detect.mjs).
-// Never add real ID photos here: synthetic scenes and specimen images only.
+// Never add real ID photos here: synthetic scenes and specimen images only. Real photos go in
+// tests/private/ (git-ignored), with corners marked in tools/mark-corners.html; they are added when present.
 import { makeCard, loadCard, scene, cornerError, rng, CASES, wood, desk, grid, dark, fabric } from './scenes.js';
 
 /** A cluttered desk: papers, notebooks, pens and a keyboard, drawn once and sampled per pixel. */
@@ -76,6 +77,15 @@ const SPECIMEN_CASES = [
   ['v3 front · 12 MP portrait, fabric', 'v3f', 3024, 4032, sc([[900, 250], [950, 1350], [300, 1330], [260, 260]], P), fabric, { noise: 20 }],
 ];
 
+/**
+ * Real photos with hand-marked corners (tools/mark-corners.html), if there are any: tests/private/
+ * is git-ignored and never committed. [] when the folder or its photos.js doesn't exist.
+ * @returns {Promise<{ file: string, corners: number[][] }[]>}
+ */
+async function privatePhotos() {
+  try { return (await import('/tests/private/photos.js')).default; } catch { return []; }
+}
+
 const CARD_URLS = { v4f: 'dni_es_v4_front', v4b: 'dni_es_v4_back', v3f: 'dni_es_v3_front', v3b: 'dni_es_v3_back' };
 
 /**
@@ -91,10 +101,17 @@ export async function runBench(detectCard, opts = {}) {
     ...SPECIMEN_CASES,
   ];
   const reps = opts.reps ?? 3, out = [];
-  for (const [name, cardKey, W, H, q, bgDef, o = {}] of all) {
+  for (const c of await privatePhotos()) all.push([`photo · ${c.file}`, null, 0, 0, null, null, { photo: c }]);
+  for (const [name, cardKey, W0, H0, q0, bgDef, o = {}] of all) {
     if (opts.only && !name.includes(opts.only)) continue;
-    const bg = bgDef.make ? bgDef.make(W, H) : bgDef;
-    const s = scene(cards[cardKey], W, H, q, bg, o);
+    let s, W = W0, H = H0, q = q0;
+    if (o.photo) {
+      const img = new Image(); img.src = `/tests/private/${encodeURIComponent(o.photo.file)}`; await img.decode();
+      const k = Math.min(1, 2400 / Math.max(img.naturalWidth, img.naturalHeight)); // as the app (ui/image-file.js)
+      W = Math.round(img.naturalWidth * k); H = Math.round(img.naturalHeight * k);
+      s = document.createElement('canvas'); s.width = W; s.height = H; s.getContext('2d').drawImage(img, 0, 0, W, H);
+      q = o.photo.corners.map(([u, v]) => [u * W, v * H]);
+    } else s = scene(cards[cardKey], W, H, q, bgDef.make ? bgDef.make(W, H) : bgDef, o);
     const times = []; let r = null;
     for (let i = 0; i < reps; i++) { const t0 = performance.now(); r = detectCard(s); times.push(performance.now() - t0); }
     times.sort((a, b) => a - b);
