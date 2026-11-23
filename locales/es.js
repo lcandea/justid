@@ -297,4 +297,7 @@ export default {
   'builder.message_body': 'Hola, para «{purpose}» necesito una copia de tu DNI. Puedes prepararla con JustID: solo incluye los datos necesarios y todo se hace en tu móvil.',
 
   'dialog.cancel': 'Cancelar',
+
+  'demo.note': 'Modo de prueba: estás usando las fotos del DNI de muestra oficial (espécimen), no las tuyas.',
+  'demo.exit': 'Usar mis fotos',
 };

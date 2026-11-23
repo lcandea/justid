@@ -207,6 +207,10 @@ details[open] > summary .pm::before { content: '−'; }
 .request-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 3rem 4rem; align-items: center; }
 @media (min-width: 62rem) { .request-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .req-copy { display: flex; flex-direction: column; gap: 1.375rem; align-items: flex-start; }
+.req-ctas { display: flex; flex-wrap: wrap; gap: .75rem 1.25rem; align-items: center; }
+.req-try { color: var(--ink); border-bottom-color: var(--ink); }
+.req-try:hover { border-bottom-color: var(--ink); text-decoration: underline; }
+.req-try-note { font-size: .9375rem; max-width: 34rem; }
 .req-body { font-size: 1.1875rem; line-height: 1.55; max-width: 34rem; }
 .req-mock { display: flex; flex-direction: column; gap: .875rem; min-width: 0; }
 .req-url { display: flex; background: var(--ink); color: var(--cream); font-size: .875rem; padding: 1rem 1.125rem; white-space: nowrap; overflow: hidden; }

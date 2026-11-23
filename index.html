@@ -308,10 +308,15 @@
       <p class="eyebrow"><span aria-hidden="true">07 — </span><span data-i18n="landing.request.eyebrow">Para caseros, gestores y empresas</span></p>
       <h2 id="req-h" data-i18n="landing.request.title">¿Necesitas el DNI de otra persona?</h2>
       <p class="req-body" data-i18n="landing.request.body">No pidas una foto completa. Crea un enlace que diga qué datos necesitas y para qué. La otra persona decide qué comparte y te envía una copia con marca de agua por WhatsApp o correo.</p>
-      <a class="btn btn-dark" href="app/request.html"><span data-i18n="landing.request.cta">Crear una petición</span> <span aria-hidden="true">→</span></a>
+      <div class="req-ctas">
+        <a class="btn btn-dark" href="app/request.html"><span data-i18n="landing.request.cta">Crear una petición</span> <span aria-hidden="true">→</span></a>
+        <!-- href completed by landing.js with the example request below (#fragment) -->
+        <a class="btn btn-link req-try" id="req-try" href="app/?demo=specimenv4" data-i18n="landing.request.try">Pruébalo con el DNI de muestra</a>
+      </div>
+      <p class="req-try-note" data-i18n="landing.request.try_note">Abre la petición de ejemplo con las fotos del DNI de muestra oficial: no necesitas el tuyo.</p>
     </div>
     <div class="req-mock" role="img" aria-label="Ejemplo de enlace de petición y de lo que verá la otra persona" data-i18n-attr="aria-label:landing.request.mock_aria">
-      <div class="req-url mono" aria-hidden="true"><span class="u-base">…/app/request.html</span><span class="u-frag">#v1.eyJ3aG8iOiJQaXNvcyBNYXlvciIsIndoeSI6</span></div>
+      <div class="req-url mono" aria-hidden="true"><span class="u-base" id="req-url-base">justid.candea.es/app/</span><span class="u-frag" id="req-url-frag">#req=1&amp;doc=dni_es&amp;from=JustID</span></div>
       <div class="req-card" aria-hidden="true">
         <span class="mono req-from" data-i18n="landing.request.mock_from">Petición de · Pisos Mayor (en sus palabras)</span>
         <p data-i18n="landing.request.mock_why">«Para el contrato de alquiler de C/ Mayor 12»</p>
@@ -321,6 +326,7 @@
           <span data-i18n="landing.request.mock_c3">Fecha de caducidad</span>
           <span class="chip-dark" data-i18n="landing.request.mock_c4">+ Domicilio · tú decides</span>
         </div>
+        <span class="mono req-from" data-i18n="landing.request.mock_reply">Responder a · justid@justid.com</span>
       </div>
       <p class="mono req-note" data-i18n="landing.request.note">La petición viaja dentro del enlace. No se guarda en ningún servidor.</p>
     </div>

@@ -296,4 +296,7 @@ export default {
   'builder.message_body': 'Hi, for “{purpose}” I need a copy of your ID. You can prepare it with JustID: it only includes the necessary data and everything happens on your phone.',
 
   'dialog.cancel': 'Cancel',
+
+  'demo.note': 'Test mode: you are using the official sample ID (specimen) photos, not yours.',
+  'demo.exit': 'Use my photos',
 };
