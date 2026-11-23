@@ -30,6 +30,7 @@ export function renderRequestPanel(box, { request: req, extras, backNeeded, isSh
   const parts = [
     el('h2', { class: 'req-title' }, t('request.panel_title', { name })),
     el('p', { class: 'req-purpose' }, t('request.purpose', { purpose: req.purpose })),
+    el('p', { class: 'req-fields' }, t('request.fields_list', { list: req.fields.map(id => t('field.' + id)).join(', ') })),
   ];
   if (extras.length) {
     parts.push(el('p', { class: 'req-lead warn' }, t('request.extras_lead', { name })));

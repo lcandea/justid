@@ -4,7 +4,8 @@
 // Someone who needs a copy of your DNI (a landlord, a gym…) builds a link on app/request.html.
 // Everything the request says travels in the URL #fragment, which browsers never send to the
 // server: who asks, what for, which fields, whether the back side is needed, how to send it back
-// and an optional justification. Opening the link starts the app with those fields preselected.
+// and an optional justification. Opening the link starts the app showing only the requested
+// fields (`fields` lists every one, the usual ones included; at least one is required).
 //
 // Fragment format (URLSearchParams syntax, readable on purpose so anyone can see what a link says):
 //   #req=1&doc=dni_es&from=<name>&for=<purpose>&fields=<id>,<id>&back=1&wa=<digits>&why=<text>
@@ -37,7 +38,7 @@ const DELIVERY_KEYS = /** @type {const} */ ([['whatsapp', K.whatsapp], ['email',
 /** Error codes the request builder can show to the requester (each has a `request.error.<code>` string). */
 export const BUILDER_ERRORS = ['from_required', 'from_too_long', 'from_chars', 'purpose_required', 'purpose_too_long',
   'purpose_chars', 'why_required', 'why_too_long', 'why_chars', 'delivery_required', 'phone_invalid', 'email_invalid',
-  'url_invalid', 'too_long'];
+  'url_invalid', 'too_long', 'fields_required'];
 
 /**
  * @typedef {'whatsapp' | 'email' | 'upload'} DeliveryKind
@@ -73,20 +74,41 @@ function cleanText(value, name, required) {
   return s;
 }
 
+/** Drop spaces, dots, dashes and brackets. @param {string} s */
+const stripSeparators = s => s.replace(/[\s().-]/g, '');
+
 /**
- * Phone number as wa.me wants it: country code + number, digits only.
- * Spaces, dots, dashes, brackets and a leading + or 00 are dropped; a 9-digit Spanish number
- * (starting 6, 7, 8 or 9) gets the +34 prefix. Throws `phone_invalid`.
+ * Full international number as wa.me wants it: country code + number, digits only (E.164 without
+ * the +). Separators and a leading + or 00 are dropped; no country is ever guessed.
+ * Throws `phone_invalid`.
  * @param {unknown} value @returns {string}
  */
 export function normalizePhone(value) {
   if (typeof value !== 'string' || value.length > 40) throw new RequestError('phone_invalid');
-  let s = value.replace(/[\s().-]/g, '');
+  let s = stripSeparators(value);
   if (s.startsWith('+')) s = s.slice(1);
   else if (s.startsWith('00')) s = s.slice(2);
-  if (/^[6-9]\d{8}$/.test(s)) s = '34' + s;
   if (!/^[1-9]\d{7,14}$/.test(s)) throw new RequestError('phone_invalid');
   return s;
+}
+
+/** Countries whose numbers keep their leading 0 after the country code (Italy, San Marino, Vatican). */
+const KEEP_LEADING_ZERO = new Set(['39', '378', '379']);
+
+/**
+ * Join the dial code picked in the builder with the number typed next to it.
+ * A number typed with its own + or 00 prefix is taken as already international. Otherwise one
+ * national trunk 0 is dropped (UK 07700… -> 447700…), except where it is part of the number.
+ * Throws `phone_invalid`.
+ * @param {string} dial country calling code, digits only (e.g. '34') @param {string} number
+ * @returns {string}
+ */
+export function composePhone(dial, number) {
+  if (typeof dial !== 'string' || !/^[1-9]\d{0,3}$/.test(dial) || typeof number !== 'string') throw new RequestError('phone_invalid');
+  const s = stripSeparators(number);
+  if (s.startsWith('+') || s.startsWith('00')) return normalizePhone(s);
+  if (!/^\d+$/.test(s)) throw new RequestError('phone_invalid');
+  return normalizePhone(dial + (KEEP_LEADING_ZERO.has(dial) ? s : s.replace(/^0/, '')));
 }
 
 // Deliberately narrow (no quotes, no %, no IP literals): it ends up in a mailto: link, and
@@ -156,6 +178,7 @@ export function validateRequest(raw, families) {
     wanted.add(id);
   }
   const fields = family.fields.filter(f => wanted.has(f.id)).map(f => f.id); // catalogue order, no duplicates
+  if (!fields.length) throw new RequestError('fields_required'); // a request for nothing is a mistake
   if (typeof raw.back !== 'boolean') throw new RequestError('back_invalid');
   const delivery = cleanDelivery(raw.delivery);
   const why = cleanText(raw.why, 'why', false);
@@ -167,6 +190,7 @@ export function validateRequest(raw, families) {
 
 /**
  * Requested fields that are normally hidden: the user must accept each one before it is shown.
+ * Empty means the request stays within what is normally shared (it may ask for less).
  * @param {DniRequest} req @param {Family} family @returns {string[]}
  */
 export function extraFields(req, family) {

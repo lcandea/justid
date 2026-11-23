@@ -264,7 +264,8 @@ function renderSlot(side) {
       el('label', { class: 'empty' + (sample ? ' has-sample' : '') },
         sample ? el('img', { class: 'ghost', src: assetUrl(sample), alt: '', 'aria-hidden': 'true', decoding: 'async' }) : null,
         icon(ICONS.camera), el('strong', {}, sideName(side)),
-        el('span', {}, t(side === 'front' ? 'photos.tap_front' : 'photos.tap_back')),
+        el('span', { class: side === 'back' && requestNeedsBack() ? 'req-asked' : '' }, side === 'front' ? t('photos.tap_front')
+          : requestNeedsBack() ? t('photos.tap_back_requested', { name: /** @type {any} */ (request).from }) : t('photos.tap_back')),
         fileInput(true, f => takeFile(side, f))),
       el('label', { class: 'gal' }, t('photos.gallery'), fileInput(false, f => takeFile(side, f))));
     return;
@@ -332,23 +333,26 @@ $('#crop-use').addEventListener('click', () => {
 
 /* ---------- request links ---------- */
 /**
- * Initial visibility. Without a request: the template's defaults. With one: defaults + requested
- * fields, except that a normally hidden field stays hidden until the user accepts it.
+ * Initial visibility. Without a request: the template's defaults. With one: only the requested
+ * fields, and a normally hidden one stays hidden until the user accepts it. Fields that were not
+ * asked for are hidden, even the usual ones. The user can still hide anything on step 2.
  * @param {import('./templates.js').Field} f
  */
 function startsHidden(f) {
   if (!request) return f.hide;
   if (requestExtras.has(f.id)) return !state.accepted.has(f.id);
-  return requestFields.has(f.id) ? false : f.hide;
+  return !requestFields.has(f.id);
 }
-/** The back side is needed when asked for, or when a requested field is only on the back. */
+/** With a request: the back side is asked for, or a requested field is only on the back. */
 function requestNeedsBack() {
-  if (!request) return true;
+  if (!request) return false;
   return request.back || state.template.fields.some(f => requestFields.has(f.id) && f.zones.length > 0 && f.zones.every(z => z.side === 'back'));
 }
 function renderRequest() {
   $('#req-invalid').classList.toggle('hidden', !requestResult || requestResult.ok);
   $('#req-cta').classList.toggle('hidden', !!request);
+  // The photo tip says the back is optional, unless the request asks for it.
+  $('#photos-tip').textContent = t(requestNeedsBack() ? 'photos.tip_back_requested' : 'photos.tip');
   if (!request) return;
   const present = new Set(state.template.fields.map(f => f.id));
   renderRequestPanel($('#req-panel'), {
@@ -356,8 +360,6 @@ function renderRequest() {
     isShown: id => !state.hidden.has(id),
     onAccept: (id, ok) => setHidden(id, !ok),
   });
-  // Not asked for: don't offer the back slot (unless a photo already landed there).
-  $('#slot-back').classList.toggle('hidden', !requestNeedsBack() && !state.base.back);
 }
 
 /* ---------- step 2: fields ---------- */

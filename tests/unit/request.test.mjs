@@ -14,7 +14,7 @@ const family = FAMILIES.find(f => f.id === 'dni_es');
 
 /** A valid request; override parts per test. */
 const base = (over = {}) => ({
-  doc: 'dni_es', from: 'Inmobiliaria ABC', purpose: 'Alquiler de vivienda', fields: [], back: false,
+  doc: 'dni_es', from: 'Inmobiliaria ABC', purpose: 'Alquiler de vivienda', fields: ['given_name', 'surnames', 'document_number'], back: false,
   delivery: { kind: 'whatsapp', value: '+34 600 11 22 33' }, why: '', ...over,
 });
 const enc = (over = {}) => R.encodeRequest(base(over), FAMILIES);
@@ -23,7 +23,7 @@ const dec = s => R.decodeRequest(s, FAMILIES);
 const encFails = (over, code) => assert.throws(() => enc(over), e => e instanceof R.RequestError && e.code === code, code);
 /** Decode a fragment built from key/value pairs (lets tests craft links the builder would never make). */
 const decPairs = pairs => dec('#' + new URLSearchParams(pairs).toString());
-const good = { req: '1', doc: 'dni_es', from: 'Ana', for: 'Alquiler', wa: '34600112233' };
+const good = { req: '1', doc: 'dni_es', from: 'Ana', for: 'Alquiler', fields: 'given_name', wa: '34600112233' };
 
 test('round trip: what the builder encodes is exactly what the app decodes', () => {
   const req = base({ fields: ['address', 'birth_place'], back: true, why: 'Lo exige el contrato de arrendamiento.',
@@ -44,7 +44,7 @@ test('the fragment is readable and has a fixed key order', () => {
 test('each delivery method round-trips and is normalised', () => {
   assert.deepEqual(dec(enc()).request.delivery, { kind: 'whatsapp', value: '34600112233' });
   assert.deepEqual(dec(enc({ delivery: { kind: 'whatsapp', value: '0044 7700 900123' } })).request.delivery.value, '447700900123');
-  assert.equal(dec(enc({ delivery: { kind: 'whatsapp', value: '612 345 678' } })).request.delivery.value, '34612345678'); // Spanish default
+  assert.equal(dec(enc({ delivery: { kind: 'whatsapp', value: '612 345 678' } })).request.delivery.value, '612345678'); // taken as typed: no country is guessed
   assert.deepEqual(dec(enc({ delivery: { kind: 'email', value: ' a.b+c@sub.example.es ' } })).request.delivery, { kind: 'email', value: 'a.b+c@sub.example.es' });
   assert.deepEqual(dec(enc({ delivery: { kind: 'upload', value: 'https://Example.com/subir?x=1' } })).request.delivery,
     { kind: 'upload', value: 'https://example.com/subir?x=1' });
@@ -100,6 +100,8 @@ test('required parts', () => {
   encFails({ delivery: { kind: 'whatsapp', value: ' ' } }, 'delivery_required');
   encFails({ delivery: { kind: 'fax', value: '123' } }, 'delivery_required');
   encFails({ doc: 'passport_es' }, 'doc_unsupported');
+  encFails({ fields: [] }, 'fields_required');
+  assert.deepEqual(decPairs({ ...good, fields: '' }), { ok: false, error: 'fields_required' });
   const { from, ...noFrom } = good;
   assert.deepEqual(decPairs(noFrom), { ok: false, error: 'from_required' });
   const { wa, ...noDelivery } = good;
@@ -201,8 +203,27 @@ test('wording: credits INCIBE and the AEPD, never claims a government recommenda
 });
 
 test('request code renders decoded text only as text (no innerHTML, no HTML parsing)', () => {
-  for (const f of ['app/js/request.js', 'app/js/request-view.js', 'app/js/request-page.js']) {
+  for (const f of ['app/js/request.js', 'app/js/request-view.js', 'app/js/request-page.js', 'app/js/dial-picker.js']) {
     const src = readFileSync(join(ROOT, f), 'utf8');
     assert.doesNotMatch(src, /innerHTML|outerHTML|insertAdjacentHTML|document\.write|DOMParser|createContextualFragment/, f);
+  }
+});
+
+test('a request may ask for fewer fields than the usual ones, but not for none', () => {
+  const out = dec(enc({ fields: ['given_name', 'document_number'] }));
+  assert.deepEqual(out.request.fields, ['given_name', 'document_number']);
+  assert.deepEqual(R.extraFields(out.request, family), []); // still within what is normally shared
+  encFails({ fields: [] }, 'fields_required');
+});
+
+test('composePhone joins the picked dial code and the typed number', () => {
+  assert.equal(R.composePhone('34', '600 11 22 33'), '34600112233');
+  assert.equal(R.composePhone('351', '912-345-678'), '351912345678');
+  assert.equal(R.composePhone('44', '07700 900123'), '447700900123'); // national trunk 0 dropped
+  assert.equal(R.composePhone('39', '06 1234 5678'), '390612345678'); // Italy keeps it
+  assert.equal(R.composePhone('34', '+44 7700 900123'), '447700900123'); // typed its own prefix: wins
+  assert.equal(R.composePhone('34', '0044 7700 900123'), '447700900123');
+  for (const [dial, n] of [['34', '600abc'], ['34', '12'], ['x', '600112233'], ['34', '+'], ['0', '600112233']]) {
+    assert.throws(() => R.composePhone(dial, n), e => e.code === 'phone_invalid', `${dial} ${n}`);
   }
 });
