@@ -1,6 +1,6 @@
 // @ts-check
 // Landing page behaviour: applies the chosen language to the static Spanish markup, mounts the
-// ES/EN switches and wires the "copy the AI prompt" button. No network access (the CSP forbids it).
+// ES/EN switches, wires the "copy the AI prompt" button and makes the hero's specimen draggable. No network access (the CSP forbids it).
 import { applyI18n, mountLangSwitch, t } from '../app/js/ui/i18n.js';
 import { encodeRequest } from '../app/js/core/request.js';
 import { defaultFields } from '../app/js/core/request-builder.js';
@@ -13,6 +13,7 @@ applyI18n();
 document.querySelectorAll('[data-lang-switch]').forEach(box => mountLangSwitch(/** @type {HTMLElement} */ (box)));
 setupCopyButton();
 setupExampleRequest();
+setupSpecimenSlider();
 window.addEventListener('langchange', setupExampleRequest);
 
 /** Select all the text of an element so the user can copy it by hand. @param {HTMLElement} node */
@@ -97,4 +98,52 @@ function setupExampleRequest() {
   const base = document.getElementById('req-url-base'), frag = document.getElementById('req-url-frag');
   if (base) base.textContent = location.host + '/app/';
   if (frag) frag.textContent = '#' + fragment;
+}
+
+/**
+ * The hero's specimen: the CSS animation sweeps the scan line until the visitor takes over. Pressing
+ * (mouse or touch) moves the line to the pointer and dragging follows it; arrow keys, Home and End
+ * work too. It then stays where it was left. With reduced motion there is no animation, but
+ * dragging still works. The card is rotated, so the pointer is mapped into the card's own axes.
+ */
+function setupSpecimenSlider() {
+  const card = /** @type {HTMLElement | null} */ (document.querySelector('.id-card'));
+  if (!card) return;
+  const ANGLE = -4 * Math.PI / 180; // must match the rotate() in landing.css
+  let pos = 62;
+
+  /** @param {number} value percentage of the card showing the covered copy */
+  const set = value => {
+    pos = Math.round(Math.min(100, Math.max(0, value)));
+    card.classList.add('is-manual');
+    card.style.setProperty('--pos', pos + '%');
+    card.setAttribute('aria-valuenow', String(pos));
+    card.setAttribute('aria-valuetext', t('landing.hero.slider_value', { n: pos }));
+  };
+  /** Position under the pointer, in percent of the card's width. @param {PointerEvent} e */
+  const fromPointer = e => {
+    const r = card.getBoundingClientRect(), dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+    const local = dx * Math.cos(ANGLE) + dy * Math.sin(ANGLE); // undo the rotation
+    return (local / card.offsetWidth + 0.5) * 100;
+  };
+
+  /** The pointer currently dragging, if any. @type {number | null} */
+  let dragging = null;
+  card.addEventListener('pointerdown', e => {
+    if (e.button !== 0) return;
+    dragging = e.pointerId;
+    try { card.setPointerCapture(e.pointerId); } catch { /* keeps working without capture */ }
+    set(fromPointer(e));
+  });
+  card.addEventListener('pointermove', e => { if (e.pointerId === dragging) set(fromPointer(e)); });
+  for (const type of ['pointerup', 'pointercancel']) card.addEventListener(type, () => { dragging = null; });
+  card.addEventListener('keydown', e => {
+    const step = e.shiftKey ? 10 : 5;
+    const next = { ArrowLeft: pos - step, ArrowDown: pos - step, ArrowRight: pos + step, ArrowUp: pos + step, Home: 0, End: 100 }[e.key];
+    if (next === undefined) return;
+    e.preventDefault();
+    set(next);
+  });
+  window.addEventListener('langchange', () => card.setAttribute('aria-valuetext', t('landing.hero.slider_value', { n: pos })));
+  card.setAttribute('aria-valuetext', t('landing.hero.slider_value', { n: pos }));
 }
