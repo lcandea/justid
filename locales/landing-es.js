@@ -61,11 +61,11 @@ export default {
   'landing.why.advice': 'INCIBE y la AEPD recomiendan no enviar copias completas, tapar lo que no hace falta e indicar para qué es la copia.',
   'landing.why.more': 'Para saber más',
   'landing.why.incibe': 'INCIBE',
-  'landing.why.incibe_aria': 'INCIBE (Instituto Nacional de Ciberseguridad): consejos para evitar la suplantación de identidad. Se abre en una pestaña nueva.',
+  'landing.why.incibe_aria': 'INCIBE (Instituto Nacional de Ciberseguridad): precauciones si vas a enviar tu DNI por internet. Se abre en una pestaña nueva.',
   'landing.why.aepd': 'AEPD',
-  'landing.why.aepd_aria': 'AEPD (Agencia Española de Protección de Datos): qué datos te pueden pedir y cómo protegerte. Se abre en una pestaña nueva.',
+  'landing.why.aepd_aria': 'AEPD (Agencia Española de Protección de Datos): preguntas frecuentes sobre la identificación con DNI. Se abre en una pestaña nueva.',
   'landing.why.rtve': 'RTVE',
-  'landing.why.rtve_aria': 'RTVE: reportaje sobre fraudes con copias del DNI. Se abre en una pestaña nueva.',
+  'landing.why.rtve_aria': 'RTVE: los expertos recomiendan pixelar datos al compartir el DNI por internet. Se abre en una pestaña nueva.',
 
   // 4. What it does
   'landing.features.eyebrow': 'Qué hace',

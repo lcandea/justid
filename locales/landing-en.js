@@ -61,11 +61,11 @@ export default {
   'landing.why.advice': 'INCIBE and the AEPD advise against sending full copies: cover what isn’t needed and state what the copy is for.',
   'landing.why.more': 'Learn more',
   'landing.why.incibe': 'INCIBE',
-  'landing.why.incibe_aria': 'INCIBE (Spanish National Cybersecurity Institute): advice on avoiding identity theft. Opens in a new tab.',
+  'landing.why.incibe_aria': 'INCIBE (Spanish National Cybersecurity Institute): precautions before sending your ID online. Opens in a new tab.',
   'landing.why.aepd': 'AEPD',
-  'landing.why.aepd_aria': 'AEPD (Spanish Data Protection Agency): what data you can be asked for and how to protect yourself. Opens in a new tab.',
+  'landing.why.aepd_aria': 'AEPD (Spanish Data Protection Agency): FAQ on identifying yourself with your ID. Opens in a new tab.',
   'landing.why.rtve': 'RTVE',
-  'landing.why.rtve_aria': 'RTVE: report on fraud involving ID copies. Opens in a new tab.',
+  'landing.why.rtve_aria': 'RTVE: experts recommend pixelating data when sharing your ID online. Opens in a new tab.',
 
   // 4. What it does
   'landing.features.eyebrow': 'What it does',
