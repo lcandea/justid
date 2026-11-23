@@ -8,6 +8,7 @@
     "serve": "python3 tools/serve.py 8765",
     "import-template": "node tools/import-template.mjs",
     "render-landing-specimen": "node tools/render-landing-specimen.mjs",
+    "bench-detect": "node tools/bench-detect.mjs",
     "typecheck": "tsc -p tsconfig.json",
     "test:unit": "node --test tests/unit/*.test.mjs",
     "test:e2e": "playwright test",
