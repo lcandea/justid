@@ -69,6 +69,7 @@ Requirements: Node 22+ (tests only) and Python 3 (local server). The site itself
 
 ```sh
 npm install                 # dev tools only: TypeScript (type check) + Playwright (tests)
+npx playwright install webkit  # once: Safari's engine for the iPhone tests (Chrome tests use your installed Chrome)
 npm run serve               # http://localhost:8765/app/, also printed with your LAN IP for testing on a phone
 npm test                    # type check + unit tests + browser tests
 ```
