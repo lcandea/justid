@@ -152,3 +152,77 @@ button.lock.wiggle svg { animation: lock-wiggle 5s ease-in-out 1s infinite; tran
 .zoom-viewer::backdrop { background: #0b0c0e; }
 .zoom-img { max-width: 96vw; max-height: 90dvh; transform-origin: center; user-select: none; -webkit-user-drag: none; will-change: transform; }
 .zoom-close { position: absolute; top: max(12px, env(safe-area-inset-top)); right: 12px; width: 44px; height: 44px; justify-content: center; border-radius: 50%; font-size: 18px; background: rgba(255,255,255,.12); color: #fff; border: 0; }
+
+/* Request links: summary on step 1 (what is asked, by whom) */
+.req-invalid { margin: 0 0 12px; }
+.req-panel { background: var(--card); border: 1px solid var(--accent); border-radius: 14px; padding: 14px 16px; margin: 0 0 18px; }
+.req-panel .req-title { font-size: 18px; margin: 0 0 4px; overflow-wrap: anywhere; }
+.req-panel p { margin: 6px 0; overflow-wrap: anywhere; }
+.req-purpose { font-weight: 600; }
+.req-lead.warn { color: var(--warn); font-weight: 600; }
+.req-lead.ok { color: var(--ok); }
+.req-extras { list-style: none; margin: 6px 0 10px; padding: 0; }
+.req-extra-row { border: 1px dashed var(--warn); border-radius: 10px; padding: 9px 10px; margin: 6px 0; }
+.req-extra-row.accepted { border-style: solid; border-color: var(--ok); }
+.req-extra-row .req-state { display: block; font-size: 12px; color: var(--warn); }
+.req-extra-row.accepted .req-state { color: var(--ok); }
+.req-why-lead { font-size: 13px; color: var(--muted); }
+/* Text written by the requester: quoted and set apart so it can't pass for JustID's own wording */
+.req-why { margin: 4px 0 10px; padding: 8px 12px; border-left: 3px solid var(--muted); background: var(--bg); border-radius: 0 8px 8px 0; font-style: italic; overflow-wrap: anywhere; }
+.req-why::before { content: "«"; }
+.req-why::after { content: "»"; }
+.req-meta { font-size: 14px; }
+.req-verify { font-size: 12px; }
+.req-cta { margin-top: 14px; text-align: center; }
+.fld.req-extra { background: color-mix(in srgb, var(--warn) 10%, transparent); border-radius: 8px; padding-left: 8px; padding-right: 8px; }
+.req-send { margin-top: 18px; padding-top: 6px; border-top: 1px solid var(--line); }
+.req-send p { margin: 6px 0; }
+a.btn.big { width: 100%; justify-content: center; padding: 14px; font-size: 17px; border-radius: 12px; text-decoration: none; text-align: center; overflow-wrap: anywhere; }
+.req-send .req-send-btn { margin-top: 8px; }
+
+/* Request builder (request.html) */
+.builder-body { padding-bottom: env(safe-area-inset-bottom); }
+.builder .builder-nav { margin: 0 0 8px; font-size: 14px; }
+.builder .lbl { margin-top: 14px; }
+.builder textarea { font-size: 16px; padding: 12px; resize: vertical; }
+.builder .b-count { text-align: right; margin: 2px 0 0; }
+.builder .b-field small { display: block; font-size: 12px; }
+.builder .b-field .b-extra-note { color: var(--warn); }
+.builder .b-back { margin-top: 10px; }
+.builder #b-delivery { flex-wrap: wrap; }
+.builder #b-error { margin: 12px 0; }
+.builder #b-error:empty { margin: 4px 0; }
+/* WhatsApp number: country-code button + number; the searchable country list floats ABOVE the row
+   (search box at the bottom, next to the button), so the phone keyboard never covers it */
+.phone-wrap { position: relative; }
+.phone-row { display: flex; gap: 8px; }
+.phone-row input { flex: 1; min-width: 0; }
+.dial-btn { flex: none; font-size: 16px; padding: 0 12px; border-radius: 8px; white-space: nowrap; }
+.dial-flag { font-size: 20px; line-height: 1; }
+.dial-pop { position: absolute; left: 0; right: 0; bottom: calc(100% + 6px); z-index: 20; display: flex; flex-direction: column;
+  border: 1px solid var(--line); border-radius: 12px; background: var(--card); padding: 8px; box-shadow: 0 -6px 24px rgb(0 0 0 / 0.18); }
+.dial-head { order: 3; display: flex; gap: 8px; }
+.dial-head input { flex: 1; min-width: 0; }
+.dial-close { display: none; }
+/* Phones: a full-screen sheet pinned to the visible area above the keyboard (iOS keeps the layout
+   viewport behind the keyboard, so JS feeds the visual viewport in --vv-top / --vv-h). Search on top. */
+.dial-pop.sheet { position: fixed; left: 0; right: 0; bottom: auto; top: var(--vv-top, 0px); height: var(--vv-h, 100vh);
+  z-index: 1000; border: 0; border-radius: 0; box-shadow: none; padding: calc(env(safe-area-inset-top, 0px) + 10px) 12px 8px; }
+.dial-pop.sheet .dial-head { order: 0; }
+.dial-pop.sheet .dial-close { display: block; flex: none; }
+.dial-pop.sheet .dial-list { order: 1; flex: 1; min-height: 0; max-height: none; margin: 8px 0 0; }
+.dial-pop.sheet .dial-empty { order: 2; }
+html.dial-lock, html.dial-lock body { overflow: hidden; }
+.dial-pop .dial-empty { order: 2; }
+.dial-pop input { font-size: 16px; padding: 10px; }
+.dial-list { order: 1; list-style: none; margin: 0 0 6px; padding: 0; max-height: min(260px, 38vh); max-height: min(260px, 38dvh); overflow-y: auto; overscroll-behavior: contain; }
+.dial-list li { display: flex; align-items: center; gap: 10px; padding: 9px 8px; border-radius: 8px; cursor: pointer; }
+.dial-list li.active { background: color-mix(in srgb, var(--accent) 18%, transparent); outline: 2px solid var(--accent); outline-offset: -2px; }
+.dial-list li[aria-selected="true"] .dial-name { font-weight: 600; }
+.dial-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.dial-code { color: var(--muted); font-variant-numeric: tabular-nums; }
+.dial-empty { margin: 8px 4px; }
+.b-phone-preview { margin: 4px 0 0; }
+.slot .empty .req-asked { color: var(--accent); font-weight: 600; }
+.b-result { margin-top: 20px; }
+.b-result #b-link { margin: 6px 0 12px; font-size: 14px; }

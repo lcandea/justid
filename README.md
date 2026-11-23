@@ -15,6 +15,7 @@
 - **Field-by-field hiding.** You choose which fields to hide, with recommended defaults. Hidden fields are pixelated with noise, or covered with solid blocks.
 - **Purpose watermark.** "SOLO PARA: …" is written across the whole card, so the copy can't be reused for anything else.
 - **PDF at real card size**, with a caption stating its purpose and date. You can share it straight from your phone.
+- **Request links** (`app/request.html`). Whoever needs your DNI (a landlord, a gym…) builds a link saying who they are, what for, which extra fields they want and why, and how to send it back (WhatsApp, email or an upload page). The whole request lives in the link's `#fragment`, which browsers never send to a server. Opening it shows only the fields asked for (the usual ones come preselected for the requester, who can ask for less), and each normally hidden one stays hidden until you accept it. WhatsApp numbers are entered with a searchable country-code picker. The requester's justification is shown as their own words, never as JustID's. Format and validation: `app/js/request.js`.
 - **Zone editor** (`app/editor.html`) for adjusting templates or creating new ones.
 
 ## Privacy: how you can verify it
