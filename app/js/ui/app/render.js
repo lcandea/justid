@@ -2,7 +2,7 @@
 // Drawing the redacted previews, the zone outlines and the summary line.
 import { $, $input } from '../dom.js';
 import { t, getLang } from '../i18n.js';
-import { renderRedacted } from '../../core/redact.js';
+import { prepareCard, watermarkLayer, composeRedacted } from '../../core/redact.js';
 import { watermarkText } from '../../core/watermark.js';
 import { SIDE_LIST, hiddenFieldCount } from '../../core/flow.js';
 import { state, zonesCanvas, sides, sideName } from './state.js';
@@ -38,15 +38,52 @@ export function updateSummary() {
   $('#summary').textContent = t('share.summary', { sides: list, count, watermark: currentWatermark() });
 }
 
+/** Secret per-session seed: pixelation noise and watermark jitter are stable on screen but unpredictable. */
+const SEED = crypto.getRandomValues(new Uint32Array(1))[0];
+
+/**
+ * Cached layers per side. A layer is rebuilt only when its own inputs change, and a side whose
+ * output inputs are all unchanged is not redrawn at all (toggling a front field leaves the back alone).
+ * @typedef {{ base: HTMLCanvasElement | null, bw: boolean, card: HTMLCanvasElement | null,
+ *   wmKey: string, wm: HTMLCanvasElement | null, template: object | null, outKey: string }} SideCache
+ * @type {Record<import('./state.js').Side, SideCache>}
+ */
+const cache = {
+  front: { base: null, bw: false, card: null, wmKey: '', wm: null, template: null, outKey: '' },
+  back: { base: null, bw: false, card: null, wmKey: '', wm: null, template: null, outKey: '' },
+};
+let cacheGen = 0; // bumped whenever a cached layer is rebuilt, so the output key changes too
+
+/** @param {import('./state.js').Side} side @param {HTMLCanvasElement} base @param {string} watermark */
+function renderSide(side, base, watermark) {
+  const c = cache[side];
+  if (c.base !== base || c.bw !== state.bw || !c.card) {
+    c.base = base; c.bw = state.bw; c.card = prepareCard(base, state.bw); cacheGen++;
+  }
+  // The font is part of the key: if the watermark was drawn before Archivo loaded, redraw it once it has.
+  const wmKey = `${base.width}x${base.height}|${state.bw}|${watermark}|${document.fonts.check('500 12px Archivo')}`;
+  if (c.wmKey !== wmKey) {
+    c.wmKey = wmKey; c.wm = watermark ? watermarkLayer(base.width, base.height, watermark, state.bw, SEED) : null; cacheGen++;
+  }
+  if (c.template !== state.template) { c.template = state.template; cacheGen++; }
+  const hiddenHere = state.template.fields
+    .filter(f => state.hidden.has(f.id) && f.zones.some(z => z.side === side)).map(f => f.id).join(',');
+  const outKey = `${cacheGen}|${state.mode}|${hiddenHere}`;
+  if (c.outKey === outKey) return;
+  c.outKey = outKey;
+  composeRedacted(state.canvas[side], c.card, side, { template: state.template, hidden: state.hidden, mode: state.mode, seed: SEED }, c.wm);
+}
+
 let renderTimer = 0;
-/** Re-render both previews (debounced). */
+/** Re-render what changed in the previews (debounced). */
 export function renderAll() {
   clearTimeout(renderTimer);
   renderTimer = window.setTimeout(() => {
-    const opts = { template: state.template, hidden: state.hidden, mode: state.mode, bw: state.bw, watermark: currentWatermark() };
+    const watermark = currentWatermark();
     for (const side of SIDE_LIST) {
       const base = state.base[side];
-      if (base) renderRedacted(state.canvas[side], base, side, opts);
+      if (base) renderSide(side, base, watermark);
+      else cache[side].base = null;
     }
     drawZones(); updateSummary();
   }, 50);

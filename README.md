@@ -32,7 +32,7 @@ The landing page explains JustID for everyone: [why it matters](https://justid.c
 The pipeline, with the module that does each part. Every module starts with a comment explaining what it does and why; that is the detailed documentation.
 
 1. **Photo.** The photo is decoded onto a `<canvas>`, which also drops its EXIF metadata.
-2. **Detection.** A gradient-based Hough transform finds the card's four edges (`app/js/core/detect.js`).
+2. **Detection.** A gradient-based Hough transform proposes edges and candidate quadrilaterals (`app/js/core/detect.js`); the candidates are ranked against the templates' reference pictures (`app/js/core/card-match.js`), and the corners are refined to sub-pixel accuracy on a sharper copy of the photo (`app/js/core/refine.js`).
 3. **Straightening.** A homography warps the card to 1012 × 638 px, which is ID-1 size at about 300 dpi (`app/js/core/image.js`).
 4. **Identification.** A small grey "signature" of the card is compared against each template's reference picture (`app/js/core/identify.js`).
 5. **Redaction.** Each hidden field's zones are pixelated or covered, and the watermark is drawn on top (`app/js/core/redact.js`).
@@ -42,7 +42,8 @@ The pipeline, with the module that does each part. Every module starts with a co
 
 ```
 index.html            landing page; 404.html, favicon.svg
-landing/              landing.css, landing.js, img/ (covered specimen, made by tools/render-landing-specimen.mjs)
+why/index.html        /why: why share an ID with just enough, for senders (#send) and recipients (#receive); the PDF links here
+landing/              landing.css, landing.js, img/ (covered specimen, made by tools/render-landing-specimen.mjs); why.css, why.js for /why
 _headers              HTTP security headers (CSP, anti-framing) for every response
 wrangler.jsonc        Cloudflare deployment config (static files only, no server code)
 app/                  the app: index.html (4-step flow), request.html (request builder), editor.html (zone editor)
@@ -56,7 +57,7 @@ app/                  the app: index.html (4-step flow), request.html (request b
       editor.js       controller of editor.html
   css/                common.css (header, small bits) + one sheet per page: flow.css, request.css, editor.css
 shared/               theme.css (colour/type tokens + shared components) and fonts/, used by the landing and the app
-locales/              es.js, en.js: every user-visible string (landing strings in landing-es.js / landing-en.js, merged in)
+locales/              es.js, en.js: every user-visible string (landing / why strings in landing-*.js / why-*.js, merged in)
 templates/            document templates, pure data:
   dni_es.js           family: field catalogue + which fields are shown by default
   dni_es_v3.js        version: where each field is on the card + reference pictures
@@ -67,7 +68,8 @@ tests/unit/           Node tests: template purity, translations, privacy guards,
 tests/e2e/            Playwright tests (desktop Chrome, Android Chrome, iPhone WebKit): app flow, CSP, detector,
                       request links, landing
 tools/                dev-only, never shipped: local server, reference-picture normaliser (uv project),
-                      template importer, landing specimen renderer
+                      template importer, landing specimen renderer, QR codes of the PDF (make-qr.mjs,
+                      writes app/js/core/qr-codes.js with the `qrcode` dev dependency)
 ```
 
 ## Development

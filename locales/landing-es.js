@@ -65,6 +65,7 @@ export default {
   'landing.why.aepd': 'AEPD',
   'landing.why.aepd_aria': 'AEPD (Agencia Española de Protección de Datos): preguntas frecuentes sobre la identificación con DNI. Se abre en una pestaña nueva.',
   'landing.why.rtve': 'RTVE',
+  'landing.why.more_page': 'Para quien envía y para quien recibe',
   'landing.why.rtve_aria': 'RTVE: los expertos recomiendan pixelar datos al compartir el DNI por internet. Se abre en una pestaña nueva.',
 
   // 4. What it does
@@ -122,7 +123,7 @@ export default {
   'landing.inside.simple_b': 'por internet, y es tu navegador quien hace cumplir esa prohibición, no nosotros.',
   'landing.inside.t1_a': 'La foto se dibuja en un',
   'landing.inside.t1_b': ', lo que elimina sus metadatos EXIF (ubicación, modelo de móvil…).',
-  'landing.inside.t2': 'Una transformada de Hough basada en gradientes encuentra los bordes de la tarjeta, y una homografía la endereza a 1012 × 638 px (tamaño ID-1 a unos 300 ppp).',
+  'landing.inside.t2': 'Una transformada de Hough basada en gradientes propone posibles bordes; los cuadriláteros candidatos se ordenan comparándolos con las imágenes de referencia de las plantillas, y las esquinas se afinan al subpíxel en la foto a más resolución. Una homografía endereza la tarjeta a 1012 × 638 px (tamaño ID-1 a unos 300 ppp).',
   'landing.inside.t3': 'La versión del DNI se reconoce comparando una «firma» en escala de grises con imágenes de referencia.',
   'landing.inside.t4': 'Las zonas ocultas se pixelan con ruido o se tapan; la marca de agua se dibuja encima. Los píxeles originales no quedan en el PDF.',
   'landing.inside.t5': 'Un generador de PDF propio, sin dependencias, incrusta las imágenes ya tapadas.',
@@ -177,11 +178,12 @@ export default {
   'landing.request.mock_c4': '+ Domicilio · tú decides',
   'landing.request.mock_reply': 'Responder a · justid@justid.com',
   'landing.request.try': 'Pruébalo con el DNI de muestra',
+  'landing.request.why': 'Por qué pedirlo así',
   'landing.request.try_note': 'Abre la petición de ejemplo con las fotos del DNI de muestra oficial: no necesitas el tuyo.',
   'landing.request.demo_from': 'JustID (ejemplo)',
   'landing.request.demo_purpose': 'Probar JustID',
   'landing.request.demo_why': 'Es un ejemplo: así se ve cuando alguien pide un dato extra. Tú decides si lo compartes.',
-  'landing.request.note': 'La petición viaja dentro del enlace. No se guarda en ningún servidor.',
+  'landing.request.note': 'La petición viaja dentro del enlace. No se guarda en ningún servidor y no caduca: créalo una vez y reutilízalo con todos tus clientes.',
 
   // 8. FAQ
   'landing.faq.eyebrow': 'Preguntas',
@@ -193,7 +195,8 @@ export default {
   'landing.faq.q3': '¿Guardáis mis fotos?',
   'landing.faq.a3': 'No. Al cerrar la página desaparecen. No usamos cookies, analíticas ni rastreadores.',
   'landing.faq.q4': '¿Una copia tapada sigue siendo válida?',
-  'landing.faq.a4': 'Depende de quién la pida. Muchos trámites solo necesitan comprobar tu nombre y tu número de DNI. Si te piden más datos, pregunta para qué los necesitan.',
+  'landing.faq.a4': 'Para la mayoría de trámites, sí: basta con tu nombre, tu número de DNI y tu foto. Solo algunas entidades, como los bancos, están obligadas por ley a guardar una copia completa.',
+  'landing.faq.a4_more': 'Qué responder si te dicen que no vale',
   'landing.faq.q5': '¿Qué DNI admite?',
   'landing.faq.a5': 'El DNI español 3.0 (2015–2021) y 4.0 (desde 2021). Con el marcador de zonas puedes adaptarlo a otros documentos.',
 
@@ -201,6 +204,7 @@ export default {
   'landing.footer.nav': 'Pie de página',
   'landing.footer.source': 'Código fuente',
   'landing.footer.license': 'Licencia MIT',
+  'landing.footer.why': 'Por qué así',
   'landing.footer.disclaimer_a': 'JustID es un proyecto independiente y de código abierto.',
   'landing.footer.disclaimer_b': 'No está afiliado a la Policía Nacional, al Ministerio del Interior ni a ningún organismo público.',
 };

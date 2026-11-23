@@ -9,6 +9,7 @@
     "import-template": "node tools/import-template.mjs",
     "render-landing-specimen": "node tools/render-landing-specimen.mjs",
     "bench-detect": "node tools/bench-detect.mjs",
+    "make-qr": "node tools/make-qr.mjs",
     "typecheck": "tsc -p tsconfig.json",
     "test:unit": "node --test tests/unit/*.test.mjs",
     "test:e2e": "playwright test",
@@ -16,6 +17,7 @@
   },
   "devDependencies": {
     "@playwright/test": "1.65.0",
+    "qrcode": "1.5.4",
     "typescript": "6.0.3",
     "wrangler": "4.158.0"
   }

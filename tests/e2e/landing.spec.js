@@ -124,3 +124,19 @@ test('step 1 offers to try with a v3 or v4 sample ID, keeping the request link',
   await expect(page.locator('#demo-note')).toBeVisible();
   await expect(page.locator('#tpl-name')).toHaveText('DNI España v4 (desde 2021)');
 });
+
+test('/why loads cleanly, has both audiences, switches language and links to the app', async ({ page, baseURL }) => {
+  const seen = watch(page, String(baseURL));
+  await page.goto('/why/#receive');
+  await expect(page.locator('h1')).toHaveCount(1);
+  await expect(page.locator('section#send h2')).toHaveCount(1);
+  await expect(page.locator('section#receive h2')).toBeInViewport();
+  await expect(page.locator('a[href="/app/request.html"]')).toHaveCount(1);
+  await expect(page.locator('a[href="/app/"]')).toHaveCount(1);
+  await page.locator('.site-header [data-lang-switch] button', { hasText: 'EN' }).click();
+  await expect(page.locator('h1')).toContainText(/just enough/i);
+  await expect(page.locator('#receive .why-sources a').first()).toHaveAttribute('href', /eur-lex\.europa\.eu\/legal-content\/EN\//);
+  await page.evaluate(() => document.fonts.ready);
+  expect(seen.errors).toEqual([]);
+  expect(seen.outside).toEqual([]);
+});

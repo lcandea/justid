@@ -65,6 +65,7 @@ export default {
   'landing.why.aepd': 'AEPD',
   'landing.why.aepd_aria': 'AEPD (Spanish Data Protection Agency): FAQ on identifying yourself with your ID. Opens in a new tab.',
   'landing.why.rtve': 'RTVE',
+  'landing.why.more_page': 'For senders and recipients',
   'landing.why.rtve_aria': 'RTVE: experts recommend pixelating data when sharing your ID online. Opens in a new tab.',
 
   // 4. What it does
@@ -122,7 +123,7 @@ export default {
   'landing.inside.simple_b': 'over the internet, and it is your browser that enforces that ban, not us.',
   'landing.inside.t1_a': 'The photo is drawn onto a',
   'landing.inside.t1_b': ', which strips its EXIF metadata (location, phone model…).',
-  'landing.inside.t2': 'A gradient-based Hough transform finds the card’s edges, and a homography straightens it to 1012 × 638 px (ID-1 size at about 300 dpi).',
+  'landing.inside.t2': 'A gradient-based Hough transform proposes candidate edges; the candidate quadrilaterals are ranked against the templates’ reference pictures, and the corners are refined to sub-pixel accuracy on a sharper copy of the photo. A homography straightens the card to 1012 × 638 px (ID-1 size at about 300 dpi).',
   'landing.inside.t3': 'The ID version is recognised by comparing a greyscale “signature” with reference images.',
   'landing.inside.t4': 'Hidden zones are pixelated with noise or covered; the watermark is drawn on top. The original pixels never reach the PDF.',
   'landing.inside.t5': 'A dependency-free PDF writer of our own embeds the already-covered images.',
@@ -177,11 +178,12 @@ export default {
   'landing.request.mock_c4': '+ Home address · you decide',
   'landing.request.mock_reply': 'Reply to · justid@justid.com',
   'landing.request.try': 'Try it with the sample ID',
+  'landing.request.why': 'Why ask for it this way',
   'landing.request.try_note': 'Opens the example request with the official sample ID photos: you don’t need yours.',
   'landing.request.demo_from': 'JustID (example)',
   'landing.request.demo_purpose': 'Try JustID',
   'landing.request.demo_why': 'This is an example: this is what it looks like when someone asks for extra data. You decide whether to share it.',
-  'landing.request.note': 'The request travels inside the link. It is not stored on any server.',
+  'landing.request.note': 'The request travels inside the link. It is not stored on any server and never expires: create it once and reuse it with all your customers.',
 
   // 8. FAQ
   'landing.faq.eyebrow': 'Questions',
@@ -193,7 +195,8 @@ export default {
   'landing.faq.q3': 'Do you keep my photos?',
   'landing.faq.a3': 'No. They are gone when you close the page. We use no cookies, analytics or trackers.',
   'landing.faq.q4': 'Is a covered copy still valid?',
-  'landing.faq.a4': 'It depends on who is asking. Many procedures only need to check your name and ID number. If they ask for more, ask what they need it for.',
+  'landing.faq.a4': 'For most procedures, yes: your name, ID number and photo are enough. Only some organisations, such as banks, are required by law to keep a full copy.',
+  'landing.faq.a4_more': 'What to answer if they say it isn’t valid',
   'landing.faq.q5': 'Which IDs does it support?',
   'landing.faq.a5': 'The Spanish DNI 3.0 (2015–2021) and 4.0 (since 2021). With the zone editor you can adapt it to other documents.',
 
@@ -201,6 +204,7 @@ export default {
   'landing.footer.nav': 'Footer',
   'landing.footer.source': 'Source code',
   'landing.footer.license': 'MIT licence',
+  'landing.footer.why': 'Why this way',
   'landing.footer.disclaimer_a': 'JustID is an independent, open-source project.',
   'landing.footer.disclaimer_b': 'It is not affiliated with the Policía Nacional, the Ministry of the Interior or any public body.',
 };

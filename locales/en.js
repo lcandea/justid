@@ -1,10 +1,12 @@
 // @ts-check
 // English UI strings. Keys must match locales/es.js exactly (checked by tests).
 import landing from './landing-en.js';
+import why from './why-en.js';
 
-// Landing page strings live in landing-en.js.
+// Landing page strings live in landing-en.js, the /why page strings in why-en.js.
 export default {
   ...landing,
+  ...why,
   'meta.title': 'JustID — Share your ID, just enough',
   'meta.editor_title': 'JustID — Zone editor',
   'brand.tagline': 'Just enough',
@@ -123,9 +125,18 @@ export default {
   'nav.need_purpose': 'Type the purpose',
 
   'wm.only_for': 'ONLY FOR: {purpose}',
-  'pdf.caption_purpose': 'Copy of an identity document with redacted data. Purpose: {purpose}',
-  'pdf.caption_recipient': 'Recipient: {recipient}. ',
-  'pdf.caption_date': '{recipient}Date: {date}. Not valid for any other purpose.',
+  'pdf.eyebrow': 'Copy with redacted data',
+  'pdf.purpose_label': 'Purpose',
+  'pdf.recipient_label': 'Recipient',
+  'pdf.date_label': 'Date',
+  'pdf.hidden_label': 'Hidden fields',
+  'pdf.notice': 'Valid only for the purpose stated. Not valid for any other use.',
+  'pdf.recipient_eyebrow': 'For the recipient',
+  'pdf.recipient_body': 'This copy deliberately hides the data that the stated purpose does not need. For many procedures it is a valid and safer way to share an ID, for the recipient too. To learn why, scan the code or visit:',
+  'pdf.recipient_url': 'justid.candea.es/why',
+  'pdf.qr_use': 'Use JustID',
+  'pdf.footer': "Generated with JustID on the holder's device. The photos were never uploaded to any server.",
+  'pdf.site': 'justid.candea.es',
   'pdf.filename': 'id_copy_{date}.pdf',
 
   'template.dni_es_v3': 'Spanish ID card (DNI) v3 (2015–2021)',
@@ -249,7 +260,7 @@ export default {
   'builder.who_title': 'Who is asking',
   'builder.ready': 'Ready to send',
   'builder.title': 'Ask for a copy of an ID, just enough',
-  'builder.intro': 'Create a link to ask someone for a copy of their Spanish ID. They open it in JustID, see what you ask for and why, and prepare the copy on their phone. The request is stored inside the link itself (after the #) and never reaches any server.',
+  'builder.intro': 'Create a link to ask someone for a copy of their Spanish ID. They open it in JustID, see what you ask for and why, and prepare the copy on their phone. The request is stored inside the link itself (after the #) and never reaches any server. The link never expires: create it once and reuse it with all your customers.',
   'builder.back_to_app': '← Go to the app',
   'builder.from_label': 'Your name or your company’s',
   'builder.from_placeholder': 'e.g. ABC Lettings',
@@ -283,7 +294,7 @@ export default {
   'builder.contact_placeholder_upload': 'https://…',
   'builder.create': 'Create link',
   'builder.result_title': 'Your request link',
-  'builder.result_hint': 'Send it to the person. Anyone with the link can read what it says, so don’t include anything private.',
+  'builder.result_hint': 'Send it to the person. It never expires: keep it and reuse it every time you ask for an ID for this same purpose, for example on your website, in your email signature or in your message templates. Anyone with the link can read what it says, so don’t include anything private.',
   'builder.share': 'Share link',
   'builder.copy': 'Copy link',
   'builder.copied': 'Link copied.',

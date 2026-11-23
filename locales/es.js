@@ -2,10 +2,12 @@
 // Spanish UI strings (default language). Keys must match locales/en.js exactly (checked by tests).
 // Placeholders use {name} and are filled by t() in app/js/ui/i18n.js.
 import landing from './landing-es.js';
+import why from './why-es.js';
 
-// Landing page strings live in landing-es.js.
+// Landing page strings live in landing-es.js, the /why page strings in why-es.js.
 export default {
   ...landing,
+  ...why,
   'meta.title': 'JustID — Comparte tu DNI, solo lo justo',
   'meta.editor_title': 'JustID — Marcador de zonas',
   'brand.tagline': 'Solo lo justo',
@@ -124,9 +126,18 @@ export default {
   'nav.need_purpose': 'Escribe el motivo',
 
   'wm.only_for': 'SOLO PARA: {purpose}',
-  'pdf.caption_purpose': 'Copia de documento de identidad con datos ocultados. Finalidad: {purpose}',
-  'pdf.caption_recipient': 'Destinatario: {recipient}. ',
-  'pdf.caption_date': '{recipient}Fecha: {date}. No válida para otro fin.',
+  'pdf.eyebrow': 'Copia con datos ocultados',
+  'pdf.purpose_label': 'Finalidad',
+  'pdf.recipient_label': 'Destinatario',
+  'pdf.date_label': 'Fecha',
+  'pdf.hidden_label': 'Datos ocultados',
+  'pdf.notice': 'Válida solo para la finalidad indicada. No sirve para ningún otro uso.',
+  'pdf.recipient_eyebrow': 'Para quien lo recibe',
+  'pdf.recipient_body': 'Esta copia oculta a propósito los datos que no hacen falta para la finalidad indicada. Para muchos trámites es una forma válida y más segura de compartir un DNI, también para quien lo recibe. Para saber por qué, escanea el código o visita:',
+  'pdf.recipient_url': 'justid.candea.es/why',
+  'pdf.qr_use': 'Usa JustID',
+  'pdf.footer': 'Generado con JustID en el dispositivo del titular. Las fotos no se han subido a ningún servidor.',
+  'pdf.site': 'justid.candea.es',
   'pdf.filename': 'copia_documento_{date}.pdf',
 
   'template.dni_es_v3': 'DNI España v3 (2015–2021)',
@@ -250,7 +261,7 @@ export default {
   'builder.who_title': 'Quién la pide',
   'builder.ready': 'Listo para enviar',
   'builder.title': 'Pide una copia de DNI, solo con lo justo',
-  'builder.intro': 'Crea un enlace para pedirle a alguien una copia de su DNI. Lo abrirá en JustID, verá qué le pides y por qué, y preparará la copia en su móvil. Los datos de la solicitud van dentro del propio enlace (detrás del #) y nunca llegan a ningún servidor.',
+  'builder.intro': 'Crea un enlace para pedirle a alguien una copia de su DNI. Lo abrirá en JustID, verá qué le pides y por qué, y preparará la copia en su móvil. Los datos de la solicitud van dentro del propio enlace (detrás del #) y nunca llegan a ningún servidor. El enlace no caduca: créalo una vez y reutilízalo con todos tus clientes.',
   'builder.back_to_app': '← Ir a la app',
   'builder.from_label': 'Tu nombre o el de tu empresa',
   'builder.from_placeholder': 'p. ej. Inmobiliaria ABC',
@@ -284,7 +295,7 @@ export default {
   'builder.contact_placeholder_upload': 'https://…',
   'builder.create': 'Crear enlace',
   'builder.result_title': 'Tu enlace de solicitud',
-  'builder.result_hint': 'Envíaselo a la persona. Cualquiera que tenga el enlace puede leer lo que pone, así que no incluyas nada privado.',
+  'builder.result_hint': 'Envíaselo a la persona. No caduca: guárdalo y reutilízalo cada vez que pidas un DNI para esta misma finalidad, por ejemplo en tu web, en tu firma de correo o en tus mensajes. Cualquiera que tenga el enlace puede leer lo que pone, así que no incluyas nada privado.',
   'builder.share': 'Compartir enlace',
   'builder.copy': 'Copiar enlace',
   'builder.copied': 'Enlace copiado.',

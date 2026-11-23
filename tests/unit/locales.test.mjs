@@ -22,7 +22,7 @@ test('placeholders match between languages', () => {
 });
 
 test('every data-i18n key used in HTML exists', () => {
-  for (const file of [...walk('app', '.html'), `${ROOT}/index.html`]) {
+  for (const file of [...walk('app', '.html'), `${ROOT}/index.html`, `${ROOT}/why/index.html`]) {
     const html = readFileSync(file, 'utf8');
     for (const m of html.matchAll(/data-i18n="([^"]+)"/g)) assert.ok(m[1] in es, `${file}: unknown key ${m[1]}`);
     for (const m of html.matchAll(/data-i18n-attr="([^"]+)"/g)) {
@@ -61,6 +61,16 @@ test('landing strings are all prefixed and live in the landing locale files', as
   for (const k of [...Object.keys(landingEs), ...Object.keys(landingEn)]) assert.match(k, /^landing\./, `unprefixed landing key ${k}`);
   for (const k of Object.keys(landingEs)) assert.equal(es[k], landingEs[k], `${k} not merged into es.js`);
   for (const k of Object.keys(landingEn)) assert.equal(en[k], landingEn[k], `${k} not merged into en.js`);
+});
+
+test('/why page strings are all prefixed and live in the why locale files', async () => {
+  for (const [lang, all] of [['es', es], ['en', en]]) {
+    const part = (await import(join(ROOT, `locales/why-${lang}.js`))).default;
+    for (const k of Object.keys(part)) {
+      assert.match(k, /^why\./, `unprefixed /why key ${k}`);
+      assert.equal(all[k], part[k], `${k} not merged into ${lang}.js`);
+    }
+  }
 });
 
 test('the landing "shown / covered by default" lists match the show flags of templates/dni_es.js', () => {

@@ -1,5 +1,5 @@
 // @ts-check
-// Texts that end up on the output: the watermark drawn over the card and the PDF caption.
+// Texts that end up on the output: the watermark drawn over the card and the texts of the PDF page.
 // Translation and the current date are decided by the caller; these functions only compose.
 
 /** @typedef {(key: string, params?: Record<string, string | number>) => string} Translate */
@@ -18,17 +18,24 @@ export function watermarkText({ purpose, recipient, date, onlyFor }) {
 }
 
 /**
- * The two caption lines printed under the cards in the PDF.
- * @param {{ purpose: string, recipient: string, date: string }} o
+ * Everything printed on the PDF page around the cards, translated.
+ * @param {{ purpose: string, recipient: string, date: string, hiddenCount: number }} o purpose / recipient as typed (trimmed here)
  * @param {Translate} tr translate function
- * @returns {string[]}
+ * @returns {import('./pdf.js').PdfTexts}
  */
-export function pdfCaption({ purpose, recipient, date }, tr) {
+export function pdfTexts({ purpose, recipient, date, hiddenCount }, tr) {
   const r = recipient.trim();
-  return [
-    tr('pdf.caption_purpose', { purpose: purpose.trim() }),
-    tr('pdf.caption_date', { recipient: r ? tr('pdf.caption_recipient', { recipient: r }) : '', date }),
-  ];
+  return {
+    eyebrow: tr('pdf.eyebrow'), purposeLabel: tr('pdf.purpose_label'), purpose: purpose.trim(),
+    meta: [
+      ...(r ? [{ label: tr('pdf.recipient_label'), value: r, wide: true }] : []),
+      { label: tr('pdf.date_label'), value: date },
+      { label: tr('pdf.hidden_label'), value: String(hiddenCount) },
+    ],
+    notice: tr('pdf.notice'), footer: tr('pdf.footer'), site: tr('pdf.site'),
+    recipient: { eyebrow: tr('pdf.recipient_eyebrow'), body: tr('pdf.recipient_body'), url: tr('pdf.recipient_url') },
+    useLabel: tr('pdf.qr_use'),
+  };
 }
 
 /** File name of the PDF. @param {Translate} tr @param {Date} now */
