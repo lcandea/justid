@@ -6,7 +6,7 @@ import { t, getLang, applyI18n, mountLangSwitch } from './i18n.js';
 import { loadImageFile, warpToCard } from './image.js';
 import { CropEditor } from './crop-editor.js';
 import { allTemplates, templateName, fieldLabel, normalizeCustom, saveCustomTemplate, assetUrl } from './templates.js';
-import { identifyDocument } from './identify.js';
+import { identifyDocument, detectSide } from './identify.js';
 import { renderRedacted } from './redact.js';
 import { makePdf, canvasToJpeg } from './pdf.js';
 import { openZoom } from './zoom-viewer.js';
@@ -35,6 +35,10 @@ const state = {
   /** confident identification result @type {ResolvedTemplate | null} */ idGuess: null,
   /** template id the user chose to keep despite the warning @type {string | null} */ idDismissed: null,
   /** template was set by auto-identification */ tplAuto: false,
+  /** true when that slot holds a photo that looks like the other side of the card @type {Record<Side, boolean>} */
+  wrongSide: { front: false, back: false },
+  /** the user said "it's fine" for that slot's photo @type {Record<Side, boolean>} */
+  wrongSideOk: { front: false, back: false },
 };
 const zonesCanvas = el('canvas', { class: 'zones' });
 const sides = () => SIDE_LIST.filter(s => state.base[s]);
@@ -83,9 +87,66 @@ function renderTemplateInfo() {
 //  - no manual choice yet -> switch to the guessed template silently (+ "detected" badge)
 //  - manual choice differs -> keep it, but show a mismatch warning with a one-tap fix
 let identifyRun = 0;
+/** Cards keyed by the side they really are (a front photo put in the back slot counts as front). */
+function cardsByRealSide() {
+  /** @type {Partial<Record<Side, HTMLCanvasElement>>} */
+  const out = {};
+  for (const s of sides()) {
+    const real = state.wrongSide[s] && !state.wrongSideOk[s] ? otherSide(s) : s;
+    out[real] ??= /** @type {HTMLCanvasElement} */ (state.base[s]);
+  }
+  return out;
+}
+const otherSide = (/** @type {Side} */ s) => (s === 'front' ? 'back' : 'front');
+
+/** Check that the photo in `slot` is really that side of the card; warn otherwise. @param {Side} slot */
+async function checkSide(slot) {
+  const base = state.base[slot];
+  state.wrongSide[slot] = false; state.wrongSideOk[slot] = false;
+  if (base) {
+    const r = await detectSide(base, state.templates);
+    if (state.base[slot] !== base) return; // replaced meanwhile
+    console.debug('[side]', slot, `front=${r.front.toFixed(3)} back=${r.back.toFixed(3)}`, r.confident ? r.side : 'unsure');
+    state.wrongSide[slot] = r.confident && r.side !== slot;
+  }
+  renderSideWarning();
+}
+
+function renderSideWarning() {
+  const box = $('#side-warn');
+  const slot = SIDE_LIST.find(s => state.base[s] && state.wrongSide[s] && !state.wrongSideOk[s]);
+  const show = !!slot && state.step <= 1;
+  box.classList.toggle('hidden', !show);
+  if (!slot || !show) return;
+  const target = otherSide(slot);
+  // the other slot holds the matching photo too -> they were simply swapped
+  const swap = !!state.base[target];
+  const move = el('button', { class: 'primary', type: 'button' },
+    t(swap ? 'side.warn_swap' : target === 'front' ? 'side.warn_move_front' : 'side.warn_move_back'));
+  move.addEventListener('click', () => swapSides());
+  const keep = el('button', { type: 'button' }, t('side.warn_keep'));
+  keep.addEventListener('click', () => { state.wrongSideOk[slot] = true; renderSideWarning(); autoIdentify(); });
+  box.replaceChildren(
+    el('p', {}, el('strong', {}, t('side.warn_title') + ' '), t(slot === 'front' ? 'side.warn_body_front' : 'side.warn_body_back')),
+    el('div', { class: 'row' }, move, keep));
+}
+
+/** Exchange everything between the two slots (photos, framing, warnings). */
+function swapSides() {
+  for (const key of /** @type {const} */ (['src', 'base'])) [state[key].front, state[key].back] = [state[key].back, state[key].front];
+  [crop.lastQuad.front, crop.lastQuad.back] = [crop.lastQuad.back, crop.lastQuad.front];
+  for (const s of SIDE_LIST) {
+    if (crop.lastQuad[s] === undefined) delete crop.lastQuad[s];
+    state.wrongSide[s] = false; state.wrongSideOk[s] = false;
+  }
+  if (!state.base[state.pvSide]) state.pvSide = sides()[0] || 'front';
+  renderSlot('front'); renderSlot('back'); renderSideWarning(); renderAll(); updateNav();
+  checkSide('front'); checkSide('back'); autoIdentify();
+}
+
 async function autoIdentify() {
   const run = ++identifyRun;
-  const r = sides().length ? await identifyDocument(state.base, state.templates) : null;
+  const r = sides().length ? await identifyDocument(cardsByRealSide(), state.templates) : null;
   if (run !== identifyRun) return; // a newer photo superseded this run
   if (r) console.debug('[identify]', r.ranking.map(x => `${x.template.id}=${x.score.toFixed(3)}`).join(' '), r.confident ? 'confident' : 'unsure');
   state.idGuess = r?.confident ? r.template : null;
@@ -147,6 +208,7 @@ function renderSlot(side) {
     state.base[side] = state.src[side] = null;
     if (state.pvSide === side) state.pvSide = sides()[0] || 'front';
     renderSlot(side); renderAll(); updateNav();
+    state.wrongSide[side] = false; renderSideWarning();
     autoIdentify(); // re-evaluate with the remaining photo (clears the warning if none left)
   });
   box.replaceChildren(base, el('div', { class: 'bar' }, el('span', { class: 't' }, t('photos.done', { side: sideName(side) })),
@@ -196,7 +258,7 @@ $('#crop-use').addEventListener('click', () => {
   if (!state.base[state.pvSide]) state.pvSide = side;
   leaveCrop();
   renderSlot(side); renderAll(); updateNav();
-  autoIdentify();
+  checkSide(side).then(autoIdentify);
   if (side === 'front' && !state.base.back) setTimeout(() => $('#slot-back').scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
 });
 
@@ -307,7 +369,7 @@ function goStep(n, push = true) {
   document.querySelectorAll('.step').forEach(sec => sec.classList.toggle('hidden', Number(/** @type {HTMLElement} */ (sec).dataset.step) !== n));
   mountPreviews();
   updateNav();
-  renderTplWarning();
+  renderTplWarning(); renderSideWarning();
   window.scrollTo(0, 0);
   if (push) history.pushState({ step: n }, '');
   if (n === 2 && !$input('#purpose').value) setTimeout(() => $input('#purpose').focus(), 100);
@@ -445,7 +507,7 @@ window.addEventListener('langchange', () => {
   const selected = state.template.id;
   $('#tpl').replaceChildren(...state.templates.map(x => el('option', { value: x.id }, templateName(x))));
   $select('#tpl').value = selected;
-  renderTemplateInfo(); renderSlot('front'); renderSlot('back'); renderFields(); renderChips(); updateNav(); renderAll();
+  renderTemplateInfo(); renderSideWarning(); renderSlot('front'); renderSlot('back'); renderFields(); renderChips(); updateNav(); renderAll();
   if (crop.editor) { crop.editor.opts.topLabel = t('crop.top_label'); crop.editor.draw(); $('#crop-title').textContent = t(crop.side === 'front' ? 'crop.title_front' : 'crop.title_back'); }
 });
 

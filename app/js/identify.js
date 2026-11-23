@@ -83,6 +83,31 @@ function sampleSignature(path) {
   return p;
 }
 
+/** Fronts and backs differ far more than versions do (~0.6 vs ~0.45 score gap), so a bigger margin is safe. */
+const SIDE_MIN_MARGIN = 0.15;
+
+/**
+ * Which side of the card is this? Compares it with every template's front and back pictures.
+ * The back is unmistakable (chip + 3-line MRZ); the front has the photo and the header.
+ * @param {HTMLCanvasElement} card straightened card
+ * @param {ResolvedTemplate[]} templates
+ * @returns {Promise<{ side: 'front' | 'back', front: number, back: number, confident: boolean }>}
+ */
+export async function detectSide(card, templates) {
+  const sig = docSignature(card);
+  const best = { front: -1, back: -1 };
+  for (const tpl of templates) {
+    for (const s of /** @type {('front' | 'back')[]} */ (['front', 'back'])) {
+      const path = tpl.sample?.[s]; if (!path) continue;
+      const ref = await sampleSignature(path); if (!ref) continue;
+      best[s] = Math.max(best[s], signatureScore(sig, ref));
+    }
+  }
+  const side = best.back > best.front ? 'back' : 'front';
+  const confident = Math.max(best.front, best.back) >= ID_MIN_SCORE && Math.abs(best.front - best.back) >= SIDE_MIN_MARGIN;
+  return { side, front: best.front, back: best.back, confident };
+}
+
 /**
  * Rank templates by similarity to the photographed card(s). Scores are averaged over the sides
  * both the photos and the template have; the front weighs double (both DNI backs share the

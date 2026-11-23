@@ -172,3 +172,39 @@ test('pinch gesture zooms the reference picture', async ({ page }) => {
   });
   expect(scale).toBeCloseTo(3, 1); // 240 / 80
 });
+
+test('warns when the back is put in the front slot, and moves it with one tap', async ({ page }) => {
+  await page.goto('/app/');
+  await addPhoto(page, 'front', 'img/dni_es_v3_back.webp');
+  const warn = page.locator('#side-warn');
+  await expect(warn).toBeVisible();
+  await expect(warn).toContainText('parece el reverso');
+  await warn.getByRole('button', { name: 'Moverla al reverso' }).click();
+  await expect(warn).toBeHidden();
+  await expect(page.locator('#slot-front .empty')).toBeVisible();
+  await expect(page.locator('#slot-back canvas.thumb')).toBeVisible();
+  // the version is still recognised from the (now correctly placed) back
+  await expect(page.locator('#tpl-name')).toHaveText('DNI España v3 (2015–2021)');
+});
+
+test('offers to swap when both photos are in the wrong slots', async ({ page }) => {
+  await page.goto('/app/');
+  await addPhoto(page, 'front', 'img/dni_es_v4_back.webp');
+  await addPhoto(page, 'back', 'img/dni_es_v4_front.webp');
+  const warn = page.locator('#side-warn');
+  await warn.getByRole('button', { name: 'Intercambiar las fotos' }).click();
+  await expect(warn).toBeHidden();
+  await expect(page.locator('#tpl-name')).toHaveText('DNI España v4 (desde 2021)');
+  // after the swap the front slot holds the front: no warning comes back
+  await page.waitForTimeout(500);
+  await expect(warn).toBeHidden();
+});
+
+test('no side warning for correctly placed photos', async ({ page }) => {
+  await page.goto('/app/');
+  await addPhoto(page, 'front', 'img/dni_es_v4_front.webp');
+  await addPhoto(page, 'back', 'img/dni_es_v4_back.webp');
+  await page.waitForTimeout(500);
+  await expect(page.locator('#side-warn')).toBeHidden();
+  await expect(page.locator('#tpl-warn')).toBeHidden();
+});
