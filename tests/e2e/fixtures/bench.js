@@ -101,7 +101,7 @@ export async function runBench(detectCard, opts = {}) {
     const err = r ? cornerError(r.quad, q) : null;
     const cardDiag = Math.hypot(q[0][0] - q[2][0], q[0][1] - q[2][1]);
     out.push({
-      name, W, H, found: !!r,
+      name, W, H, truth: q, quad: r ? r.quad : null, found: !!r,
       errPct: err == null ? null : 100 * err / Math.hypot(W, H), // the spec's metric (% of the photo diagonal)
       errCard: err == null ? null : 100 * err / cardDiag, // what the straightened card actually suffers
       ms: times[Math.floor(times.length / 2)],
