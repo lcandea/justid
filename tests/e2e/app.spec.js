@@ -136,3 +136,39 @@ for (const width of [360, 412]) {
     }
   });
 }
+
+test('reference pictures open full screen and can be zoomed', async ({ page, isMobile }) => {
+  await page.goto('/app/');
+  await page.locator('.tpl-box summary').click();
+  await page.locator('.tpl-pv-open').first().click();
+  const viewer = page.locator('dialog.zoom-viewer');
+  await expect(viewer).toBeVisible();
+  const scale = () => page.locator('.zoom-img').evaluate(i => new DOMMatrix(getComputedStyle(i).transform).a);
+  const box = /** @type {{ x: number, y: number, width: number, height: number }} */ (await page.locator('.zoom-img').boundingBox());
+  const cx = box.x + box.width / 2, cy = box.y + box.height / 2;
+  if (isMobile) {
+    await page.touchscreen.tap(cx, cy); await page.touchscreen.tap(cx, cy); // double tap
+  } else {
+    await page.mouse.move(cx, cy); await page.mouse.wheel(0, -400);
+  }
+  await expect.poll(scale).toBeGreaterThan(1.5);
+  await page.locator('.zoom-close').click();
+  await expect(viewer).toBeHidden();
+});
+
+test('pinch gesture zooms the reference picture', async ({ page }) => {
+  await page.goto('/app/');
+  await page.locator('.tpl-box summary').click();
+  await page.locator('.tpl-pv-open').first().click();
+  const scale = await page.evaluate(async () => {
+    const d = /** @type {HTMLDialogElement} */ (document.querySelector('dialog.zoom-viewer'));
+    const r = d.getBoundingClientRect(), cx = r.width / 2, cy = r.height / 2;
+    const fire = (type, id, x, y) => d.dispatchEvent(new PointerEvent(type, { pointerId: id, clientX: x, clientY: y, bubbles: true, pointerType: 'touch' }));
+    fire('pointerdown', 1, cx - 40, cy); fire('pointerdown', 2, cx + 40, cy);   // fingers 80 px apart
+    fire('pointermove', 1, cx - 120, cy); fire('pointermove', 2, cx + 120, cy); // spread to 240 px
+    fire('pointerup', 1, cx - 120, cy); fire('pointerup', 2, cx + 120, cy);
+    await new Promise(r => requestAnimationFrame(r));
+    return new DOMMatrix(getComputedStyle(/** @type {Element} */ (document.querySelector('.zoom-img'))).transform).a;
+  });
+  expect(scale).toBeCloseTo(3, 1); // 240 / 80
+});

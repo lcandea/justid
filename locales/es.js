@@ -50,6 +50,10 @@ export default {
   'tpl.warn_switch': 'Cambiar a {name}',
   'tpl.warn_keep': 'Mantener',
 
+  'zoom.close': 'Cerrar',
+  'zoom.hint': 'Toca una imagen para ampliarla',
+  'zoom.open': 'Ampliar {name}',
+
   'crop.title_front': 'Encuadra el anverso',
   'crop.title_back': 'Encuadra el reverso',
   'crop.msg_adjust': 'Arrastra las esquinas si hace falta. La línea amarilla es el borde superior.',

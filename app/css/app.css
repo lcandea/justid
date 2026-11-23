@@ -142,3 +142,11 @@ button.lock.wiggle svg { animation: lock-wiggle 5s ease-in-out 1s infinite; tran
 .noscript { margin: 16px; padding: 12px; border: 1px solid var(--warn); border-radius: 12px; }
 #photo-status:empty { display: none; }
 @media (max-width: 380px) { .tagline { display: none; } }
+/* Reference pictures open a zoom viewer */
+.tpl-pv-open { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; border-radius: 10px; }
+.tpl-pv-hint { margin: 6px 0 0; font-size: 12px; text-align: center; }
+.zoom-viewer { width: 100vw; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: #0b0c0e; overflow: hidden; touch-action: none; display: none; }
+.zoom-viewer[open] { display: flex; align-items: center; justify-content: center; }
+.zoom-viewer::backdrop { background: #0b0c0e; }
+.zoom-img { max-width: 96vw; max-height: 90dvh; transform-origin: center; user-select: none; -webkit-user-drag: none; will-change: transform; }
+.zoom-close { position: absolute; top: max(12px, env(safe-area-inset-top)); right: 12px; width: 44px; height: 44px; justify-content: center; border-radius: 50%; font-size: 18px; background: rgba(255,255,255,.12); color: #fff; border: 0; }

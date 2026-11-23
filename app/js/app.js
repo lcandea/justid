@@ -9,6 +9,7 @@ import { allTemplates, templateName, fieldLabel, normalizeCustom, saveCustomTemp
 import { identifyDocument } from './identify.js';
 import { renderRedacted } from './redact.js';
 import { makePdf, canvasToJpeg } from './pdf.js';
+import { openZoom } from './zoom-viewer.js';
 
 /** @typedef {import('./templates.js').ResolvedTemplate} ResolvedTemplate */
 /** @typedef {'front' | 'back'} Side */
@@ -63,11 +64,17 @@ function renderTemplateInfo() {
   $('#tpl-auto').classList.toggle('hidden', !state.tplAuto);
   $('#tpl-note').textContent = /draft|borrador/i.test(tpl.id + (tpl.name || '')) ? t('tpl.draft_note') : '';
   // reference pictures (normalised, transparent corners)
-  const items = SIDE_LIST.filter(s => tpl.sample?.[s]).map(s =>
-    el('figure', {}, el('img', { src: assetUrl(/** @type {string} */ (tpl.sample?.[s])), alt: `${templateName(tpl)} — ${sideName(s)}`, loading: 'lazy', decoding: 'async' }),
-      el('figcaption', {}, sideName(s))));
+  const items = SIDE_LIST.filter(s => tpl.sample?.[s]).map(s => {
+    const src = assetUrl(/** @type {string} */ (tpl.sample?.[s])), alt = `${templateName(tpl)} — ${sideName(s)}`;
+    // tap to open full-screen with pinch-to-zoom
+    const open = el('button', { type: 'button', class: 'tpl-pv-open', 'aria-label': t('zoom.open', { name: alt }) },
+      el('img', { src, alt, loading: 'lazy', decoding: 'async' }));
+    open.addEventListener('click', () => openZoom(src, alt));
+    return el('figure', {}, open, el('figcaption', {}, sideName(s)));
+  });
   $('#tpl-pv').replaceChildren(...items);
   $('#tpl-pv').classList.toggle('hidden', !items.length);
+  $('#tpl-pv-hint').classList.toggle('hidden', !items.length);
   renderTplWarning();
 }
 

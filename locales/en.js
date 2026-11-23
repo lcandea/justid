@@ -49,6 +49,10 @@ export default {
   'tpl.warn_switch': 'Switch to {name}',
   'tpl.warn_keep': 'Keep',
 
+  'zoom.close': 'Close',
+  'zoom.hint': 'Tap a picture to enlarge it',
+  'zoom.open': 'Ampliar {name}',
+
   'crop.title_front': 'Frame the front',
   'crop.title_back': 'Frame the back',
   'crop.msg_adjust': 'Drag the corners if needed. The yellow line is the top edge.',
