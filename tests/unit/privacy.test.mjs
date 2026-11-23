@@ -6,15 +6,21 @@ import { readFileSync } from 'node:fs';
 import { ROOT, walk } from './helpers.mjs';
 import { relative } from 'node:path';
 
-const shipped = [...walk('app', '.js'), ...walk('locales', '.js'), ...walk('templates', '.js')];
+const shipped = [...walk('app', '.js'), ...walk('landing', '.js'), ...walk('locales', '.js'), ...walk('templates', '.js')];
 const pages = [...walk('app', '.html'), `${ROOT}/index.html`, `${ROOT}/404.html`];
 
 test('no network APIs anywhere in the shipped JavaScript', () => {
-  const banned = [/\bfetch\s*\(/, /XMLHttpRequest/, /WebSocket/, /EventSource/, /sendBeacon/, /RTCPeerConnection/,
-    /\bimport\s*\(\s*['"`]https?:/, /from\s+['"]https?:/, /\bnew\s+Worker\s*\(/, /serviceWorker/];
+  const apiNames = [/\bfetch\s*\(/, /XMLHttpRequest/, /WebSocket/, /EventSource/, /sendBeacon/, /RTCPeerConnection/,
+    /\bnew\s+Worker\s*\(/, /serviceWorker/];
+  const remoteImports = [/\bimport\s*\(\s*['"`]https?:/, /from\s+['"]https?:/];
   for (const file of shipped) {
     const src = readFileSync(file, 'utf8');
-    for (const re of banned) assert.ok(!re.test(src), `${relative(ROOT, file)} matches ${re}`);
+    // Locale files are translated text only; they may name these APIs (the landing's "ask an AI" prompt does),
+    // but they still must not import anything remote.
+    const isLocale = relative(ROOT, file).startsWith('locales/');
+    for (const re of isLocale ? remoteImports : [...apiNames, ...remoteImports]) {
+      assert.ok(!re.test(src), `${relative(ROOT, file)} matches ${re}`);
+    }
   }
 });
 
@@ -64,5 +70,5 @@ test('the deployed _headers file sends the strict CSP and anti-framing headers o
 test('the build script publishes only the public folders', () => {
   const script = readFileSync(`${ROOT}/tools/build-site.sh`, 'utf8');
   const cp = script.match(/^cp -R (.+) _site\/$/m)?.[1].split(/\s+/) || [];
-  assert.deepEqual(cp.sort(), ['404.html', '_headers', 'app', 'favicon.svg', 'index.html', 'locales', 'templates']);
+  assert.deepEqual(cp.sort(), ['404.html', '_headers', 'app', 'favicon.svg', 'index.html', 'landing', 'locales', 'templates']);
 });

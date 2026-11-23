@@ -2,14 +2,362 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'none'">
-<meta http-equiv="refresh" content="0; url=app/">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d0d0c">
+<meta name="color-scheme" content="dark">
+<!--
+  Same Content Security Policy as the app: connect-src 'none' means this page cannot send anything anywhere.
+  Fonts, styles, scripts and images only come from this same site.
+-->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="Tapa los datos de tu DNI que no hacen falta, marca para qué es la copia y envíala en PDF. Todo ocurre en tu móvil: tu DNI no sale de tu dispositivo." data-i18n-attr="content:landing.meta.description">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<title>JustID</title>
+<title data-i18n="landing.meta.title">JustID — Comparte tu DNI, solo lo justo</title>
+<link rel="preload" href="landing/fonts/archivo-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="landing/landing.css">
+<script type="module" src="landing/landing.js"></script>
 </head>
 <body>
-<!-- Temporary entry point until the landing page exists: go straight to the app. -->
-<p><a href="app/">JustID</a></p>
+<a class="skip" href="#main" data-i18n="landing.skip">Saltar al contenido</a>
+
+<!-- 1. Hero -->
+<div class="hero">
+  <div class="hero-bg" aria-hidden="true">
+    <div class="blob blob-a"></div>
+    <div class="blob blob-b"></div>
+    <div class="blob blob-c"></div>
+    <div class="grain"></div>
+  </div>
+
+  <header class="site-header wrap">
+    <a class="logo" href="#top" aria-label="JustID"><span>Just</span><span class="logo-id">ID</span></a>
+    <nav class="site-nav" aria-label="Principal" data-i18n-attr="aria-label:landing.nav.label">
+      <a class="nav-link nav-anchor" href="#por-que" data-i18n="landing.nav.why">Por qué importa</a>
+      <a class="nav-link nav-anchor" href="#como" data-i18n="landing.nav.how">Cómo funciona</a>
+      <a class="nav-link nav-anchor" href="#verifica" data-i18n="landing.nav.verify">Verifícalo</a>
+      <div class="lang-switch" data-lang-switch></div>
+      <a class="nav-link nav-gh" href="https://github.com/lcandea/justid" rel="noopener noreferrer"><span data-i18n="landing.nav.github">GitHub</span> <span aria-hidden="true">↗</span></a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero-main wrap" id="top" aria-labelledby="h1">
+      <div class="hero-copy">
+        <p class="eyebrow eyebrow-dot" data-i18n="landing.hero.eyebrow">Tu DNI no sale de tu móvil</p>
+        <h1 id="h1"><span data-i18n="landing.hero.h1_a">Comparte tu DNI.</span> <span class="accent" data-i18n="landing.hero.h1_b">Solo lo justo.</span></h1>
+        <p class="lede">
+          <span data-i18n="landing.hero.lede_a">Tu nombre y tu número, sí. Tu</span>
+          <span class="bar bar-sig" role="img" aria-label="firma tapada" data-i18n-attr="aria-label:landing.hero.bar_signature"></span><span data-i18n="landing.hero.lede_b">, tu</span>
+          <span class="bar bar-addr" role="img" aria-label="domicilio tapado" data-i18n-attr="aria-label:landing.hero.bar_address"></span>
+          <span data-i18n="landing.hero.lede_c">y el nombre de tus padres, no.</span>
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="app/"><span data-i18n="landing.hero.cta_primary">Proteger mi DNI</span> <span aria-hidden="true">→</span></a>
+          <a class="btn btn-link" href="app/request.html" data-i18n="landing.hero.cta_secondary">Pedir un DNI a alguien</a>
+        </div>
+        <p class="trust mono" data-i18n="landing.hero.trust">Gratis · Sin registro · Sin anuncios · Código abierto</p>
+      </div>
+
+      <figure class="specimen" aria-label="Ejemplo de una copia de DNI con datos tapados y una marca de agua con el motivo" data-i18n-attr="aria-label:landing.hero.specimen_aria">
+        <div class="specimen-label mono" aria-hidden="true" data-i18n="landing.hero.specimen_label">Espécimen · anverso</div>
+        <div class="card-stage" aria-hidden="true">
+          <!-- Real v4 specimen (templates/ref). The covered copy is real JustID output: app/js/redact.js on that
+               specimen with the default hidden fields, pixel mode and a watermark, one image per language
+               (landing/img, regenerate if redact.js or the default fields change). The scan line wipes between them. -->
+          <div class="id-card">
+            <img class="card-img" src="templates/ref/dni_es_v4_front.webp" alt="" width="1012" height="638">
+            <span class="card-tag card-tag-orig mono" data-i18n="landing.card.original">Original</span>
+            <div class="card-covered">
+              <img class="card-img" src="landing/img/dni_es_v4_front_covered_es.webp" alt="" width="1012" height="638" data-i18n-attr="src:landing.card.covered_src">
+              <span class="card-tag card-tag-covered mono" data-i18n="landing.card.covered">Con JustID</span>
+            </div>
+            <div class="scan"></div>
+          </div>
+        </div>
+        <p class="specimen-stats mono">
+          <span data-i18n="landing.hero.stat_fields">7 campos tapados</span>
+          <span><span data-i18n="landing.hero.stat_bytes">0 bytes enviados</span><span class="caret" aria-hidden="true">_</span></span>
+        </p>
+      </figure>
+    </section>
+  </main>
+
+  <div class="hero-foot wrap mono">
+    <span>Content-Security-Policy: connect-src 'none'</span>
+    <span data-i18n="landing.hero.footer_versions">DNI 3.0 · DNI 4.0 · PDF a tamaño real</span>
+  </div>
+</div>
+
+<div class="rest">
+<!-- 2. Video -->
+<section class="section wrap" id="video" aria-labelledby="video-h">
+  <div class="head head-split">
+    <div>
+      <p class="eyebrow"><span aria-hidden="true">02 — </span><span data-i18n="landing.video.eyebrow">Vídeo</span></p>
+      <h2 id="video-h" data-i18n="landing.video.title">Mira cómo funciona en 30 segundos</h2>
+    </div>
+    <p class="head-note" data-i18n="landing.video.soon">Próximamente: un vídeo corto con el proceso completo, de la foto al PDF.</p>
+  </div>
+  <!-- No video file exists yet: the play button is disabled and says so. Self-hosted only (the CSP blocks embeds). -->
+  <figure class="video-box">
+    <div class="video-grid" aria-hidden="true"></div>
+    <div class="video-bars" aria-hidden="true"><span class="vb-light"></span><span class="vb-dark"></span></div>
+    <div class="video-center">
+      <button type="button" class="play" disabled aria-label="Vídeo próximamente" data-i18n-attr="aria-label:landing.video.play">
+        <svg aria-hidden="true" width="40" height="40" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"></path></svg>
+      </button>
+      <span class="soon-badge mono" data-i18n="landing.video.badge">Próximamente</span>
+    </div>
+    <figcaption class="mono">
+      <span data-i18n="landing.video.flow">Foto → Tapar → Marca de agua → PDF</span>
+      <span data-i18n="landing.video.meta">0:30 · sin sonido necesario · subtítulos</span>
+    </figcaption>
+  </figure>
+</section>
+
+<!-- 3. Why it matters -->
+<section class="section wrap" id="por-que" aria-labelledby="why-h">
+  <div class="head head-why">
+    <div>
+      <p class="eyebrow"><span aria-hidden="true">03 — </span><span data-i18n="landing.why.eyebrow">Por qué importa</span></p>
+      <h2 id="why-h" data-i18n="landing.why.title">Una fotocopia del DNI vale más de lo que parece</h2>
+    </div>
+    <p class="why-intro">
+      <span data-i18n="landing.why.intro_a">Para alquilar un piso, apuntarte al gimnasio o recoger un paquete, una foto completa entrega</span>
+      <mark data-i18n="landing.why.mark1">tu firma</mark>,
+      <mark data-i18n="landing.why.mark2">el número de soporte</mark>,
+      <mark data-i18n="landing.why.mark3">el nombre de tus padres</mark>
+      <span data-i18n="landing.why.and">y</span>
+      <mark data-i18n="landing.why.mark4">tu dirección</mark>.
+      <span data-i18n="landing.why.intro_z">Con esa copia, otra persona puede hacerse pasar por ti.</span>
+    </p>
+  </div>
+  <ol class="cols3 why-list">
+    <li><span class="big-n" aria-hidden="true">01</span><h3 data-i18n="landing.why.p1_title">Suplantación de identidad</h3><p data-i18n="landing.why.p1_body">Con una copia de tu DNI se pueden contratar servicios, pedir préstamos o abrir cuentas a tu nombre.</p></li>
+    <li><span class="big-n" aria-hidden="true">02</span><h3 data-i18n="landing.why.p2_title">No sabes dónde acaba</h3><p data-i18n="landing.why.p2_body">La copia queda en correos, chats y carpetas compartidas que no controlas.</p></li>
+    <li><span class="big-n" aria-hidden="true">03</span><h3 data-i18n="landing.why.p3_title">La ley dice «solo lo necesario»</h3><p data-i18n="landing.why.p3_body">La protección de datos exige que solo se pidan los datos imprescindibles para cada fin.</p></li>
+  </ol>
+  <div class="sources">
+    <p data-i18n="landing.why.advice">INCIBE y la AEPD recomiendan no enviar copias completas, tapar lo que no hace falta e indicar para qué es la copia.</p>
+    <nav aria-label="Para saber más" data-i18n-attr="aria-label:landing.why.more" class="mono">
+      <!-- TODO: replace the "#" placeholders with the chosen INCIBE, AEPD and RTVE article URLs. -->
+      <a class="src-link" href="#" target="_blank" rel="noopener noreferrer" aria-label="INCIBE (Instituto Nacional de Ciberseguridad): consejos para evitar la suplantación de identidad. Se abre en una pestaña nueva." data-i18n-attr="aria-label:landing.why.incibe_aria"><span data-i18n="landing.why.incibe">INCIBE</span> <span aria-hidden="true">↗</span></a>
+      <a class="src-link" href="#" target="_blank" rel="noopener noreferrer" aria-label="AEPD (Agencia Española de Protección de Datos): qué datos te pueden pedir y cómo protegerte. Se abre en una pestaña nueva." data-i18n-attr="aria-label:landing.why.aepd_aria"><span data-i18n="landing.why.aepd">AEPD</span> <span aria-hidden="true">↗</span></a>
+      <a class="src-link" href="#" target="_blank" rel="noopener noreferrer" aria-label="RTVE: reportaje sobre fraudes con copias del DNI. Se abre en una pestaña nueva." data-i18n-attr="aria-label:landing.why.rtve_aria"><span data-i18n="landing.why.rtve">RTVE</span> <span aria-hidden="true">↗</span></a>
+    </nav>
+  </div>
+</section>
+
+<!-- 4. What it does -->
+<section class="section wrap features" id="funciones" aria-labelledby="feat-h">
+  <div class="head">
+    <p class="eyebrow"><span aria-hidden="true">04 — </span><span data-i18n="landing.features.eyebrow">Qué hace</span></p>
+    <h2 id="feat-h"><span data-i18n="landing.features.title_a">Todo lo que necesitas,</span> <span class="accent" data-i18n="landing.features.title_b">nada más.</span></h2>
+  </div>
+  <ul class="cols3 feat-list">
+    <li><span class="mono feat-n" aria-hidden="true">→ 01</span><h3 data-i18n="landing.features.f1_title">Detecta tu DNI en la foto</h3><p data-i18n="landing.features.f1_body">Lo endereza solo. Puedes ajustar las esquinas a mano.</p></li>
+    <li><span class="mono feat-n" aria-hidden="true">→ 02</span><h3 data-i18n="landing.features.f2_title">Reconoce la versión</h3><p data-i18n="landing.features.f2_body">DNI 3.0 (2015–2021) o 4.0 (desde 2021). Te avisa si fotografías la cara equivocada.</p></li>
+    <li><span class="mono feat-n" aria-hidden="true">→ 03</span><h3 data-i18n="landing.features.f3_title">Tapa los datos uno a uno</h3><p data-i18n="landing.features.f3_body">Te proponemos qué ocultar; tú decides. Pixelado o tapado sólido.</p></li>
+    <li><span class="mono feat-n" aria-hidden="true">→ 04</span><h3 data-i18n="landing.features.f4_title">Marca de agua con el motivo</h3><p data-i18n="landing.features.f4_body">«SOLO PARA: …» cruza la tarjeta: la copia no sirve para otra cosa.</p></li>
+    <li><span class="mono feat-n" aria-hidden="true">→ 05</span><h3 data-i18n="landing.features.f5_title">PDF a tamaño real</h3><p data-i18n="landing.features.f5_body">Con el motivo y la fecha. Lo compartes directamente desde el móvil.</p></li>
+    <li><span class="mono feat-n" aria-hidden="true">→ 06</span><h3 data-i18n="landing.features.f6_title">Pide un DNI a alguien</h3><p data-i18n="landing.features.f6_body">Un enlace que indica qué datos necesitas y por qué.</p></li>
+  </ul>
+</section>
+
+<!-- Defaults: keep in sync with the `show` flags of templates/dni_es.js (checked by tests/unit/locales.test.mjs). -->
+<section class="defaults" aria-labelledby="def-h">
+  <div class="wrap defaults-grid">
+    <div class="def-intro">
+      <p class="mono def-eyebrow" data-i18n="landing.defaults.eyebrow">Por defecto</p>
+      <h3 id="def-h" data-i18n="landing.defaults.title">Qué se ve y qué se tapa</h3>
+      <p data-i18n="landing.defaults.note">Siguiendo las recomendaciones. Puedes cambiar cualquier campo antes de generar el PDF.</p>
+    </div>
+    <div class="def-shown">
+      <h4 class="mono def-h" data-i18n="landing.defaults.shown">Se ve</h4>
+      <ul>
+        <li data-i18n="landing.defaults.s1">Nombre y apellidos</li>
+        <li data-i18n="landing.defaults.s2">Número de DNI</li>
+        <li data-i18n="landing.defaults.s3">Foto</li>
+        <li data-i18n="landing.defaults.s4">Fecha de nacimiento</li>
+        <li data-i18n="landing.defaults.s5">Fecha de caducidad</li>
+      </ul>
+    </div>
+    <div class="def-hidden">
+      <h4 class="mono def-h" data-i18n="landing.defaults.hidden">Se tapa</h4>
+      <ul>
+        <li data-i18n="landing.defaults.h1">Firma</li>
+        <li data-i18n="landing.defaults.h2">Número de soporte</li>
+        <li data-i18n="landing.defaults.h3">CAN (6 cifras del anverso)</li>
+        <li data-i18n="landing.defaults.h4">Domicilio</li>
+        <li data-i18n="landing.defaults.h5">Lugar de nacimiento</li>
+        <li data-i18n="landing.defaults.h6">Nombre de los padres</li>
+        <li data-i18n="landing.defaults.h7">Sexo</li>
+        <li data-i18n="landing.defaults.h8">Nacionalidad</li>
+        <li data-i18n="landing.defaults.h9">Fecha de expedición</li>
+        <li data-i18n="landing.defaults.h10">Zona de lectura mecánica</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 5. How it works -->
+<section class="section wrap" id="como" aria-labelledby="how-h">
+  <div class="head head-split head-end">
+    <div>
+      <p class="eyebrow"><span aria-hidden="true">05 — </span><span data-i18n="landing.how.eyebrow">Cómo funciona</span></p>
+      <h2 id="how-h" data-i18n="landing.how.title">Tres pasos, un minuto.</h2>
+    </div>
+    <a class="btn btn-primary" href="app/"><span data-i18n="landing.how.cta">Empezar ahora</span> <span aria-hidden="true">→</span></a>
+  </div>
+  <ol class="steps">
+    <li>
+      <div class="step-top"><span class="num" aria-hidden="true">1</span>
+        <svg aria-hidden="true" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"></path><circle cx="12" cy="13" r="3.5"></circle></svg></div>
+      <h3 data-i18n="landing.how.s1_title">Haz una foto</h3>
+      <p data-i18n="landing.how.s1_body">De cada cara de tu DNI. El reverso es opcional.</p>
+    </li>
+    <li>
+      <div class="step-top"><span class="num" aria-hidden="true">2</span>
+        <svg aria-hidden="true" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"></rect><path d="M6 10h6M6 14h12"></path><path d="M14 10h4" stroke-width="3.2"></path></svg></div>
+      <h3 data-i18n="landing.how.s2_title">Elige qué tapar</h3>
+      <p data-i18n="landing.how.s2_body">Y escribe para qué es la copia: irá como marca de agua.</p>
+    </li>
+    <li>
+      <div class="step-top"><span class="num" aria-hidden="true">3</span>
+        <svg aria-hidden="true" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M8 7l4-4 4 4"></path><path d="M5 12v8h14v-8"></path></svg></div>
+      <h3 data-i18n="landing.how.s3_title">Comparte el PDF</h3>
+      <p data-i18n="landing.how.s3_body">Por WhatsApp, correo o donde lo necesites.</p>
+    </li>
+  </ol>
+
+  <div class="inside">
+    <h3 data-i18n="landing.inside.title">¿Y por dentro?</h3>
+    <div class="inside-panels">
+      <details class="panel" name="inside" open>
+        <summary><span data-i18n="landing.inside.simple">Explicación sencilla</span><span class="pm" aria-hidden="true"></span></summary>
+        <p class="panel-simple">
+          <span data-i18n="landing.inside.simple_a">La web es como una app que se descarga entera a tu móvil al abrirla. Después, todo el trabajo (recortar la foto, tapar los datos, crear el PDF) lo hace tu propio teléfono. No hay ningún servidor que reciba tus fotos: la página tiene</span>
+          <mark data-i18n="landing.inside.simple_mark">prohibido enviar nada</mark>
+          <span data-i18n="landing.inside.simple_b">por internet, y es tu navegador quien hace cumplir esa prohibición, no nosotros.</span>
+        </p>
+      </details>
+      <details class="panel" name="inside">
+        <summary><span data-i18n="landing.inside.technical">Explicación técnica</span><span class="pm" aria-hidden="true"></span></summary>
+        <ul class="panel-tech">
+          <li><span data-i18n="landing.inside.t1_a">La foto se dibuja en un</span> <code>&lt;canvas&gt;</code><span data-i18n="landing.inside.t1_b">, lo que elimina sus metadatos EXIF (ubicación, modelo de móvil…).</span></li>
+          <li data-i18n="landing.inside.t2">Una transformada de Hough basada en gradientes encuentra los bordes de la tarjeta, y una homografía la endereza a 1012 × 638 px (tamaño ID-1 a unos 300 ppp).</li>
+          <li data-i18n="landing.inside.t3">La versión del DNI se reconoce comparando una «firma» en escala de grises con imágenes de referencia.</li>
+          <li data-i18n="landing.inside.t4">Las zonas ocultas se pixelan con ruido o se tapan; la marca de agua se dibuja encima. Los píxeles originales no quedan en el PDF.</li>
+          <li data-i18n="landing.inside.t5">Un generador de PDF propio, sin dependencias, incrusta las imágenes ya tapadas.</li>
+          <li><span data-i18n="landing.inside.t6_a">La política de seguridad (CSP) de todas las páginas incluye</span> <code>connect-src 'none'</code> <span data-i18n="landing.inside.t6_and">y</span> <code>form-action 'none'</code><span data-i18n="landing.inside.t6_b">: el navegador bloquea cualquier envío de datos, aunque hubiera código malicioso.</span></li>
+          <li data-i18n="landing.inside.t7">Sin compilación ni dependencias: los archivos del repositorio son exactamente los que ejecuta tu navegador.</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- 6. Verify -->
+<section class="section wrap" id="verifica" aria-labelledby="ver-h">
+  <div class="head">
+    <p class="eyebrow"><span aria-hidden="true">06 — </span><span data-i18n="landing.verify.eyebrow">No te fíes de nosotros</span></p>
+    <h2 id="ver-h" data-i18n="landing.verify.title">Compruébalo tú mismo.</h2>
+  </div>
+  <div class="cols2 ver-top">
+    <div class="ver-steps">
+      <p class="mono label" data-i18n="landing.verify.a_label">A · Mira las conexiones (en ordenador)</p>
+      <ol>
+        <li data-i18n="landing.verify.a1">Abre JustID en Chrome, Edge o Firefox.</li>
+        <li><span data-i18n="landing.verify.a2_a">Pulsa</span> <kbd>F12</kbd> <span data-i18n="landing.verify.a2_b">(o</span> <kbd>Cmd</kbd> + <kbd data-i18n="landing.verify.key_option">Opción</kbd> + <kbd>I</kbd> <span data-i18n="landing.verify.a2_c">en Mac) y ve a la pestaña</span> <strong data-i18n="landing.verify.a2_network">Red</strong> <span data-i18n="landing.verify.a2_d">(Network).</span></li>
+        <li data-i18n="landing.verify.a3">Usa la app normalmente: haz o elige las fotos, tapa datos y genera el PDF.</li>
+        <li data-i18n="landing.verify.a4">Comprueba que no aparece ninguna petición nueva al procesar tu DNI. Solo verás la carga inicial de los archivos de la propia web.</li>
+      </ol>
+    </div>
+    <figure class="netpanel mono" role="img" aria-label="Ilustración de la pestaña Red de las herramientas de desarrollo, sin peticiones al procesar un DNI" data-i18n-attr="aria-label:landing.net.aria">
+      <div class="np-tabs"><span data-i18n="landing.net.tab_elements">Elementos</span><span data-i18n="landing.net.tab_console">Consola</span><span class="np-on" data-i18n="landing.net.tab_network">Red</span></div>
+      <div class="np-row np-head"><span data-i18n="landing.net.col_name">Nombre</span><span data-i18n="landing.net.col_status">Estado</span><span data-i18n="landing.net.col_type">Tipo</span></div>
+      <div class="np-row"><span>app/</span><span>200</span><span>doc</span></div>
+      <div class="np-row"><span>js/detect.js</span><span>200</span><span>script</span></div>
+      <div class="np-row"><span>js/redact.js</span><span>200</span><span>script</span></div>
+      <div class="np-row"><span>js/pdf.js</span><span>200</span><span>script</span></div>
+      <div class="np-foot"><span data-i18n="landing.net.processing">— procesando tu DNI —</span><span><span data-i18n="landing.net.zero">0 peticiones</span><span class="caret" aria-hidden="true">_</span></span></div>
+    </figure>
+  </div>
+
+  <div class="cols2 ver-bottom">
+    <div class="ver-ai">
+      <p class="mono label" data-i18n="landing.verify.b_label">B · Pregúntale a una IA</p>
+      <p data-i18n="landing.verify.b_intro">Copia este texto en ChatGPT, Claude, Gemini o la que uses.</p>
+      <div class="copy-row">
+        <!-- Needs JavaScript (clipboard): shown by landing.js. -->
+        <button type="button" class="btn btn-primary" id="copy-btn" hidden data-i18n="landing.verify.copy">Copiar el texto</button>
+        <span class="visually-hidden" id="copy-status" role="status" aria-live="polite"></span>
+      </div>
+      <p class="mono label label-c" data-i18n="landing.verify.c_label">C · Lee el código</p>
+      <p><span data-i18n="landing.verify.c_body">Código abierto, licencia MIT:</span> <a class="strong-link" href="https://github.com/lcandea/justid" rel="noopener noreferrer">github.com/lcandea/justid <span aria-hidden="true">↗</span></a></p>
+    </div>
+    <blockquote class="ai-prompt mono" id="ai-prompt" tabindex="0" aria-label="Texto para preguntar a una IA" data-i18n-attr="aria-label:landing.verify.prompt_label" data-i18n="landing.verify.prompt">Revisa el código fuente de https://github.com/lcandea/justid y dime si esta web puede enviar a algún servidor las fotos o los datos del DNI que se procesan en ella. Fíjate en la política de seguridad de contenido (CSP), en cualquier uso de fetch, XMLHttpRequest, WebSocket, sendBeacon o formularios, y en si carga scripts de terceros. Explícamelo en lenguaje sencillo.</blockquote>
+  </div>
+</section>
+
+<!-- 7. Request a DNI -->
+<section class="request" id="pedir" aria-labelledby="req-h">
+  <div class="wrap request-grid">
+    <div class="req-copy">
+      <p class="eyebrow"><span aria-hidden="true">07 — </span><span data-i18n="landing.request.eyebrow">Para caseros, gestores y empresas</span></p>
+      <h2 id="req-h" data-i18n="landing.request.title">¿Necesitas el DNI de otra persona?</h2>
+      <p class="req-body" data-i18n="landing.request.body">No pidas una foto completa. Crea un enlace que diga qué datos necesitas y para qué. La otra persona decide qué comparte y te envía una copia con marca de agua por WhatsApp o correo.</p>
+      <a class="btn btn-dark" href="app/request.html"><span data-i18n="landing.request.cta">Crear una petición</span> <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="req-mock" role="img" aria-label="Ejemplo de enlace de petición y de lo que verá la otra persona" data-i18n-attr="aria-label:landing.request.mock_aria">
+      <div class="req-url mono" aria-hidden="true"><span class="u-base">…/app/request.html</span><span class="u-frag">#v1.eyJ3aG8iOiJQaXNvcyBNYXlvciIsIndoeSI6</span></div>
+      <div class="req-card" aria-hidden="true">
+        <span class="mono req-from" data-i18n="landing.request.mock_from">Petición de · Pisos Mayor (en sus palabras)</span>
+        <p data-i18n="landing.request.mock_why">«Para el contrato de alquiler de C/ Mayor 12»</p>
+        <div class="req-chips">
+          <span data-i18n="landing.request.mock_c1">Nombre</span>
+          <span data-i18n="landing.request.mock_c2">Número de DNI</span>
+          <span data-i18n="landing.request.mock_c3">Fecha de caducidad</span>
+          <span class="chip-dark" data-i18n="landing.request.mock_c4">+ Domicilio · tú decides</span>
+        </div>
+      </div>
+      <p class="mono req-note" data-i18n="landing.request.note">La petición viaja dentro del enlace. No se guarda en ningún servidor.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 8. FAQ -->
+<section class="section wrap faq" id="faq" aria-labelledby="faq-h">
+  <div class="faq-grid">
+    <div>
+      <p class="eyebrow"><span aria-hidden="true">08 — </span><span data-i18n="landing.faq.eyebrow">Preguntas</span></p>
+      <h2 id="faq-h" data-i18n="landing.faq.title">Preguntas frecuentes</h2>
+    </div>
+    <div class="faq-list">
+      <details><summary><span data-i18n="landing.faq.q1">¿Es gratis?</span><span class="pm" aria-hidden="true"></span></summary><p data-i18n="landing.faq.a1">Sí. Sin registro, sin anuncios y sin letra pequeña.</p></details>
+      <details><summary><span data-i18n="landing.faq.q2">¿Funciona sin internet?</span><span class="pm" aria-hidden="true"></span></summary><p data-i18n="landing.faq.a2">Una vez cargada la página, todo el proceso ocurre en tu dispositivo.</p></details>
+      <details><summary><span data-i18n="landing.faq.q3">¿Guardáis mis fotos?</span><span class="pm" aria-hidden="true"></span></summary><p data-i18n="landing.faq.a3">No. Al cerrar la página desaparecen. No usamos cookies, analíticas ni rastreadores.</p></details>
+      <details><summary><span data-i18n="landing.faq.q4">¿Una copia tapada sigue siendo válida?</span><span class="pm" aria-hidden="true"></span></summary><p data-i18n="landing.faq.a4">Depende de quién la pida. Muchos trámites solo necesitan comprobar tu nombre y tu número de DNI. Si te piden más datos, pregunta para qué los necesitan.</p></details>
+      <details><summary><span data-i18n="landing.faq.q5">¿Qué DNI admite?</span><span class="pm" aria-hidden="true"></span></summary><p data-i18n="landing.faq.a5">El DNI español 3.0 (2015–2021) y 4.0 (desde 2021). Con el marcador de zonas puedes adaptarlo a otros documentos.</p></details>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- 9. Footer -->
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot-top">
+      <div class="logo logo-xl" aria-hidden="true"><span>Just</span><span class="logo-id">ID</span></div>
+      <nav class="foot-nav mono" aria-label="Pie de página" data-i18n-attr="aria-label:landing.footer.nav">
+        <a href="https://github.com/lcandea/justid" rel="noopener noreferrer"><span data-i18n="landing.footer.source">Código fuente</span> <span aria-hidden="true">↗</span></a>
+        <span class="muted" data-i18n="landing.footer.license">Licencia MIT</span>
+        <div class="lang-switch" data-lang-switch></div>
+      </nav>
+    </div>
+    <p class="disclaimer"><span data-i18n="landing.footer.disclaimer_a">JustID es un proyecto independiente y de código abierto.</span> <strong data-i18n="landing.footer.disclaimer_b">No está afiliado a la Policía Nacional, al Ministerio del Interior ni a ningún organismo público.</strong></p>
+  </div>
+</footer>
 </body>
 </html>
