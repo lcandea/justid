@@ -230,7 +230,7 @@ for (const width of [360, 412]) {
   });
 }
 
-test('country code picker: searchable by name or prefix, keyboard friendly, full number in the link', async ({ page }) => {
+test('country code picker: searchable by name or prefix, keyboard friendly, full number in the link', async ({ page }, testInfo) => {
   await page.goto('/app/request.html');
   await page.locator('#b-from').fill('ABC');
   await page.locator('#b-purpose').fill('Alquiler');
@@ -243,10 +243,20 @@ test('country code picker: searchable by name or prefix, keyboard friendly, full
   await expect(pop).toBeVisible();
   await expect(btn).toHaveAttribute('aria-expanded', 'true');
   await expect(search).toBeFocused();
-  // opens upwards (the field sits near the end of the page; on phones the keyboard covers what's below)
   const popBox = await pop.boundingBox(), btnBox = await btn.boundingBox();
-  expect(popBox && btnBox && popBox.y + popBox.height <= btnBox.y + 1).toBe(true);
-  expect(popBox && popBox.y >= 0).toBe(true); // fully on screen
+  if (testInfo.project.name === 'mobile') {
+    // phones: full-screen sheet with the search box on top, so the keyboard never covers it
+    await expect(pop).toHaveClass(/\bsheet\b/);
+    expect(popBox && popBox.y <= 1).toBe(true);
+    const searchBox = await search.boundingBox(), vh = page.viewportSize()?.height ?? 0;
+    expect(searchBox && searchBox.y < vh / 3).toBe(true);
+    await expect(page.locator('#b-dial-close')).toBeVisible();
+  } else {
+    // desktop: opens upwards (the field sits near the end of the page), fully on screen
+    await expect(page.locator('#b-dial-close')).toBeHidden();
+    expect(popBox && btnBox && popBox.y + popBox.height <= btnBox.y + 1).toBe(true);
+    expect(popBox && popBox.y >= 0).toBe(true);
+  }
   await search.fill('portu');
   await expect(page.locator('#b-dial-list li')).toHaveCount(1);
   await expect(page.locator('#b-dial-list li')).toContainText('Portugal');
@@ -286,4 +296,16 @@ test('country code picker: searchable by name or prefix, keyboard friendly, full
   // email delivery: no country picker
   await page.locator('#b-delivery button', { hasText: 'Email' }).click();
   await expect(btn).toBeHidden();
+});
+
+test('country code picker: the phone sheet closes with its button and unlocks the page', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile', 'sheet mode is for phones');
+  await page.goto('/app/request.html');
+  await page.locator('#b-dial').click();
+  await expect(page.locator('#b-dial-pop')).toBeVisible();
+  await expect(page.locator('html')).toHaveClass(/\bdial-lock\b/);
+  await page.locator('#b-dial-close').click();
+  await expect(page.locator('#b-dial-pop')).toBeHidden();
+  await expect(page.locator('html')).not.toHaveClass(/\bdial-lock\b/);
+  await expect(page.locator('#b-dial')).toBeFocused();
 });

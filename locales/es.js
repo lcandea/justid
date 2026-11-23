@@ -261,6 +261,7 @@ export default {
   'builder.dial_search': 'Buscar país o prefijo',
   'builder.dial_list': 'Países',
   'builder.dial_none': 'Ningún país coincide.',
+  'builder.dial_close': 'Cerrar',
   'builder.phone_preview': 'Se usará: {phone}',
   'builder.contact_placeholder_email': 'nombre@ejemplo.com',
   'builder.contact_placeholder_upload': 'https://…',

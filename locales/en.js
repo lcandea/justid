@@ -260,6 +260,7 @@ export default {
   'builder.dial_search': 'Search country or code',
   'builder.dial_list': 'Countries',
   'builder.dial_none': 'No country matches.',
+  'builder.dial_close': 'Close',
   'builder.phone_preview': 'Will be used: {phone}',
   'builder.contact_placeholder_email': 'name@example.com',
   'builder.contact_placeholder_upload': 'https://…',

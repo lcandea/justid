@@ -54,7 +54,7 @@ export function filterCountries(list, query) {
  */
 export class DialPicker {
   /**
-   * @param {{ button: HTMLButtonElement, pop: HTMLElement, search: HTMLInputElement, list: HTMLElement, empty: HTMLElement }} els
+   * @param {{ button: HTMLButtonElement, pop: HTMLElement, search: HTMLInputElement, list: HTMLElement, empty: HTMLElement, closeBtn?: HTMLButtonElement | null }} els
    * @param {{ initial: string, lang: () => string, buttonLabel: (c: Country) => string, onChange: (c: Country) => void }} opts
    */
   constructor(els, opts) {
@@ -64,6 +64,14 @@ export class DialPicker {
     this.active = 0;
     /** @type {Country} */ this.selected = this.all.find(c => c.iso === opts.initial) || this.all[0];
     this.renderButton();
+    // Phones get a full-screen sheet: a popup next to the field ends up under the keyboard.
+    this.sheetQuery = window.matchMedia('(max-width: 600px), (pointer: coarse)');
+    this.syncViewport = () => {
+      const vv = window.visualViewport; if (!vv) return;
+      els.pop.style.setProperty('--vv-top', `${vv.offsetTop}px`);
+      els.pop.style.setProperty('--vv-h', `${vv.height}px`);
+    };
+    els.closeBtn?.addEventListener('click', () => this.close(true));
 
     els.button.addEventListener('click', () => (this.isOpen() ? this.close(true) : this.open()));
     els.button.addEventListener('keydown', e => { if (e.key === 'ArrowDown') { e.preventDefault(); this.open(); } });
@@ -100,20 +108,31 @@ export class DialPicker {
   isOpen() { return !this.els.pop.classList.contains('hidden'); }
 
   open() {
+    const sheet = this.sheetQuery.matches;
+    this.els.pop.classList.toggle('sheet', sheet);
+    if (sheet) {
+      document.documentElement.classList.add('dial-lock');
+      this.syncViewport();
+      window.visualViewport?.addEventListener('resize', this.syncViewport);
+      window.visualViewport?.addEventListener('scroll', this.syncViewport);
+    }
     this.els.pop.classList.remove('hidden');
     this.els.button.setAttribute('aria-expanded', 'true');
     this.els.search.value = '';
     this.shown = this.all;
     this.active = Math.max(0, this.all.indexOf(this.selected));
     this.renderList();
-    // The list opens upwards: keep the whole popup on screen, then focus without a second scroll.
-    this.els.pop.scrollIntoView({ block: 'nearest' });
+    // Desktop: the list opens upwards; keep the whole popup on screen, then focus without a second scroll.
+    if (!sheet) this.els.pop.scrollIntoView({ block: 'nearest' });
     this.els.search.focus({ preventScroll: true });
   }
 
   /** @param {boolean} focusButton */
   close(focusButton) {
     this.els.pop.classList.add('hidden');
+    document.documentElement.classList.remove('dial-lock');
+    window.visualViewport?.removeEventListener('resize', this.syncViewport);
+    window.visualViewport?.removeEventListener('scroll', this.syncViewport);
     this.els.button.setAttribute('aria-expanded', 'false');
     this.els.search.removeAttribute('aria-activedescendant');
     if (focusButton) this.els.button.focus();

@@ -171,7 +171,7 @@ async function shareLink() {
 
 /* ---------- init ---------- */
 const dial = new DialPicker({
-  button: $button('#b-dial'), pop: $('#b-dial-pop'), search: $input('#b-dial-search'), list: $('#b-dial-list'), empty: $('#b-dial-empty'),
+  button: $button('#b-dial'), pop: $('#b-dial-pop'), search: $input('#b-dial-search'), list: $('#b-dial-list'), empty: $('#b-dial-empty'), closeBtn: $button('#b-dial-close'),
 }, {
   initial: 'ES', // Spain by default
   lang: getLang,

@@ -60,7 +60,11 @@
     <input type="text" id="b-contact" maxlength="300" autocomplete="off">
   </div>
   <div class="dial-pop hidden" id="b-dial-pop">
+    <div class="dial-head">
     <input type="text" id="b-dial-search" role="combobox" aria-expanded="true" aria-controls="b-dial-list" aria-autocomplete="list" autocomplete="off" data-i18n-attr="placeholder:builder.dial_search;aria-label:builder.dial_search">
+      <!-- Only shown in the full-screen sheet on phones (no Escape key there) -->
+      <button type="button" class="dial-close" id="b-dial-close" data-i18n="builder.dial_close"></button>
+    </div>
     <ul class="dial-list" id="b-dial-list" role="listbox" data-i18n-attr="aria-label:builder.dial_list"></ul>
     <p class="muted dial-empty hidden" id="b-dial-empty" data-i18n="builder.dial_none"></p>
   </div>

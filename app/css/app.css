@@ -201,7 +201,18 @@ a.btn.big { width: 100%; justify-content: center; padding: 14px; font-size: 17px
 .dial-flag { font-size: 20px; line-height: 1; }
 .dial-pop { position: absolute; left: 0; right: 0; bottom: calc(100% + 6px); z-index: 20; display: flex; flex-direction: column;
   border: 1px solid var(--line); border-radius: 12px; background: var(--card); padding: 8px; box-shadow: 0 -6px 24px rgb(0 0 0 / 0.18); }
-.dial-pop input { order: 3; }
+.dial-head { order: 3; display: flex; gap: 8px; }
+.dial-head input { flex: 1; min-width: 0; }
+.dial-close { display: none; }
+/* Phones: a full-screen sheet pinned to the visible area above the keyboard (iOS keeps the layout
+   viewport behind the keyboard, so JS feeds the visual viewport in --vv-top / --vv-h). Search on top. */
+.dial-pop.sheet { position: fixed; left: 0; right: 0; bottom: auto; top: var(--vv-top, 0px); height: var(--vv-h, 100vh);
+  z-index: 1000; border: 0; border-radius: 0; box-shadow: none; padding: calc(env(safe-area-inset-top, 0px) + 10px) 12px 8px; }
+.dial-pop.sheet .dial-head { order: 0; }
+.dial-pop.sheet .dial-close { display: block; flex: none; }
+.dial-pop.sheet .dial-list { order: 1; flex: 1; min-height: 0; max-height: none; margin: 8px 0 0; }
+.dial-pop.sheet .dial-empty { order: 2; }
+html.dial-lock, html.dial-lock body { overflow: hidden; }
 .dial-pop .dial-empty { order: 2; }
 .dial-pop input { font-size: 16px; padding: 10px; }
 .dial-list { order: 1; list-style: none; margin: 0 0 6px; padding: 0; max-height: min(260px, 38vh); max-height: min(260px, 38dvh); overflow-y: auto; overscroll-behavior: contain; }
