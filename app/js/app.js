@@ -10,6 +10,9 @@ import { identifyDocument, detectSide } from './identify.js';
 import { renderRedacted } from './redact.js';
 import { makePdf, canvasToJpeg } from './pdf.js';
 import { openZoom } from './zoom-viewer.js';
+import { decodeRequest, extraFields } from './request.js';
+import { renderRequestPanel, syncRequestPanel, renderSendBlock } from './request-view.js';
+import { FAMILIES } from '../../templates/index.js';
 
 /** @typedef {import('./templates.js').ResolvedTemplate} ResolvedTemplate */
 /** @typedef {'front' | 'back'} Side */
@@ -21,6 +24,17 @@ const STEPS = 4;
 const CAN_SHARE = !!navigator.canShare; // only on HTTPS/localhost and supporting browsers
 /** @type {Side[]} */
 const SIDE_LIST = ['front', 'back'];
+
+// A request link (#req=…, made on request.html) preselects what to show. It is decoded once, as
+// untrusted input: an invalid link is ignored (with a notice) and the app works as usual.
+const requestResult = decodeRequest(location.hash, FAMILIES);
+const request = requestResult?.ok ? requestResult.request : null;
+const requestFamily = request ? FAMILIES.find(f => f.id === request.doc) : undefined;
+/** Requested fields that are normally hidden: each needs the user's explicit OK. */
+const requestExtras = new Set(request && requestFamily ? extraFields(request, requestFamily) : []);
+const requestFields = new Set(request?.fields || []);
+// Another request pasted into the address bar: start over with it.
+window.addEventListener('hashchange', () => location.reload());
 
 const state = {
   /** @type {ResolvedTemplate[]} */ templates: [],
@@ -39,6 +53,7 @@ const state = {
   wrongSide: { front: false, back: false },
   /** the user said "it's fine" for that slot's photo @type {Record<Side, boolean>} */
   wrongSideOk: { front: false, back: false },
+  /** extra requested fields the user agreed to show @type {Set<string>} */ accepted: new Set(),
 };
 const zonesCanvas = el('canvas', { class: 'zones' });
 const sides = () => SIDE_LIST.filter(s => state.base[s]);
@@ -47,7 +62,8 @@ const sideName = (/** @type {Side} */ s) => t('side.' + s);
 /* ---------- templates ---------- */
 /** @param {string} [selectId] */
 function fillTemplateSelect(selectId) {
-  state.templates = allTemplates();
+  // A request is for one document family: only offer its versions.
+  state.templates = allTemplates().filter(x => !request || x.family === request.doc);
   const sel = $select('#tpl');
   sel.replaceChildren(...state.templates.map(x => el('option', { value: x.id }, templateName(x))));
   if (selectId) sel.value = selectId;
@@ -57,8 +73,9 @@ function fillTemplateSelect(selectId) {
 function setTemplate(tpl, { auto = false } = {}) {
   state.template = tpl;
   state.tplAuto = auto;
-  state.hidden = new Set(tpl.fields.filter(f => f.hide).map(f => f.id));
+  state.hidden = new Set(tpl.fields.filter(startsHidden).map(f => f.id));
   renderTemplateInfo();
+  renderRequest();
   renderSlot('front'); renderSlot('back'); // empty slots show the template's sample as a hint
   renderFields(); renderAll();
 }
@@ -313,6 +330,36 @@ $('#crop-use').addEventListener('click', () => {
   if (side === 'front' && !state.base.back) setTimeout(() => $('#slot-back').scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
 });
 
+/* ---------- request links ---------- */
+/**
+ * Initial visibility. Without a request: the template's defaults. With one: defaults + requested
+ * fields, except that a normally hidden field stays hidden until the user accepts it.
+ * @param {import('./templates.js').Field} f
+ */
+function startsHidden(f) {
+  if (!request) return f.hide;
+  if (requestExtras.has(f.id)) return !state.accepted.has(f.id);
+  return requestFields.has(f.id) ? false : f.hide;
+}
+/** The back side is needed when asked for, or when a requested field is only on the back. */
+function requestNeedsBack() {
+  if (!request) return true;
+  return request.back || state.template.fields.some(f => requestFields.has(f.id) && f.zones.length > 0 && f.zones.every(z => z.side === 'back'));
+}
+function renderRequest() {
+  $('#req-invalid').classList.toggle('hidden', !requestResult || requestResult.ok);
+  $('#req-cta').classList.toggle('hidden', !!request);
+  if (!request) return;
+  const present = new Set(state.template.fields.map(f => f.id));
+  renderRequestPanel($('#req-panel'), {
+    request, extras: [...requestExtras].filter(id => present.has(id)), backNeeded: requestNeedsBack(),
+    isShown: id => !state.hidden.has(id),
+    onAccept: (id, ok) => setHidden(id, !ok),
+  });
+  // Not asked for: don't offer the back slot (unless a photo already landed there).
+  $('#slot-back').classList.toggle('hidden', !requestNeedsBack() && !state.base.back);
+}
+
 /* ---------- step 2: fields ---------- */
 function renderFields() {
   /** @type {Record<Side, import('./templates.js').Field[]>} */
@@ -327,9 +374,10 @@ function renderFields() {
       const cb = el('input', { type: 'checkbox', checked: state.hidden.has(f.id), 'aria-label': t('hide.aria', { field: label }) });
       cb.addEventListener('change', () => setHidden(f.id, cb.checked));
       const also = f.zones.some(z => z.side !== side) ? t(side === 'front' ? 'hide.also_on_back' : 'hide.also_on_front') : '';
-      const row = el('label', { class: 'fld', 'data-f': f.id },
+      const extra = request && requestExtras.has(f.id) ? t('hide.requested_extra', { name: request.from }) : '';
+      const row = el('label', { class: 'fld' + (extra ? ' req-extra' : ''), 'data-f': f.id },
         el('span', { class: 'nm' }, label,
-          el('small', { class: f.hide ? '' : 'ok' }, t(f.hide ? 'hide.recommended' : 'hide.usually_shown') + also)),
+          el('small', { class: f.hide ? '' : 'ok' }, t(f.hide ? 'hide.recommended' : 'hide.usually_shown') + also + extra)),
         el('span', { class: 'switch' }, cb, el('i')));
       box.append(row);
     }
@@ -338,6 +386,10 @@ function renderFields() {
 /** @param {string} id @param {boolean} on */
 function setHidden(id, on) {
   on ? state.hidden.add(id) : state.hidden.delete(id);
+  if (requestExtras.has(id)) {
+    on ? state.accepted.delete(id) : state.accepted.add(id); // showing an extra field = accepting it
+    syncRequestPanel($('#req-panel'), x => !state.hidden.has(x));
+  }
   const cb = /** @type {HTMLInputElement | null} */ (document.querySelector(`.fld[data-f="${id}"] input`));
   if (cb) cb.checked = on;
   renderAll();
@@ -405,6 +457,7 @@ function mountPreviews() {
   } else if (s === 3) {
     $('#pv-final').replaceChildren(...sides().map(sd => state.canvas[sd]));
     updateSummary();
+    if (request) renderSendBlock($('#req-send'), request, $input('#purpose').value.trim());
   }
 }
 function canAdvance(s = state.step) {
@@ -562,7 +615,8 @@ window.addEventListener('langchange', () => {
   const selected = state.template.id;
   $('#tpl').replaceChildren(...state.templates.map(x => el('option', { value: x.id }, templateName(x))));
   $select('#tpl').value = selected;
-  renderTemplateInfo(); renderSlot('front'); renderSlot('back'); renderFields(); renderChips(); updateNav(); renderAll();
+  renderTemplateInfo(); renderRequest(); renderSlot('front'); renderSlot('back'); renderFields(); renderChips(); updateNav(); renderAll();
+  if (request && state.step === STEPS - 1) renderSendBlock($('#req-send'), request, $input('#purpose').value.trim());
   if (crop.editor) { crop.editor.opts.topLabel = t('crop.top_label'); crop.editor.draw(); $('#crop-title').textContent = t(crop.side === 'front' ? 'crop.title_front' : 'crop.title_back'); }
 });
 
@@ -572,6 +626,10 @@ $('#decision').addEventListener('cancel', e => e.preventDefault());
 applyI18n();
 mountLangSwitch($('#lang'));
 initPrivacy();
+if (request) { // the requester's purpose and name become the watermark; the user can still edit both
+  $input('#purpose').value = request.purpose;
+  $input('#recipient').value = request.from;
+}
 renderChips();
 fillTemplateSelect();
 history.replaceState({ step: 0 }, '');

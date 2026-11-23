@@ -38,6 +38,9 @@
 
   <!-- Step 1: photos -->
   <section class="step" data-step="0">
+    <!-- Request links (#req=…): summary of what is asked, filled by request-view.js -->
+    <p class="status warn req-invalid hidden" id="req-invalid" role="alert" data-i18n="request.invalid"></p>
+    <div class="req-panel hidden" id="req-panel" aria-live="polite"></div>
     <h2 data-i18n="photos.title"></h2>
     <p class="muted" data-i18n="photos.tip"></p>
     <div class="slots">
@@ -56,6 +59,7 @@
       </div>
       <p class="muted" id="tpl-note"></p>
     </details>
+    <p class="muted req-cta" id="req-cta"><a href="request.html" data-i18n="request.cta"></a></p>
   </section>
 
   <!-- Step 2: choose what to hide -->
@@ -93,6 +97,7 @@
       <button type="button" class="big" id="btn-dl" data-i18n="share.download_pdf"></button>
     </div>
     <p class="status" id="out-status" role="status"></p>
+    <div class="req-send hidden" id="req-send"></div>
   </section>
 </main>
 
