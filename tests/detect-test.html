@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pruebas del detector</title>
+<link rel="stylesheet" href="../css/styles.css?v=4">
+<style>
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+  .grid canvas { width: 100%; border-radius: 8px; }
+  .pass { color: var(--ok); } .fail { color: var(--warn); }
+</style>
+</head>
+<body>
+<header><h1>Pruebas del detector de tarjeta</h1><p>Escenas sintéticas: verde = verdad, magenta = detectado.</p></header>
+<main><p id="sum"></p><div class="grid" id="out"></div></main>
+<script src="../js/common.js?v=4"></script>
+<script src="../js/detect.js?v=4"></script>
+<script src="detect-test.js?v=4"></script>
+</body>
+</html>

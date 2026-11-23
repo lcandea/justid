@@ -1,0 +1,136 @@
+/* Flujo por pasos, pensado primero para móvil */
+.flow-body { padding-bottom: calc(76px + env(safe-area-inset-bottom)); -webkit-tap-highlight-color: transparent; }
+.top { position: sticky; top: 0; z-index: 10; background: var(--card); border-bottom: 1px solid var(--line); padding: 10px 16px 8px; padding-top: max(10px, env(safe-area-inset-top)); }
+.brand { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 15px; }
+.lock { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--ok); white-space: nowrap; }
+.steps { list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin: 8px 0 0; padding: 0; }
+.steps li { font-size: 12px; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 3px; padding-top: 6px; border-top: 3px solid var(--line); cursor: default; }
+.steps li span { display: none; }
+.steps li.done { color: var(--fg); border-color: var(--accent); cursor: pointer; }
+.steps li.cur { color: var(--accent); border-color: var(--accent); font-weight: 600; }
+
+.flow { max-width: 720px; margin: 0 auto; padding: 16px; display: block; }
+.step h2 { font-size: 20px; margin: 4px 0 4px; }
+.step > .muted { margin: 0 0 14px; }
+.step h3 { margin-top: 18px; }
+
+/* huecos de foto */
+.slots { display: grid; gap: 12px; }
+@media (min-width: 560px) { .slots { grid-template-columns: 1fr 1fr; } }
+.slot { background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.slot .empty { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; aspect-ratio: 85.6 / 54; border: 2px dashed var(--line); border-radius: 12px; margin: 10px; color: var(--muted); cursor: pointer; }
+.slot .empty strong { color: var(--fg); font-size: 16px; }
+.slot .empty svg { color: var(--accent); }
+.slot .empty input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.slot .gal { display: block; text-align: center; padding: 0 10px 12px; font-size: 14px; color: var(--accent); position: relative; }
+.slot .gal input { position: absolute; inset: 0; opacity: 0; }
+.slot .thumb { display: block; width: 100%; height: auto; }
+.slot .bar { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; gap: 6px; }
+.slot .bar .t { font-weight: 600; }
+.slot .bar .row { gap: 6px; }
+.slot .bar button, .slot .bar .btn { padding: 6px 10px; font-size: 14px; }
+
+.tpl-box { margin-top: 16px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; }
+.tpl-box summary { cursor: pointer; color: var(--muted); font-size: 14px; }
+.tpl-box[open] summary { margin-bottom: 10px; }
+
+/* vista previa */
+.pv { position: relative; }
+.pv canvas.preview { display: block; width: 100%; height: auto; }
+.pv canvas.zones { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.pv-sticky { position: sticky; top: 84px; z-index: 5; background: var(--bg); padding: 4px 0 6px; margin: 0 -2px; }
+.pv-sticky .seg { margin-bottom: 8px; }
+.hint { margin: 6px 0 0; font-size: 13px; color: var(--muted); text-align: center; }
+@media (max-height: 700px) { .pv-sticky { position: static; } }
+
+/* lista de campos con interruptores */
+#fields h3 { margin-top: 14px; }
+.fld { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 2px; border-bottom: 1px solid var(--line); cursor: pointer; }
+.fld .nm { display: flex; flex-direction: column; }
+.fld .nm small { color: var(--warn); font-size: 12px; }
+.fld .nm small.ok { color: var(--muted); }
+.fld.flash { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.switch { position: relative; flex: none; width: 46px; height: 28px; }
+.switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.switch i { position: absolute; inset: 0; border-radius: 999px; background: var(--line); transition: background .15s; pointer-events: none; }
+.switch i::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.3); transition: transform .15s; }
+.switch input:checked + i { background: var(--accent); }
+.switch input:checked + i::after { transform: translateX(18px); }
+
+.seg.small button { padding: 6px 12px; font-size: 14px; }
+.seg button { padding: 9px 14px; }
+
+/* motivo */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 14px; }
+.chips button { border-radius: 999px; padding: 7px 12px; font-size: 14px; }
+.chips button.on { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.lbl { display: block; margin-bottom: 4px; }
+input[type=text] { font-size: 16px; padding: 12px; } /* 16px evita el zoom automático de iOS */
+
+/* final */
+.final { display: grid; gap: 10px; }
+.summary { color: var(--muted); font-size: 14px; margin: 14px 0; }
+.share-actions { display: grid; gap: 10px; }
+button.big { width: 100%; justify-content: center; padding: 14px; font-size: 17px; border-radius: 12px; }
+
+/* barra inferior */
+.bottom-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: flex; gap: 10px; padding: 10px 16px; padding-bottom: max(10px, env(safe-area-inset-bottom)); background: var(--card); border-top: 1px solid var(--line); }
+.bottom-bar button { flex: 1; justify-content: center; padding: 13px; font-size: 16px; border-radius: 12px; }
+.bottom-bar button.primary { flex: 2; }
+.bottom-bar .invisible { display: none; } /* step 1 has no "Atrás": let the main button take the full width */
+
+/* encuadre a pantalla completa */
+.overlay { position: fixed; inset: 0; z-index: 50; background: #0b0c0e; color: #f2f3f5; display: flex; flex-direction: column; }
+.ov-head { padding: 12px 16px 8px; padding-top: max(12px, env(safe-area-inset-top)); display: flex; flex-direction: column; gap: 2px; }
+.ov-head span { font-size: 13px; color: #b6bcc7; }
+.ov-canvas { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 8px; }
+.ov-canvas canvas { border-radius: 6px; }
+.ov-bar { display: flex; gap: 6px; padding: 10px 12px; padding-bottom: max(10px, env(safe-area-inset-bottom)); background: #15171b; }
+.ov-bar button { flex: 1; justify-content: center; padding: 12px 4px; font-size: 15px; background: #23262c; color: #f2f3f5; border-color: #30343b; border-radius: 10px; }
+.ov-bar button.primary { flex: 1.4; background: #4ade80; color: #06210f; border-color: #4ade80; font-weight: 700; }
+body.no-scroll { overflow: hidden; }
+section.step { background: none; border: 0; padding: 0; border-radius: 0; }
+.steps li.reach { color: var(--fg); cursor: pointer; }
+/* en pantallas anchas, cabecera y barra alineadas con el contenido */
+.top > * { max-width: 688px; margin-left: auto; margin-right: auto; }
+.bottom-bar { padding-left: max(16px, calc((100vw - 688px) / 2)); padding-right: max(16px, calc((100vw - 688px) / 2)); }
+
+/* Template reference pictures (img/ref/, transparent rounded corners) */
+.tpl-auto { margin-left: 6px; padding: 1px 7px; border-radius: 999px; font-size: 12px; background: var(--accent); color: var(--accent-fg); vertical-align: 1px; }
+.tpl-pv { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.tpl-pv figure { margin: 0; }
+.tpl-pv img { display: block; width: 100%; height: auto; aspect-ratio: 1012 / 638; filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .35)); }
+.tpl-pv figcaption { margin-top: 4px; text-align: center; font-size: 12px; color: var(--muted); }
+/* Empty photo slot: faint sample of the expected side as a framing hint */
+.slot .empty.has-sample { overflow: hidden; }
+.slot .empty .ghost { position: absolute; inset: 10%; width: 80%; height: 80%; object-fit: contain; opacity: .1; pointer-events: none; }
+.slot .empty > :not(.ghost):not(input) { position: relative; }
+/* Document version mismatch warning */
+.tpl-warn { margin: 0 0 14px; padding: 10px 14px; border: 1px solid var(--warn); border-radius: 12px; background: color-mix(in srgb, var(--warn) 12%, var(--card)); }
+.tpl-warn p { margin: 0 0 8px; }
+.tpl-warn strong { color: var(--warn); }
+.tpl-warn .row { gap: 8px; flex-wrap: wrap; }
+
+/* Privacy badge: a button that wiggles now and then until it's opened */
+button.lock { background: none; border: 1px solid color-mix(in srgb, var(--ok) 45%, transparent); border-radius: 999px; padding: 3px 9px; font: inherit; font-size: 12px; color: var(--ok); cursor: pointer; }
+button.lock:hover { background: color-mix(in srgb, var(--ok) 12%, transparent); }
+button.lock.wiggle svg { animation: lock-wiggle 5s ease-in-out 1s infinite; transform-origin: 50% 60%; }
+/* 5 s cycle: ~3.6 s at rest, then grow -> shake left/right -> shrink back */
+@keyframes lock-wiggle {
+  0%, 72%, 100% { transform: scale(1) rotate(0); }
+  77% { transform: scale(1.45) rotate(0); }
+  80% { transform: scale(1.45) rotate(-18deg); }
+  83% { transform: scale(1.45) rotate(18deg); }
+  86% { transform: scale(1.45) rotate(-14deg); }
+  89% { transform: scale(1.45) rotate(10deg); }
+  92% { transform: scale(1.45) rotate(0); }
+}
+@media (prefers-reduced-motion: reduce) { button.lock.wiggle svg { animation: none; } }
+
+.privacy { max-width: min(440px, calc(100vw - 32px)); border: 1px solid var(--line); border-radius: 16px; padding: 20px; background: var(--card); color: var(--fg); }
+.privacy::backdrop { background: rgba(0, 0, 0, .55); }
+.privacy h2 { margin: 0 0 10px; font-size: 18px; }
+.privacy p, .privacy li { font-size: 14px; line-height: 1.5; }
+.privacy ul { padding-left: 20px; margin: 8px 0 12px; }
+.privacy a { color: var(--accent); }
+.privacy #privacy-close { width: 100%; margin-top: 6px; }
