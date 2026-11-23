@@ -1,10 +1,12 @@
 // @ts-check
 // English UI strings. Keys must match locales/es.js exactly (checked by tests).
 import landing from './landing-en.js';
+import why from './why-en.js';
 
-// Landing page strings live in landing-en.js.
+// Landing page strings live in landing-en.js, the /why page strings in why-en.js.
 export default {
   ...landing,
+  ...why,
   'meta.title': 'JustID — Share your ID, just enough',
   'meta.editor_title': 'JustID — Zone editor',
   'brand.tagline': 'Just enough',

@@ -65,6 +65,7 @@ export default {
   'landing.why.aepd': 'AEPD',
   'landing.why.aepd_aria': 'AEPD (Agencia Española de Protección de Datos): preguntas frecuentes sobre la identificación con DNI. Se abre en una pestaña nueva.',
   'landing.why.rtve': 'RTVE',
+  'landing.why.more_page': 'Para quien envía y para quien recibe',
   'landing.why.rtve_aria': 'RTVE: los expertos recomiendan pixelar datos al compartir el DNI por internet. Se abre en una pestaña nueva.',
 
   // 4. What it does
@@ -177,6 +178,7 @@ export default {
   'landing.request.mock_c4': '+ Domicilio · tú decides',
   'landing.request.mock_reply': 'Responder a · justid@justid.com',
   'landing.request.try': 'Pruébalo con el DNI de muestra',
+  'landing.request.why': 'Por qué pedirlo así',
   'landing.request.try_note': 'Abre la petición de ejemplo con las fotos del DNI de muestra oficial: no necesitas el tuyo.',
   'landing.request.demo_from': 'JustID (ejemplo)',
   'landing.request.demo_purpose': 'Probar JustID',
@@ -193,7 +195,8 @@ export default {
   'landing.faq.q3': '¿Guardáis mis fotos?',
   'landing.faq.a3': 'No. Al cerrar la página desaparecen. No usamos cookies, analíticas ni rastreadores.',
   'landing.faq.q4': '¿Una copia tapada sigue siendo válida?',
-  'landing.faq.a4': 'Depende de quién la pida. Muchos trámites solo necesitan comprobar tu nombre y tu número de DNI. Si te piden más datos, pregunta para qué los necesitan.',
+  'landing.faq.a4': 'Para la mayoría de trámites, sí: basta con tu nombre, tu número de DNI y tu foto. Solo algunas entidades, como los bancos, están obligadas por ley a guardar una copia completa.',
+  'landing.faq.a4_more': 'Qué responder si te dicen que no vale',
   'landing.faq.q5': '¿Qué DNI admite?',
   'landing.faq.a5': 'El DNI español 3.0 (2015–2021) y 4.0 (desde 2021). Con el marcador de zonas puedes adaptarlo a otros documentos.',
 
@@ -201,6 +204,7 @@ export default {
   'landing.footer.nav': 'Pie de página',
   'landing.footer.source': 'Código fuente',
   'landing.footer.license': 'Licencia MIT',
+  'landing.footer.why': 'Por qué así',
   'landing.footer.disclaimer_a': 'JustID es un proyecto independiente y de código abierto.',
   'landing.footer.disclaimer_b': 'No está afiliado a la Policía Nacional, al Ministerio del Interior ni a ningún organismo público.',
 };

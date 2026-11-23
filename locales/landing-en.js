@@ -65,6 +65,7 @@ export default {
   'landing.why.aepd': 'AEPD',
   'landing.why.aepd_aria': 'AEPD (Spanish Data Protection Agency): FAQ on identifying yourself with your ID. Opens in a new tab.',
   'landing.why.rtve': 'RTVE',
+  'landing.why.more_page': 'For senders and recipients',
   'landing.why.rtve_aria': 'RTVE: experts recommend pixelating data when sharing your ID online. Opens in a new tab.',
 
   // 4. What it does
@@ -177,6 +178,7 @@ export default {
   'landing.request.mock_c4': '+ Home address · you decide',
   'landing.request.mock_reply': 'Reply to · justid@justid.com',
   'landing.request.try': 'Try it with the sample ID',
+  'landing.request.why': 'Why ask for it this way',
   'landing.request.try_note': 'Opens the example request with the official sample ID photos: you don’t need yours.',
   'landing.request.demo_from': 'JustID (example)',
   'landing.request.demo_purpose': 'Try JustID',
@@ -193,7 +195,8 @@ export default {
   'landing.faq.q3': 'Do you keep my photos?',
   'landing.faq.a3': 'No. They are gone when you close the page. We use no cookies, analytics or trackers.',
   'landing.faq.q4': 'Is a covered copy still valid?',
-  'landing.faq.a4': 'It depends on who is asking. Many procedures only need to check your name and ID number. If they ask for more, ask what they need it for.',
+  'landing.faq.a4': 'For most procedures, yes: your name, ID number and photo are enough. Only some organisations, such as banks, are required by law to keep a full copy.',
+  'landing.faq.a4_more': 'What to answer if they say it isn’t valid',
   'landing.faq.q5': 'Which IDs does it support?',
   'landing.faq.a5': 'The Spanish DNI 3.0 (2015–2021) and 4.0 (since 2021). With the zone editor you can adapt it to other documents.',
 
@@ -201,6 +204,7 @@ export default {
   'landing.footer.nav': 'Footer',
   'landing.footer.source': 'Source code',
   'landing.footer.license': 'MIT licence',
+  'landing.footer.why': 'Why this way',
   'landing.footer.disclaimer_a': 'JustID is an independent, open-source project.',
   'landing.footer.disclaimer_b': 'It is not affiliated with the Policía Nacional, the Ministry of the Interior or any public body.',
 };

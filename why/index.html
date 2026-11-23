@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d0d0c">
+<meta name="color-scheme" content="dark">
+<!-- Same Content Security Policy as every page: connect-src 'none' means this page cannot send anything anywhere. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="Por qué enviar una copia del DNI con los datos innecesarios tapados y una marca de agua, y por qué te conviene aceptarla y pedirla así si eres quien la recibe." data-i18n-attr="content:why.meta.description">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<title data-i18n="why.meta.title">JustID — Por qué compartir el DNI con solo lo justo</title>
+<link rel="preload" href="/shared/fonts/archivo-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/shared/theme.css">
+<link rel="stylesheet" href="/landing/landing.css">
+<link rel="stylesheet" href="/landing/why.css">
+<script type="module" src="/landing/why.js"></script>
+</head>
+<body>
+<!-- /why: linked (and QR-coded) from every PDF. Two audiences: whoever sends an ID (#send) and whoever receives one (#receive). -->
+<a class="skip" href="#main" data-i18n="landing.skip">Saltar al contenido</a>
+
+<header class="site-header wrap">
+  <a class="logo" href="/" aria-label="JustID"><span>Just</span><span class="logo-id">ID</span></a>
+  <nav class="site-nav" aria-label="Principal" data-i18n-attr="aria-label:landing.nav.label">
+    <a class="nav-link" href="/" data-i18n="why.nav.what">Qué es JustID</a>
+    <div class="lang-switch" data-lang-switch></div>
+  </nav>
+</header>
+
+<main id="main">
+  <!-- Hero: pick your side -->
+  <section class="wrap why-hero" aria-labelledby="h1">
+    <p class="eyebrow eyebrow-dot" data-i18n="why.hero.eyebrow">Por qué así</p>
+    <h1 id="h1"><span data-i18n="why.hero.h1_a">Un DNI con</span> <span class="accent" data-i18n="why.hero.h1_b">solo lo justo.</span></h1>
+    <p class="lede" data-i18n="why.hero.lede">JustID tapa los datos de un DNI que no hacen falta para un trámite y marca la copia con su finalidad. Elige tu caso:</p>
+    <nav class="why-choices" aria-label="Elige tu caso" data-i18n-attr="aria-label:why.hero.choose">
+      <a class="why-choice" href="#send"><span class="mono why-choice-n" aria-hidden="true">A</span><span data-i18n="why.hero.send">Voy a enviar mi DNI</span><span class="why-arrow" aria-hidden="true">↓</span></a>
+      <a class="why-choice" href="#receive"><span class="mono why-choice-n" aria-hidden="true">B</span><span data-i18n="why.hero.receive">He recibido una copia</span><span class="why-arrow" aria-hidden="true">↓</span></a>
+    </nav>
+  </section>
+
+  <!-- A. Sender -->
+  <section class="section wrap why-part" id="send" aria-labelledby="send-h">
+    <div class="head">
+      <p class="eyebrow"><span aria-hidden="true">A — </span><span data-i18n="why.send.eyebrow">Si envías tu DNI</span></p>
+      <h2 id="send-h" data-i18n="why.send.title">Comparte solo lo que hace falta</h2>
+    </div>
+    <p class="why-intro why-lead" data-i18n="why.send.intro">Una foto completa de tu DNI entrega tu firma, tu domicilio, el número de soporte y el nombre de tus padres. Con esos datos se puede suplantar tu identidad: abrir cuentas, pedir préstamos o contratar a tu nombre.</p>
+    <ol class="cols3 why-list">
+      <li><span class="big-n" aria-hidden="true">01</span><h3 data-i18n="why.send.t1">Tapa lo que no necesitan</h3><p data-i18n="why.send.p1">JustID te propone qué ocultar según el trámite, y tú decides. Lo tapado se pixela con ruido para que no se pueda recuperar.</p></li>
+      <li><span class="big-n" aria-hidden="true">02</span><h3 data-i18n="why.send.t2">Marca para qué es</h3><p data-i18n="why.send.p2">La marca de agua con la finalidad, el destinatario y la fecha hace que la copia no sirva para otra cosa.</p></li>
+      <li><span class="big-n" aria-hidden="true">03</span><h3 data-i18n="why.send.t3">Sin subir nada</h3><p data-i18n="why.send.p3">Todo ocurre en tu móvil. Tus fotos no salen de él y la web tiene bloqueado cualquier envío de datos.</p></li>
+    </ol>
+    <div class="why-bottom">
+      <aside class="note-box">
+        <h3 data-i18n="why.send.objection_h">Si te dicen que así no vale</h3>
+        <p data-i18n="why.send.objection_p">Pregunta para qué necesitan los datos tapados. La ley les pide tratar solo los datos necesarios para la finalidad (RGPD, artículo 5.1.c). Puedes enseñarles la parte de esta página para quien recibe. Si están obligados por ley a guardar una copia completa, como un banco, tienen razón: en ese caso envíales lo que piden.</p>
+        <a class="src-link" href="#receive"><span data-i18n="why.send.objection_link">Ver la parte para quien recibe</span> <span aria-hidden="true">↓</span></a>
+      </aside>
+      <a class="btn btn-primary" href="/app/"><span data-i18n="why.send.cta">Proteger mi DNI</span> <span aria-hidden="true">→</span></a>
+    </div>
+  </section>
+
+  <!-- B. Recipient: what the copy is, whether it is enough, why to ask for IDs this way -->
+  <section class="why-part" id="receive" aria-labelledby="receive-h">
+    <div class="section wrap">
+      <div class="head">
+        <p class="eyebrow"><span aria-hidden="true">B — </span><span data-i18n="why.receive.eyebrow">Si has recibido una copia</span></p>
+        <h2 id="receive-h" data-i18n="why.receive.title">Te han enviado solo lo justo</h2>
+      </div>
+      <p class="why-intro why-lead" data-i18n="why.receive.intro">Quien te la ha enviado ha tapado los datos que no hacen falta para tu trámite y ha marcado la copia con su finalidad. Esto es lo que estás viendo.</p>
+      <ol class="cols3 why-list">
+        <li><span class="big-n" aria-hidden="true">01</span><h3 data-i18n="why.receive.t1">Lo que necesitas, a la vista</h3><p data-i18n="why.receive.p1">Normalmente quedan visibles el nombre, los apellidos, el número de DNI y la foto: lo que hace falta para saber quién es la persona.</p></li>
+        <li><span class="big-n" aria-hidden="true">02</span><h3 data-i18n="why.receive.t2">Lo demás, tapado a propósito</h3><p data-i18n="why.receive.p2">Los bloques pixelados no son un error. Ocultan datos como la firma, el domicilio o el número de soporte, que no hacen falta para tu trámite y que, en malas manos, sirven para suplantar a alguien.</p></li>
+        <li><span class="big-n" aria-hidden="true">03</span><h3 data-i18n="why.receive.t3">Una marca con su finalidad</h3><p data-i18n="why.receive.p3">La marca de agua y el PDF dicen para qué es la copia, para quién y de qué fecha. Fuera de ese uso no vale, y eso hace más difícil reutilizarla para otra cosa.</p></li>
+      </ol>
+    </div>
+
+    <div class="why-valid">
+      <div class="wrap why-valid-grid">
+        <h3 class="why-sub-h" data-i18n="why.valid.title">¿Me sirve? En la mayoría de los casos, sí</h3>
+        <div class="why-valid-body">
+          <p data-i18n="why.valid.p1">Para alquilar una vivienda, dar de alta a un cliente, inscribir a alguien en una actividad o entregar un paquete basta con saber quién es la persona: su nombre, su número de documento y su foto.</p>
+          <p data-i18n="why.valid.p2">Es lo que pide la ley. El Reglamento General de Protección de Datos establece que los datos deben ser «adecuados, pertinentes y limitados a lo necesario» para la finalidad (artículo 5.1.c, minimización de datos). Pedir una copia completa «por si acaso» va en contra de ese principio.</p>
+          <div class="why-boxes">
+            <div class="why-box">
+              <h4 data-i18n="why.valid.full_h">Cuándo sí puede hacer falta la copia completa</h4>
+              <p data-i18n="why.valid.full_p">Algunas entidades están obligadas por ley a conservar una copia íntegra del documento, como los bancos y otras entidades sujetas a la normativa de prevención del blanqueo de capitales (Ley 10/2010). Si es tu caso, díselo a quien te la envía y explícale qué datos necesitas y por qué.</p>
+            </div>
+            <div class="why-box">
+              <h4 data-i18n="why.valid.not_h">Lo que esta copia no es</h4>
+              <p data-i18n="why.valid.not_p">Es una copia, igual que una fotocopia o una foto: no certifica que el documento sea auténtico. Si necesitas comprobarlo, pide ver el original.</p>
+            </div>
+          </div>
+          <nav class="why-sources mono" aria-label="Fuentes" data-i18n-attr="aria-label:why.valid.sources">
+            <span data-i18n="why.valid.sources">Fuentes</span>
+            <a class="src-link" href="https://eur-lex.europa.eu/legal-content/ES/TXT/?uri=CELEX:32016R0679" target="_blank" rel="noopener noreferrer" aria-label="RGPD (Reglamento General de Protección de Datos), texto oficial en EUR-Lex. Se abre en una pestaña nueva." data-i18n-attr="href:why.valid.gdpr_href;aria-label:why.valid.gdpr_aria"><span data-i18n="why.valid.gdpr">RGPD, artículo 5</span> <span aria-hidden="true">↗</span></a>
+            <a class="src-link" href="https://www.aepd.es/preguntas-frecuentes/1-tus-derechos/3-identificacion-con-dni" target="_blank" rel="noopener noreferrer" aria-label="AEPD (Agencia Española de Protección de Datos): preguntas frecuentes sobre la identificación con DNI. Se abre en una pestaña nueva." data-i18n-attr="aria-label:landing.why.aepd_aria"><span data-i18n="landing.why.aepd">AEPD</span> <span aria-hidden="true">↗</span></a>
+          </nav>
+        </div>
+      </div>
+    </div>
+
+    <div class="section wrap">
+      <div class="head"><h3 class="why-sub-h" data-i18n="why.benefit.title">Por qué te conviene pedirlo así</h3></div>
+      <ol class="cols3 why-list">
+        <li><span class="big-n" aria-hidden="true">01</span><h3 data-i18n="why.benefit.t1">Menos datos, menos riesgo</h3><p data-i18n="why.benefit.p1">Lo que no guardas no se te puede filtrar. La AEPD multó con 5 millones de euros a una aseguradora cuya brecha de seguridad expuso el DNI y otros datos de más de 1,6 millones de personas.</p></li>
+        <li><span class="big-n" aria-hidden="true">02</span><h3 data-i18n="why.benefit.t2">Evitas multas por pedir de más</h3><p data-i18n="why.benefit.p2">Pedir más datos de los necesarios ya se sanciona: 30.000 € a una empresa por exigir una copia del DNI para hacer un reembolso. Con una petición de JustID queda claro qué datos pides y para qué.</p></li>
+        <li><span class="big-n" aria-hidden="true">03</span><h3 data-i18n="why.benefit.t3">Más confianza</h3><p data-i18n="why.benefit.p3">A nadie le gusta enviar su DNI completo. Pedirlo así demuestra que cuidas sus datos, y la gente lo envía con más tranquilidad.</p></li>
+      </ol>
+      <nav class="why-sources why-sources-dark mono" aria-label="Resoluciones de la AEPD" data-i18n-attr="aria-label:why.benefit.sources">
+        <span data-i18n="why.benefit.sources">Resoluciones de la AEPD</span>
+        <a class="src-link" href="https://www.aepd.es/documento/ps-00453-2023.pdf" target="_blank" rel="noopener noreferrer" aria-label="Resolución de la AEPD PS/00453/2023: 5 millones de euros por una brecha de seguridad que expuso DNI de clientes. PDF, se abre en una pestaña nueva." data-i18n-attr="aria-label:why.benefit.fine_breach_aria"><span data-i18n="why.benefit.fine_breach">PS/00453/2023 · 5 M€ por una brecha</span> <span aria-hidden="true">↗</span></a>
+        <a class="src-link" href="https://www.aepd.es/documento/ps-00253-2023.pdf" target="_blank" rel="noopener noreferrer" aria-label="Resolución de la AEPD PS/00253/2023: 30.000 euros por exigir una copia del DNI para un reembolso. PDF, se abre en una pestaña nueva." data-i18n-attr="aria-label:why.benefit.fine_copy_aria"><span data-i18n="why.benefit.fine_copy">PS/00253/2023 · 30.000 € por pedir copia del DNI</span> <span aria-hidden="true">↗</span></a>
+      </nav>
+    </div>
+
+    <div class="request">
+      <div class="wrap request-grid">
+        <div class="req-copy">
+          <p class="eyebrow" data-i18n="why.request.eyebrow">Gratis · Sin registro</p>
+          <h3 class="why-sub-h" data-i18n="why.request.title">Pide el próximo DNI así</h3>
+          <p class="req-body" data-i18n="why.request.body">Crea un enlace de petición: escribes para qué lo necesitas y qué datos pides. Al abrirlo, JustID le propone a tu cliente tapar todo lo demás y marcar la copia con tu finalidad, y te llega un PDF como el que has recibido.</p>
+          <a class="btn btn-dark" href="/app/request.html"><span data-i18n="why.request.cta">Crear una petición</span> <span aria-hidden="true">→</span></a>
+          <p class="mono req-note" data-i18n="why.request.note">Nada pasa por ningún servidor: la petición viaja dentro del enlace y la copia se hace en el móvil de tu cliente.</p>
+        </div>
+        <ol class="why-steps">
+          <li><span class="mono" aria-hidden="true">01</span><span data-i18n="why.request.s1">Crea la petición</span></li>
+          <li><span class="mono" aria-hidden="true">02</span><span data-i18n="why.request.s2">Envía el enlace por WhatsApp o correo</span></li>
+          <li><span class="mono" aria-hidden="true">03</span><span data-i18n="why.request.s3">Recibe el PDF con solo lo justo</span></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot-top">
+      <div class="logo logo-xl" aria-hidden="true"><span>Just</span><span class="logo-id">ID</span></div>
+      <nav class="foot-nav mono" aria-label="Pie de página" data-i18n-attr="aria-label:landing.footer.nav">
+        <a href="https://github.com/lcandea/justid" rel="noopener noreferrer"><span data-i18n="landing.footer.source">Código fuente</span> <span aria-hidden="true">↗</span></a>
+        <span class="muted" data-i18n="landing.footer.license">Licencia MIT</span>
+        <div class="lang-switch" data-lang-switch></div>
+      </nav>
+    </div>
+    <p class="disclaimer"><span data-i18n="landing.footer.disclaimer_a">JustID es un proyecto independiente y de código abierto.</span> <strong data-i18n="landing.footer.disclaimer_b">No está afiliado a la Policía Nacional, al Ministerio del Interior ni a ningún organismo público.</strong></p>
+  </div>
+</footer>
+</body>
+</html>

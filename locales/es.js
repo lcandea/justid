@@ -2,10 +2,12 @@
 // Spanish UI strings (default language). Keys must match locales/en.js exactly (checked by tests).
 // Placeholders use {name} and are filled by t() in app/js/ui/i18n.js.
 import landing from './landing-es.js';
+import why from './why-es.js';
 
-// Landing page strings live in landing-es.js.
+// Landing page strings live in landing-es.js, the /why page strings in why-es.js.
 export default {
   ...landing,
+  ...why,
   'meta.title': 'JustID — Comparte tu DNI, solo lo justo',
   'meta.editor_title': 'JustID — Marcador de zonas',
   'brand.tagline': 'Solo lo justo',
