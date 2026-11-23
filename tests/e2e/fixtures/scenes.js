@@ -1,6 +1,6 @@
 // Synthetic photos of a fake card on different backgrounds, used to test the card detector.
 // Loaded in the browser by tests/e2e/detector.spec.js (served from the repo root, never deployed).
-import { homography } from '../../../app/js/image.js';
+import { homography } from '../../../app/js/core/image.js';
 
 const CW = 856, CH = 540; // fake card size
 

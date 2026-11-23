@@ -1,6 +1,6 @@
 // @ts-check
 // Four draggable corners over a photo (mouse and touch), with a magnifier while dragging.
-import { detectCard } from './detect.js';
+import { detectCard } from '../core/detect.js';
 
 export class CropEditor {
   /**
@@ -122,10 +122,4 @@ export class CropEditor {
     ctx.lineWidth = 1.5 * u; ctx.strokeStyle = '#facc15';
     ctx.beginPath(); ctx.moveTo(cx - 10 * u, cy); ctx.lineTo(cx + 10 * u, cy); ctx.moveTo(cx, cy - 10 * u); ctx.lineTo(cx, cy + 10 * u); ctx.stroke();
   }
-}
-
-/** Stable colour per field id (editor overlays). @param {string} id */
-export function fieldColor(id) {
-  let h = 0; for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) % 360;
-  return `hsl(${h} 85% 50%)`;
 }

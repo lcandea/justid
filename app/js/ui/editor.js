@@ -5,12 +5,14 @@
 //   - a version module for the repository (templates/<id>.js), for official families.
 import { $, $input, $select, $textarea, el, downloadBlob } from './dom.js';
 import { t, applyI18n, mountLangSwitch } from './i18n.js';
-import { loadImageFile, warpToCard } from './image.js';
-import { CropEditor, fieldColor } from './crop-editor.js';
-import { loadSampleImage } from './identify.js';
-import { allTemplates, templateName, fieldLabel, normalizeCustom, saveCustomTemplate, toFlatJson, toVersionModule } from './templates.js';
+import { loadImageFile } from './image-file.js';
+import { warpToCard } from '../core/image.js';
+import { CropEditor } from './crop-editor.js';
+import { loadSampleImage } from './samples.js';
+import { slug, fieldColor, toVersionModule } from '../core/templates.js';
+import { allTemplates, templateName, fieldLabel, normalizeCustom, saveCustomTemplate, toFlatJson } from './templates.js';
 
-/** @typedef {import('./templates.js').ResolvedTemplate} ResolvedTemplate */
+/** @typedef {import('../core/templates.js').ResolvedTemplate} ResolvedTemplate */
 /** @typedef {'front' | 'back'} Side */
 
 const M = {
@@ -30,8 +32,6 @@ const board = /** @type {HTMLCanvasElement} */ ($('#board'));
 
 /* ---------- template ---------- */
 const clone = (/** @type {any} */ o) => JSON.parse(JSON.stringify(o));
-/** Turn a free-form name into an id: lowercase ascii, underscores. @param {string} s */
-const slug = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') || 'field';
 const jsonText = () => JSON.stringify(toFlatJson(M.tpl), null, 2);
 
 /** @param {string} [id] */

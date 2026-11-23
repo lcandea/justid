@@ -42,10 +42,16 @@ test('dynamic keys exist: field labels, template names, sides, purpose chips', (
   for (const fam of FAMILIES) for (const f of fam.fields) assert.ok(`field.${f.id}` in es, `missing field.${f.id}`);
   for (const v of VERSIONS) assert.ok(`template.${v.id}` in es, `missing template.${v.id}`);
   for (const s of ['front', 'back']) assert.ok(`side.${s}` in es);
-  for (const file of ['app/js/app.js', 'app/js/request-page.js']) {
+  // One shared list (core/purposes.js) feeds both pages, and the pages must use it instead of their own copy.
+  for (const file of ['app/js/core/purposes.js']) {
     const src = readFileSync(join(ROOT, file), 'utf8');
     const chips = src.match(/PURPOSE_CHIPS = \[([^\]]+)\]/)[1].match(/'([a-z]+)'/g).map(s => s.slice(1, -1));
     for (const c of chips) assert.ok(`purpose.chip.${c}` in es, `${file}: missing purpose.chip.${c}`);
+  }
+  for (const file of ['app/js/ui/app/purpose.js', 'app/js/ui/request-page.js']) {
+    const src = readFileSync(join(ROOT, file), 'utf8');
+    assert.match(src, /PURPOSE_CHIPS[^;]*core\/purposes\.js/, `${file}: must import PURPOSE_CHIPS from core/purposes.js`);
+    assert.doesNotMatch(src, /PURPOSE_CHIPS = \[/, `${file}: no local copy of the chip list`);
   }
 });
 

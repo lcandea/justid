@@ -4,8 +4,8 @@
 //   data-i18n-attr="placeholder:key;aria-label:key" sets attributes.
 // - Dynamic text: call t(key, { param }) and re-render on the 'langchange' window event.
 // Text is always set as textContent, never innerHTML, so translations can't inject markup.
-import es from '../../locales/es.js';
-import en from '../../locales/en.js';
+import es from '../../../locales/es.js';
+import en from '../../../locales/en.js';
 
 /** @typedef {'es' | 'en'} Lang */
 

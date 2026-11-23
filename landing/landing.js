@@ -1,7 +1,7 @@
 // @ts-check
 // Landing page behaviour: applies the chosen language to the static Spanish markup, mounts the
 // ES/EN switches and wires the "copy the AI prompt" button. No network access (the CSP forbids it).
-import { applyI18n, mountLangSwitch, t } from '../app/js/i18n.js';
+import { applyI18n, mountLangSwitch, t } from '../app/js/ui/i18n.js';
 
 /** How long the "Copiado" state stays visible, in ms. */
 const COPIED_MS = 2500;

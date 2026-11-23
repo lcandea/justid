@@ -3,27 +3,25 @@
 // The whole request goes into the link's #fragment (see request.js); nothing is sent anywhere.
 import { $, $input, $textarea, $button, el } from './dom.js';
 import { t, getLang, applyI18n, mountLangSwitch } from './i18n.js';
-import { officialTemplates } from './templates.js';
-import { FAMILIES } from '../../templates/index.js';
-import { encodeRequest, shareLinkHrefs, composePhone, RequestError, BUILDER_ERRORS, LIMITS } from './request.js';
+import { officialTemplates } from '../core/templates.js';
+import { FAMILIES } from '../../../templates/index.js';
+import { encodeRequest, shareLinkHrefs, RequestError, LIMITS } from '../core/request.js';
+import { PURPOSE_CHIPS } from '../core/purposes.js';
+import { defaultFields, tickedExtras, backOnlyFields, backForced, wholePhone as composeWhole, builderErrorKey } from '../core/request-builder.js';
 import { DialPicker } from './dial-picker.js';
 
-/** @typedef {import('./request.js').DeliveryKind} DeliveryKind */
+/** @typedef {import('../core/request.js').DeliveryKind} DeliveryKind */
 
 const DOC = 'dni_es';
-const PURPOSE_CHIPS = ['rental', 'bank', 'hotel', 'gym', 'hiring', 'admin'];
-const family = /** @type {import('./request.js').Family} */ (FAMILIES.find(f => f.id === DOC));
+const family = /** @type {import('../core/request.js').Family} */ (FAMILIES.find(f => f.id === DOC));
 const versions = officialTemplates().filter(x => x.family === DOC);
 /** Fields that only appear on the back of the card (in every version): asking for one implies the back. */
-const BACK_ONLY = new Set(family.fields.map(f => f.id).filter(id => {
-  const inVersions = versions.map(v => v.fields.find(f => f.id === id)).filter(f => !!f);
-  return inVersions.length > 0 && inVersions.every(f => f.zones.every(z => z.side === 'back'));
-}));
+const BACK_ONLY = backOnlyFields(family, versions);
 const CAN_SHARE = typeof navigator.share === 'function';
 
 const state = {
   /** fields asked for: the usual ones start ticked, any can be unticked @type {Set<string>} */
-  fields: new Set(family.fields.filter(f => f.show).map(f => f.id)),
+  fields: defaultFields(family),
   /** @type {DeliveryKind} */ delivery: 'whatsapp',
   /** last link built @type {string | null} */ link: null,
 };
@@ -31,7 +29,7 @@ const state = {
 const fieldLabel = (/** @type {string} */ id) => t('field.' + id);
 
 /** Ticked fields that are normally hidden: they need a justification. */
-const extras = () => family.fields.filter(f => !f.show && state.fields.has(f.id)).map(f => f.id);
+const extras = () => tickedExtras(family, state.fields);
 
 function renderFields() {
   const box = $('#b-fields');
@@ -55,7 +53,7 @@ function renderChips() {
 }
 
 /** Back side checkbox: forced on when a ticked field lives only on the back. */
-function needsBackForced() { return [...state.fields].some(id => BACK_ONLY.has(id)); }
+function needsBackForced() { return backForced(state.fields, BACK_ONLY); }
 function renderBack() {
   const forced = needsBackForced(), cb = $input('#b-back');
   if (forced) cb.checked = true;
@@ -82,10 +80,7 @@ function renderContact() {
 }
 
 /** WhatsApp number as it will go in the link (dial code + number), so mistakes are visible. */
-function wholePhone() {
-  const typed = $input('#b-contact').value;
-  return typed.trim() ? composePhone(dial.dial, typed) : '';
-}
+function wholePhone() { return composeWhole(dial.dial, $input('#b-contact').value); }
 function renderPhonePreview() {
   const box = $('#b-phone-preview');
   let phone = '';
@@ -120,7 +115,7 @@ function buildLink() {
   }
   catch (e) {
     if (!(e instanceof RequestError)) throw e;
-    err.textContent = BUILDER_ERRORS.includes(e.code) ? t('request.error.' + e.code) : t('request.error.generic', { code: e.code });
+    err.textContent = t(builderErrorKey(e.code), { code: e.code });
     return;
   }
   const link = new URL('./', location.href).href + '#' + fragment;

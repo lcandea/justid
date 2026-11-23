@@ -1,4 +1,4 @@
-// Request links (app/js/request.js): fragment encode/decode, limits, and hostile input.
+// Request links (app/js/core/request.js): fragment encode/decode, limits, and hostile input.
 // Everything decoded from a link is untrusted; these tests pin down what gets through.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ROOT } from './helpers.mjs';
 
-const R = await import(join(ROOT, 'app/js/request.js'));
+const R = await import(join(ROOT, 'app/js/core/request.js'));
 const { FAMILIES } = await import(join(ROOT, 'templates/index.js'));
 const es = (await import(join(ROOT, 'locales/es.js'))).default;
 const en = (await import(join(ROOT, 'locales/en.js'))).default;
@@ -203,7 +203,7 @@ test('wording: credits INCIBE and the AEPD, never claims a government recommenda
 });
 
 test('request code renders decoded text only as text (no innerHTML, no HTML parsing)', () => {
-  for (const f of ['app/js/request.js', 'app/js/request-view.js', 'app/js/request-page.js', 'app/js/dial-picker.js']) {
+  for (const f of ['app/js/core/request.js', 'app/js/ui/request-view.js', 'app/js/ui/request-page.js', 'app/js/ui/dial-picker.js']) {
     const src = readFileSync(join(ROOT, f), 'utf8');
     assert.doesNotMatch(src, /innerHTML|outerHTML|insertAdjacentHTML|document\.write|DOMParser|createContextualFragment/, f);
   }

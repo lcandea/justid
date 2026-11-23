@@ -50,7 +50,7 @@ test('no innerHTML with dynamic content (only the static icon helper may use it)
   for (const file of shipped) {
     const src = readFileSync(file, 'utf8');
     const uses = [...src.matchAll(/\.innerHTML\s*=/g)].length;
-    const allowed = relative(ROOT, file) === 'app/js/dom.js' ? 1 : 0;
+    const allowed = relative(ROOT, file) === 'app/js/ui/dom.js' ? 1 : 0;
     assert.ok(uses <= allowed, `${relative(ROOT, file)}: innerHTML assignment`);
   }
 });

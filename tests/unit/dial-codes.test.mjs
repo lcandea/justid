@@ -1,11 +1,11 @@
-// Country calling codes (app/js/dial-codes.js) and the picker's search (app/js/dial-picker.js).
+// Country calling codes (app/js/core/dial-codes.js) and the picker's search (app/js/core/countries.js).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
 import { ROOT } from './helpers.mjs';
 
-const DIAL_CODES = (await import(join(ROOT, 'app/js/dial-codes.js'))).default;
-const P = await import(join(ROOT, 'app/js/dial-picker.js'));
+const DIAL_CODES = (await import(join(ROOT, 'app/js/core/dial-codes.js'))).default;
+const P = await import(join(ROOT, 'app/js/core/countries.js'));
 
 test('dial code data: unique ISO codes, digit-only dial codes, well-known entries', () => {
   const isos = DIAL_CODES.map(([iso]) => iso);

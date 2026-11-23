@@ -4,9 +4,9 @@
 // Everything in the request comes from the link and is untrusted: it is only ever set as text.
 import { el } from './dom.js';
 import { t } from './i18n.js';
-import { deliveryHref, uploadHost } from './request.js';
+import { deliveryHref, uploadHost } from '../core/request.js';
 
-/** @typedef {import('./request.js').DniRequest} DniRequest */
+/** @typedef {import('../core/request.js').DniRequest} DniRequest */
 
 /**
  * The justification, quoted and clearly attributed to the requester (never to JustID).

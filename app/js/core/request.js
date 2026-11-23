@@ -220,7 +220,7 @@ export function encodeRequest(raw, families) {
 
 /**
  * Read a request from a URL fragment.
- * @param {string | null | undefined} hash location.hash (with or without the #)
+ * @param {string | null | undefined} hash the URL fragment (with or without the #)
  * @param {Family[]} families
  * @returns {null | { ok: true, request: DniRequest } | { ok: false, error: string }}
  *   null when the fragment is not a request at all

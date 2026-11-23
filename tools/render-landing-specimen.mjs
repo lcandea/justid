@@ -1,7 +1,7 @@
 // @ts-check
 // Dev-only: renders the landing's "covered" specimen (landing/img/dni_es_v4_front_covered_<lang>.webp) with the
 // app's own redaction code, so the hero shows real JustID output. Never shipped to the site.
-// It loads templates/ref/dni_es_v4_front.webp in a headless browser and calls renderRedacted() (app/js/redact.js)
+// It loads templates/ref/dni_es_v4_front.webp in a headless browser and calls renderRedacted() (app/js/core/redact.js)
 // with the v4 template's default hidden fields, pixel mode and a fixed example watermark, once per language.
 // Re-run it whenever redact.js, the default visibility (templates/dni_es.js) or the v4 zones change.
 // Usage: npm run render-landing-specimen
@@ -29,8 +29,8 @@ try {
   await page.goto(`http://localhost:${PORT}/index.html`);
   for (const [lang, watermark] of Object.entries(WATERMARKS)) {
     const dataUrl = await page.evaluate(async watermark => {
-      const { renderRedacted } = await import('/app/js/redact.js');
-      const { officialTemplates } = await import('/app/js/templates.js');
+      const { renderRedacted } = await import('/app/js/core/redact.js');
+      const { officialTemplates } = await import('/app/js/core/templates.js');
       const template = officialTemplates().find(t => t.id === 'dni_es_v4');
       if (!template) throw new Error('dni_es_v4 template not found');
       const img = new Image();

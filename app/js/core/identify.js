@@ -1,38 +1,22 @@
 // @ts-check
 // Document type identification by comparing a straightened card against each template's
 // reference pictures (template.sample.front/back). Runs fully in the browser.
+// Loading and caching of the reference pictures is ui/samples.js: here it is `sampleSignature`,
+// a function passed in that returns the signature of a reference picture (or null).
 //
 // Signature: the card downscaled to SIG_W × SIG_H grey, high-passed (minus a local box mean)
 // so lighting, white balance and blur matter little, then zero-mean / unit-norm.
 // The header strip gets its own signature: it carries the most distinctive layout (logos,
 // flags, title) and contains no personal data, so it varies least between people.
-import { assetUrl } from './templates.js';
+import { createCanvas } from './canvas.js';
 
 /** @typedef {import('./templates.js').ResolvedTemplate} ResolvedTemplate */
 /** @typedef {{ full: Float32Array, head: Float32Array }} Signature */
+/** @typedef {(path: string) => Promise<Signature | null>} SignatureLoader */
 
 const SIG_W = 64, SIG_H = 40, SIG_HEAD_ROWS = 9, SIG_BOX = 4; // box radius -> 9×9 window
 const SIG_HEAD_WEIGHT = 0.5;
 const ID_MIN_SCORE = 0.35, ID_MIN_MARGIN = 0.05; // below this we don't trust the guess
-
-/** @type {Map<string, Promise<HTMLImageElement | null>>} */
-const sampleImages = new Map();
-
-/** Load (and cache) a reference picture. Resolves to null if it can't be loaded. @param {string} path */
-export function loadSampleImage(path) {
-  const url = assetUrl(path);
-  let p = sampleImages.get(url);
-  if (!p) {
-    p = new Promise(resolve => {
-      const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = () => resolve(null);
-      img.src = url;
-    });
-    sampleImages.set(url, p);
-  }
-  return p;
-}
 
 /** @param {Float32Array} a */
 function normalizeVec(a) {
@@ -45,7 +29,7 @@ function normalizeVec(a) {
 
 /** @param {CanvasImageSource} src @returns {Signature} */
 export function docSignature(src) {
-  const c = document.createElement('canvas'); c.width = SIG_W; c.height = SIG_H;
+  const c = createCanvas(SIG_W, SIG_H);
   const ctx = /** @type {CanvasRenderingContext2D} */ (c.getContext('2d', { willReadFrequently: true }));
   // Reference pictures have transparent corners; photos have background there. Same neutral fill for both.
   ctx.fillStyle = '#c8c8c8'; ctx.fillRect(0, 0, SIG_W, SIG_H);
@@ -74,15 +58,6 @@ function signatureScore(a, b) {
   return (1 - SIG_HEAD_WEIGHT) * f + SIG_HEAD_WEIGHT * h;
 }
 
-/** @type {Map<string, Promise<Signature | null>>} */
-const refSignatures = new Map();
-/** @param {string} path */
-function sampleSignature(path) {
-  let p = refSignatures.get(path);
-  if (!p) { p = loadSampleImage(path).then(img => img && docSignature(img)); refSignatures.set(path, p); }
-  return p;
-}
-
 /** Fronts and backs differ far more than versions do (~0.6 vs ~0.45 score gap), so a bigger margin is safe. */
 const SIDE_MIN_MARGIN = 0.15;
 
@@ -91,9 +66,10 @@ const SIDE_MIN_MARGIN = 0.15;
  * The back is unmistakable (chip + 3-line MRZ); the front has the photo and the header.
  * @param {HTMLCanvasElement} card straightened card
  * @param {ResolvedTemplate[]} templates
+ * @param {SignatureLoader} sampleSignature
  * @returns {Promise<{ side: 'front' | 'back', front: number, back: number, confident: boolean }>}
  */
-export async function detectSide(card, templates) {
+export async function detectSide(card, templates, sampleSignature) {
   const sig = docSignature(card);
   const best = { front: -1, back: -1 };
   for (const tpl of templates) {
@@ -114,10 +90,11 @@ export async function detectSide(card, templates) {
  * chip + MRZ layout). `confident` tells whether the best guess is safe to act on.
  * @param {{ front?: HTMLCanvasElement | null, back?: HTMLCanvasElement | null }} cards straightened sides
  * @param {ResolvedTemplate[]} templates
+ * @param {SignatureLoader} sampleSignature
  * @returns {Promise<null | { template: ResolvedTemplate, score: number, margin: number, confident: boolean,
  *   ranking: { template: ResolvedTemplate, score: number }[] }>}
  */
-export async function identifyDocument(cards, templates) {
+export async function identifyDocument(cards, templates, sampleSignature) {
   const sides = /** @type {('front' | 'back')[]} */ (['front', 'back']).filter(s => cards[s]);
   const mine = Object.fromEntries(sides.map(s => [s, docSignature(/** @type {HTMLCanvasElement} */ (cards[s]))]));
   const ranking = [];

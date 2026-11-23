@@ -15,7 +15,7 @@
 - **Field-by-field hiding.** You choose which fields to hide, with recommended defaults. Hidden fields are pixelated with noise, or covered with solid blocks.
 - **Purpose watermark.** "SOLO PARA: …" is written across the whole card, so the copy can't be reused for anything else.
 - **PDF at real card size**, with a caption stating its purpose and date. You can share it straight from your phone.
-- **Request links** (`app/request.html`). Whoever needs your DNI (a landlord, a gym…) builds a link saying who they are, what for, which extra fields they want and why, and how to send it back (WhatsApp, email or an upload page). The whole request lives in the link's `#fragment`, which browsers never send to a server. Opening it shows only the fields asked for (the usual ones come preselected for the requester, who can ask for less), and each normally hidden one stays hidden until you accept it. WhatsApp numbers are entered with a searchable country-code picker. The requester's justification is shown as their own words, never as JustID's. Format and validation: `app/js/request.js`.
+- **Request links** (`app/request.html`). Whoever needs your DNI (a landlord, a gym…) builds a link saying who they are, what for, which extra fields they want and why, and how to send it back (WhatsApp, email or an upload page). The whole request lives in the link's `#fragment`, which browsers never send to a server. Opening it shows only the fields asked for (the usual ones come preselected for the requester, who can ask for less), and each normally hidden one stays hidden until you accept it. WhatsApp numbers are entered with a searchable country-code picker. The requester's justification is shown as their own words, never as JustID's. Format and validation: `app/js/core/request.js`.
 - **Zone editor** (`app/editor.html`) for adjusting templates or creating new ones.
 
 ## Privacy: how you can verify it
@@ -28,11 +28,11 @@
 ## How it works
 
 1. **Photo.** The photo is decoded onto a `<canvas>`, which also drops its EXIF metadata.
-2. **Detection.** A gradient-based Hough transform finds the card's four edges (`app/js/detect.js`).
-3. **Straightening.** A homography warps the card to 1012 × 638 px, which is ID-1 size at about 300 dpi (`app/js/image.js`).
-4. **Identification.** A small grey "signature" of the card is compared against each template's reference picture (`app/js/identify.js`).
-5. **Redaction.** Each hidden field's zones are pixelated or covered, and the watermark is drawn on top (`app/js/redact.js`).
-6. **PDF.** A tiny, dependency-free PDF writer embeds the redacted JPEGs (`app/js/pdf.js`).
+2. **Detection.** A gradient-based Hough transform finds the card's four edges (`app/js/core/detect.js`).
+3. **Straightening.** A homography warps the card to 1012 × 638 px, which is ID-1 size at about 300 dpi (`app/js/core/image.js`).
+4. **Identification.** A small grey "signature" of the card is compared against each template's reference picture (`app/js/core/identify.js`).
+5. **Redaction.** Each hidden field's zones are pixelated or covered, and the watermark is drawn on top (`app/js/core/redact.js`).
+6. **PDF.** A tiny, dependency-free PDF writer embeds the redacted JPEGs (`app/js/core/pdf.js`).
 
 ## Project structure
 
@@ -42,6 +42,13 @@ _headers              HTTP security headers (CSP, anti-framing) for every respon
 wrangler.jsonc        Cloudflare deployment config (static files only, no server code)
 app/                  the app: index.html (4-step flow), editor.html (zone editor)
   js/                 ES modules, plain JavaScript with JSDoc types (type-checked, never compiled)
+    core/             pure logic, no UI: card detection, warp, identification, redaction, PDF,
+                      request links, template model, flow rules (tests/unit/architecture.test.mjs
+                      forbids page, storage and i18n access here)
+    ui/               everything that touches the page: i18n, DOM helpers, the page controllers
+      app.js          boot file of app/index.html (steps in ui/app/: photos, hide, purpose, share...)
+      request-page.js controller of request.html
+      editor.js       controller of editor.html
   css/
 locales/              es.js, en.js: every user-visible string
 templates/            document templates, pure data:

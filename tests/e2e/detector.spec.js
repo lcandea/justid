@@ -8,7 +8,7 @@ test.describe('detector', () => {
   test('finds the card in synthetic photos (corner error < 1.5% of the diagonal)', async ({ page }) => {
     await page.goto('/app/');
     const results = await page.evaluate(async () => {
-      const { detectCard } = await import('/app/js/detect.js');
+      const { detectCard } = await import('/app/js/core/detect.js');
       const { runCases } = await import('/tests/e2e/fixtures/scenes.js');
       return runCases(detectCard);
     });
@@ -26,10 +26,10 @@ test.describe('detector', () => {
     test(`detects and identifies the original scan ${file}`, async ({ page }) => {
       await page.goto('/app/');
       const r = await page.evaluate(async name => {
-        const { detectCard } = await import('/app/js/detect.js');
-        const { warpToCard } = await import('/app/js/image.js');
-        const { identifyDocument, loadSampleImage } = await import('/app/js/identify.js');
-        const { officialTemplates } = await import('/app/js/templates.js');
+        const { detectCard } = await import('/app/js/core/detect.js');
+        const { warpToCard } = await import('/app/js/core/image.js');
+        const { identifyDocument, loadSampleImage } = await import('/app/js/ui/samples.js');
+        const { officialTemplates } = await import('/app/js/core/templates.js');
         const img = await loadSampleImage(`img/${name}.webp`); // the un-normalised originals act as "photos"
         if (!img) throw new Error('image not loaded');
         const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;

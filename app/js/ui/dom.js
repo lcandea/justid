@@ -50,3 +50,13 @@ export function icon(markup) {
   t.innerHTML = markup;
   return /** @type {Node} */ (t.content.firstChild);
 }
+
+/** Segmented control: one active button, calls onPick with its data-v. @param {string} id @param {(v: string) => void} onPick */
+export function segmented(id, onPick) {
+  const box = $('#' + id);
+  box.addEventListener('click', e => {
+    const b = /** @type {HTMLElement | null} */ (/** @type {HTMLElement} */ (e.target).closest('button')); if (!b) return;
+    box.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+    onPick(/** @type {string} */ (b.dataset.v));
+  });
+}
