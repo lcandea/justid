@@ -9,6 +9,7 @@
 
 import { createCanvas } from './canvas.js';
 import { matchQuad, alignQuad } from './card-match.js';
+import { refineQuad } from './refine.js';
 
 const CARD_RATIO = 85.6 / 54;
 const NB = 24; // orientation bins of the edge support maps (7.5° each)
@@ -24,6 +25,7 @@ const DEFAULTS = {
   matchPool: 30, // with reference pictures: how many distinct top candidates are compared with them
   matchMin: 0.5, // best match below this: no known card in the photo, geometry alone decides
   alignMin: 0.2, alignTop: 1, // no clear match: align the best partial matches (≥ alignMin) to the reference
+  refine: true, refineReach: 4, // re-measure the sides on a sharper copy, searching ± this many detection pixels
 };
 
 const angDiff = (a, b) => { const d = Math.abs(a - b) % Math.PI; return Math.min(d, Math.PI - d); };
@@ -389,10 +391,11 @@ export function detectCard(src, opts = {}) {
   }
   if (opts.debug) detectCard.lastDebug = { k, W, H, thr: C.E.thr, lines: C.lines.map(l => ({ deg: +(l.t * 180 / Math.PI).toFixed(1), r: Math.round(l.r / k), v: Math.round(l.v) })), pairs: C.pairs, cands: cands.slice(0, 6).map(c => ({ score: +c.score.toFixed(3), cov: c.cov.map(v => +v.toFixed(2)), ratio: +c.ratio.toFixed(2), areaFrac: +c.areaFrac.toFixed(3), q: c.quad.map(p => p.map(v => Math.round(v / k))) })), chosen: best && best.quad.map(p => p.map(v => Math.round(v / k))), match: matched && matched.m };
   if (!best) return null;
-  if (matched) {
-    const q = matched.q, r = matched.m.rot;
-    const quad = [0, 1, 2, 3].map(i => q[(i + r) % 4]).map(p => [Math.min(Math.max(p[0] / k, 0), src.width), Math.min(Math.max(p[1] / k, 0), src.height)]);
-    return { quad, score: best.score, coverage: best.coverage, match: { score: matched.m.score, ref: matched.m.ref } };
-  }
-  return { quad: orderQuad(best.quad, k, src), score: best.score, coverage: best.coverage };
+  let quad;
+  if (matched) { const q = matched.q, r = matched.m.rot; quad = [0, 1, 2, 3].map(i => q[(i + r) % 4]).map(p => [p[0] / k, p[1] / k]); }
+  else quad = orderQuad(best.quad, k, src);
+  if (o.refine) quad = refineQuad(src, quad, o.refineReach / k);
+  quad = quad.map(p => [Math.min(Math.max(p[0], 0), src.width), Math.min(Math.max(p[1], 0), src.height)]);
+  const res = { quad, score: best.score, coverage: best.coverage };
+  return matched ? { ...res, match: { score: matched.m.score, ref: matched.m.ref } } : res;
 }

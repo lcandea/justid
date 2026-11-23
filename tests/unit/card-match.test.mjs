@@ -88,3 +88,22 @@ test('alignQuad: pulls a near-miss corner (a few % of the card off) back onto th
   const err = Math.max(...al.quad.map((p, i) => Math.hypot(p[0] - QUAD[i][0], p[1] - QUAD[i][1])));
   assert.ok(err < 6, `corner error ${err.toFixed(1)} px`);
 });
+
+const { refineQuadPixels } = await import(join(ROOT, 'app/js/core/refine.js'));
+const worst = (a, b) => Math.max(...a.map((p, i) => Math.hypot(p[0] - b[i][0], p[1] - b[i][1])));
+
+test('refineQuadPixels: corners a few pixels off snap back onto the card edges', () => {
+  const px = photo(card, QUAD);
+  const off = QUAD.map(([x, y], i) => [x + [3, -2, 2, -3][i], y + [-2, 3, 3, -2][i]]);
+  const r = refineQuadPixels(px, off, 6);
+  assert.ok(worst(r, QUAD) < 1, `corner error ${worst(r, QUAD).toFixed(2)} px`);
+});
+
+test('refineQuadPixels: a finger over part of a side does not drag the line', () => {
+  const px = photo(card, QUAD);
+  // a skin-coloured band across the left side
+  for (let y = 150; y < 190; y++) for (let x = 40; x < 140; x++) { const i = (y * px.width + x) * 4; px.data[i] = 220; px.data[i + 1] = 170; px.data[i + 2] = 140; }
+  const off = QUAD.map(([x, y]) => [x + 2, y + 2]);
+  const r = refineQuadPixels(px, off, 6);
+  assert.ok(worst(r, QUAD) < 1.5, `corner error ${worst(r, QUAD).toFixed(2)} px`);
+});
