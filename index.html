@@ -61,12 +61,15 @@
       </div>
 
       <figure class="specimen" aria-label="Ejemplo de una copia de DNI con datos tapados y una marca de agua con el motivo" data-i18n-attr="aria-label:landing.hero.specimen_aria">
-        <div class="specimen-label mono" aria-hidden="true" data-i18n="landing.hero.specimen_label">Espécimen · anverso</div>
-        <div class="card-stage" aria-hidden="true">
+        <div class="specimen-label mono" aria-hidden="true"><span data-i18n="landing.hero.specimen_label">Espécimen · anverso</span> · <span class="accent" data-i18n="landing.hero.drag_hint">arrastra para comparar</span></div>
+        <div class="card-stage">
           <!-- Real v4 specimen (templates/ref). The covered copy is real JustID output: app/js/core/redact.js on that
                specimen with the default hidden fields, pixel mode and a watermark, one image per language
                (landing/img, regenerate if redact.js or the default fields change). The scan line wipes between them. -->
-          <div class="id-card">
+          <!-- A slider: the CSS animation plays until the card is touched, clicked or focused with the keyboard;
+               from then on landing.js sets --pos (how much of the card, from the left, shows the covered copy). -->
+          <div class="id-card" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="62"
+               aria-label="Compara el original con la copia tapada" aria-valuetext="62 % con JustID" data-i18n-attr="aria-label:landing.hero.slider_label">
             <img class="card-img" src="templates/ref/dni_es_v4_front.webp" alt="" width="1012" height="638">
             <span class="card-tag card-tag-orig mono" data-i18n="landing.card.original">Original</span>
             <div class="card-covered">

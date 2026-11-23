@@ -140,3 +140,46 @@ test('/why loads cleanly, has both audiences, switches language and links to the
   expect(seen.errors).toEqual([]);
   expect(seen.outside).toEqual([]);
 });
+
+test('the hero specimen can be dragged (also with reduced motion) and moved with the keyboard', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  const card = page.locator('.id-card');
+  const pos = () => card.evaluate(el => parseFloat(getComputedStyle(el).getPropertyValue('--pos')));
+  await expect(card).toHaveAttribute('role', 'slider');
+  expect(await pos()).toBe(62);
+  const box = /** @type {{ x: number, y: number, width: number, height: number }} */ (await card.boundingBox());
+  const midY = box.y + box.height / 2;
+  // Pointer events work the same for mouse and touch (Playwright's mouse doesn't drag on emulated phones).
+  const fire = (type, fx) => card.dispatchEvent(type, { pointerId: 7, button: 0, isPrimary: true, clientX: box.x + box.width * fx, clientY: midY });
+  await fire('pointerdown', 0.3);
+  await fire('pointermove', 0.55);
+  await fire('pointermove', 0.8);
+  await fire('pointerup', 0.8);
+  await expect(card).toHaveClass(/is-manual/);
+  expect(Math.abs(await pos() - 80)).toBeLessThan(6); // the card is rotated 4°, so roughly
+  await card.focus();
+  await page.keyboard.press('Home');
+  expect(await pos()).toBe(0);
+  await expect(card).toHaveAttribute('aria-valuenow', '0');
+  await page.keyboard.press('ArrowRight');
+  expect(await pos()).toBe(5);
+});
+
+test('after a drag the specimen animation resumes 2 s later, from where the line was left', async ({ page }) => {
+  await page.clock.install();
+  await page.goto('/');
+  const card = page.locator('.id-card');
+  const box = /** @type {{ x: number, y: number, width: number, height: number }} */ (await card.boundingBox());
+  const fire = (type, fx) => card.dispatchEvent(type, { pointerId: 3, button: 0, isPrimary: true, clientX: box.x + box.width * fx, clientY: box.y + box.height / 2 });
+  await fire('pointerdown', 0.4);
+  await fire('pointerup', 0.4);
+  await expect(card).toHaveClass(/is-manual/);
+  await page.clock.runFor(1500);
+  await expect(card).toHaveClass(/is-manual/);
+  await page.clock.runFor(700);
+  await expect(card).not.toHaveClass(/is-manual/);
+  // The animation restarts at the phase where the line sits where it was left (about 40 %), not at the edge.
+  const left = await page.locator('.scan').evaluate(el => el.offsetLeft / /** @type {HTMLElement} */ (el.parentElement).offsetWidth * 100);
+  expect(Math.abs(left - 40)).toBeLessThan(12);
+});

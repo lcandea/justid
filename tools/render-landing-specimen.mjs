@@ -30,6 +30,7 @@ try {
   for (const [lang, watermark] of Object.entries(WATERMARKS)) {
     const dataUrl = await page.evaluate(async watermark => {
       const { renderRedacted } = await import('/app/js/core/redact.js');
+      await document.fonts.load('500 12px Archivo'); // the watermark is set in Archivo
       const { officialTemplates } = await import('/app/js/core/templates.js');
       const template = officialTemplates().find(t => t.id === 'dni_es_v4');
       if (!template) throw new Error('dni_es_v4 template not found');
@@ -41,7 +42,8 @@ try {
       base.getContext('2d')?.drawImage(img, 0, 0);
       const hidden = new Set(template.fields.filter(f => f.hide).map(f => f.id));
       const out = document.createElement('canvas');
-      renderRedacted(out, base, 'front', { template, hidden, mode: 'pixel', bw: false, watermark });
+      // Fixed seed: the specimen is the same on every run (real copies use a secret per-session seed).
+      renderRedacted(out, base, 'front', { template, hidden, mode: 'pixel', bw: false, watermark, seed: 1 });
       return out.toDataURL('image/webp', 0.86);
     }, watermark);
     const file = join(ROOT, `landing/img/dni_es_v4_front_covered_${lang}.webp`);
