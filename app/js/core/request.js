@@ -37,7 +37,7 @@ const DELIVERY_KEYS = /** @type {const} */ ([['whatsapp', K.whatsapp], ['email',
 
 /** Error codes the request builder can show to the requester (each has a `request.error.<code>` string). */
 export const BUILDER_ERRORS = ['from_required', 'from_too_long', 'from_chars', 'purpose_required', 'purpose_too_long',
-  'purpose_chars', 'why_required', 'why_too_long', 'why_chars', 'delivery_required', 'phone_invalid', 'email_invalid',
+  'purpose_chars', 'why_required', 'why_too_long', 'why_chars', 'delivery_required', 'phone_required', 'email_required', 'url_required', 'phone_invalid', 'email_invalid',
   'url_invalid', 'too_long', 'fields_required'];
 
 /**
@@ -146,7 +146,11 @@ function normalizeUploadUrl(value) {
 /** @param {unknown} d @returns {Delivery} */
 function cleanDelivery(d) {
   const dd = /** @type {any} */ (d);
-  if (!dd || typeof dd !== 'object' || typeof dd.value !== 'string' || !dd.value.trim()) throw new RequestError('delivery_required');
+  if (!dd || typeof dd !== 'object' || typeof dd.value !== 'string') throw new RequestError('delivery_required');
+  if (!dd.value.trim()) { // a method is chosen but its contact is empty: say which one is missing
+    const missing = { whatsapp: 'phone_required', email: 'email_required', upload: 'url_required' }[/** @type {string} */ (dd.kind)];
+    throw new RequestError(missing || 'delivery_required');
+  }
   if (dd.kind === 'whatsapp') return { kind: 'whatsapp', value: normalizePhone(dd.value) };
   if (dd.kind === 'email') return { kind: 'email', value: normalizeEmail(dd.value) };
   if (dd.kind === 'upload') return { kind: 'upload', value: normalizeUploadUrl(dd.value) };

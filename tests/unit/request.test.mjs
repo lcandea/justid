@@ -97,7 +97,10 @@ test('required parts', () => {
   encFails({ from: '  ' }, 'from_required');
   encFails({ purpose: '' }, 'purpose_required');
   encFails({ delivery: null }, 'delivery_required');
-  encFails({ delivery: { kind: 'whatsapp', value: ' ' } }, 'delivery_required');
+  encFails({ delivery: { kind: 'whatsapp', value: ' ' } }, 'phone_required');
+  encFails({ delivery: { kind: 'email', value: '' } }, 'email_required');
+  encFails({ delivery: { kind: 'upload', value: '' } }, 'url_required');
+  encFails({ delivery: { kind: 'fax', value: '' } }, 'delivery_required');
   encFails({ delivery: { kind: 'fax', value: '123' } }, 'delivery_required');
   encFails({ doc: 'passport_es' }, 'doc_unsupported');
   encFails({ fields: [] }, 'fields_required');
