@@ -33,6 +33,8 @@ export function pdfTexts({ purpose, recipient, date, hiddenCount }, tr) {
       { label: tr('pdf.hidden_label'), value: String(hiddenCount) },
     ],
     notice: tr('pdf.notice'), footer: tr('pdf.footer'), site: tr('pdf.site'),
+    recipient: { eyebrow: tr('pdf.recipient_eyebrow'), body: tr('pdf.recipient_body'), url: tr('pdf.recipient_url') },
+    useLabel: tr('pdf.qr_use'),
   };
 }
 

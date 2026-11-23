@@ -68,7 +68,8 @@ tests/unit/           Node tests: template purity, translations, privacy guards,
 tests/e2e/            Playwright tests (desktop Chrome, Android Chrome, iPhone WebKit): app flow, CSP, detector,
                       request links, landing
 tools/                dev-only, never shipped: local server, reference-picture normaliser (uv project),
-                      template importer, landing specimen renderer
+                      template importer, landing specimen renderer, QR codes of the PDF (make-qr.mjs,
+                      writes app/js/core/qr-codes.js with the `qrcode` dev dependency)
 ```
 
 ## Development
