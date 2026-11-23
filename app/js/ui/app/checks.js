@@ -4,7 +4,7 @@
 //   1. side:    is the photo in the "front" slot really the front (and vice versa)?
 //   2. version: does the photo match the chosen template (v3 / v4)?
 // With no manual template choice yet, a confident version guess is applied silently instead.
-import { $, $select, $button } from '../dom.js';
+import { $, $select, $button, openModal } from '../dom.js';
 import { t } from '../i18n.js';
 import { templateName } from '../templates.js';
 import { detectSide, identifyDocument } from '../samples.js';
@@ -68,7 +68,7 @@ function decide({ title, body, photo, yes, no }) {
   if (photo) img.src = photo.toDataURL('image/jpeg', 0.7); // local data: URL, never leaves the page
   $button('#decision-yes').textContent = yes;
   $button('#decision-no').textContent = no;
-  dlg.showModal();
+  openModal(dlg);
   $button('#decision-yes').focus();
   return new Promise(resolve => {
     let answered = false;
@@ -76,7 +76,7 @@ function decide({ title, body, photo, yes, no }) {
     $button('#decision-yes').onclick = done(true);
     $button('#decision-no').onclick = done(false);
     // Browsers may force-close a modal (e.g. pressing Escape twice): put the question back.
-    dlg.onclose = () => { if (!answered) requestAnimationFrame(() => dlg.showModal()); };
+    dlg.onclose = () => { if (!answered) requestAnimationFrame(() => openModal(dlg)); };
   });
 }
 

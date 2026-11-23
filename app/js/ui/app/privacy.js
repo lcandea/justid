@@ -1,6 +1,6 @@
 // @ts-check
 // The privacy badge and its dialog.
-import { $ } from '../dom.js';
+import { $, openModal } from '../dom.js';
 import { REPO_URL } from './state.js';
 
 export function initPrivacy() {
@@ -9,7 +9,7 @@ export function initPrivacy() {
   link.href = REPO_URL;
   btn.addEventListener('click', () => {
     btn.classList.remove('wiggle'); // they found it: stop drawing attention to it
-    dlg.showModal();
+    openModal(dlg);
   });
   $('#privacy-close').addEventListener('click', () => dlg.close());
   // close when tapping the backdrop (the click lands on the <dialog> element itself)

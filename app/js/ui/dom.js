@@ -60,3 +60,14 @@ export function segmented(id, onPick) {
     onPick(/** @type {string} */ (b.dataset.v));
   });
 }
+
+/**
+ * Open a modal dialog with focus on the dialog itself. showModal() alone focuses the first button or link
+ * inside, which shows a focus ring on something the user didn't choose. Tab still moves into the dialog.
+ * @param {HTMLDialogElement} dlg
+ */
+export function openModal(dlg) {
+  if (!dlg.hasAttribute('tabindex')) dlg.tabIndex = -1;
+  dlg.showModal();
+  dlg.focus();
+}

@@ -19,6 +19,7 @@ export default {
   'privacy.point3': 'No cookies, no analytics, no trackers.',
   'privacy.point4': 'Your photos are not stored: they are gone when you close the page.',
   'privacy.open_source': 'We care about your privacy, so we don’t ask you to take our word for it: the project is open source and you can review the code yourself.',
+  'privacy.learn_more': 'Learn more: check it yourself',
   'privacy.repo_link': 'View the source code',
   'privacy.close': 'Got it',
 

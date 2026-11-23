@@ -1,7 +1,7 @@
 // @ts-check
 // Full-screen image viewer with pinch-to-zoom, drag to pan, double-tap / double-click to zoom
 // and mouse-wheel zoom. Used to inspect the template reference pictures.
-import { el } from './dom.js';
+import { el, openModal } from './dom.js';
 import { t } from './i18n.js';
 
 const MIN = 1, MAX = 6, DOUBLE_TAP_ZOOM = 2.5;
@@ -18,6 +18,8 @@ const pointers = new Map();
 /** @type {{ dist: number, scale: number, mid: { x: number, y: number }, x: number, y: number } | null} */
 let pinch = null;
 let lastTap = 0;
+/** where the current single-finger gesture started, to tell a tap from a drag */
+let downAt = { x: 0, y: 0 };
 
 const clamp = (/** @type {number} */ v, /** @type {number} */ lo, /** @type {number} */ hi) => Math.min(hi, Math.max(lo, v));
 
@@ -40,6 +42,12 @@ function zoomAt(/** @type {number} */ scale, /** @type {number} */ cx, /** @type
   apply();
 }
 
+/** Is the screen point outside the (possibly zoomed and panned) picture? */
+function outsideImage(/** @type {number} */ x, /** @type {number} */ y) {
+  const r = img.getBoundingClientRect();
+  return x < r.left || x > r.right || y < r.top || y > r.bottom;
+}
+
 function build() {
   img = el('img', { class: 'zoom-img', alt: '', draggable: 'false' });
   closeBtn = el('button', { type: 'button', class: 'zoom-close' }, '✕');
@@ -53,6 +61,7 @@ function build() {
     if (e.target === closeBtn) return;
     try { d.setPointerCapture(e.pointerId); } catch { /* synthetic pointers (tests) can't be captured */ }
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.size === 1) downAt = { x: e.clientX, y: e.clientY };
     if (pointers.size === 2) {
       const [a, b] = [...pointers.values()];
       pinch = { dist: Math.hypot(a.x - b.x, a.y - b.y), scale: view.scale, mid: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, x: view.x, y: view.y };
@@ -78,7 +87,11 @@ function build() {
     const wasSingle = pointers.size === 1;
     pointers.delete(e.pointerId);
     if (pointers.size < 2) pinch = null;
-    if (wasSingle && e.type === 'pointerup') { // double tap / double click toggles zoom
+    if (wasSingle && e.type === 'pointerup') {
+      const tap = Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y) < 10;
+      // a tap outside the picture closes the viewer, like tapping a dialog's backdrop
+      if (tap && outsideImage(e.clientX, e.clientY)) { /** @type {HTMLDialogElement} */ (dialog).close(); return; }
+      // double tap / double click toggles zoom
       const now = Date.now();
       if (now - lastTap < 300) { zoomAt(view.scale > 1 ? 1 : DOUBLE_TAP_ZOOM, e.clientX, e.clientY); lastTap = 0; }
       else lastTap = now;
@@ -96,5 +109,5 @@ export function openZoom(src, alt) {
   img.src = src; img.alt = alt;
   closeBtn.setAttribute('aria-label', t('zoom.close'));
   view.scale = 1; view.x = 0; view.y = 0; img.style.transform = '';
-  d.showModal();
+  openModal(d); // focus on the viewer, not on the close button
 }

@@ -125,7 +125,16 @@ test('privacy dialog opens from the lock badge and links to the repository', asy
   await page.locator('#lock-btn').click();
   await expect(page.locator('#privacy')).toBeVisible();
   await expect(page.locator('#privacy-repo')).toHaveAttribute('href', 'https://github.com/lcandea/justid');
+  await expect(page.locator('#privacy-more')).toHaveAttribute('href', '../#verifica');
+  await expect(page.locator('#privacy-more')).toHaveAttribute('target', '_blank');
+  // focus goes to the dialog itself, not to its first link or button
+  expect(await page.evaluate(() => document.activeElement?.id)).toBe('privacy');
   await page.locator('#privacy-close').click();
+  await expect(page.locator('#privacy')).toBeHidden();
+  // tapping outside the dialog closes it too
+  await page.locator('#lock-btn').click();
+  await expect(page.locator('#privacy')).toBeVisible();
+  await page.mouse.click(5, 5);
   await expect(page.locator('#privacy')).toBeHidden();
 });
 
@@ -162,6 +171,8 @@ test('reference pictures open full screen and can be zoomed', async ({ page, isM
   await page.locator('.tpl-pv-open').first().click();
   const viewer = page.locator('dialog.zoom-viewer');
   await expect(viewer).toBeVisible();
+  // opening it doesn't focus the close button
+  expect(await page.evaluate(() => document.activeElement?.classList.contains('zoom-viewer'))).toBe(true);
   const scale = () => page.locator('.zoom-img').evaluate(i => new DOMMatrix(getComputedStyle(i).transform).a);
   const box = /** @type {{ x: number, y: number, width: number, height: number }} */ (await page.locator('.zoom-img').boundingBox());
   const cx = box.x + box.width / 2, cy = box.y + box.height / 2;
@@ -172,6 +183,18 @@ test('reference pictures open full screen and can be zoomed', async ({ page, isM
   }
   await expect.poll(scale).toBeGreaterThan(1.5);
   await page.locator('.zoom-close').click();
+  await expect(viewer).toBeHidden();
+});
+
+test('tapping outside the enlarged picture closes the viewer', async ({ page, isMobile }) => {
+  await page.goto('/app/');
+  await page.locator('.tpl-box summary').click();
+  await page.locator('.tpl-pv-open').first().click();
+  const viewer = page.locator('dialog.zoom-viewer');
+  await expect(viewer).toBeVisible();
+  const box = /** @type {{ x: number, y: number, width: number, height: number }} */ (await page.locator('.zoom-img').boundingBox());
+  const x = box.x + box.width / 2, y = Math.max(2, box.y - 10); // just above the picture
+  if (isMobile) await page.touchscreen.tap(x, y); else await page.mouse.click(x, y);
   await expect(viewer).toBeHidden();
 });
 

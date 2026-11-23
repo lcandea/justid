@@ -160,6 +160,8 @@ select { appearance: none; background-image: linear-gradient(45deg, transparent 
 
 /* ---------- Dialogs ---------- */
 dialog.dlg { max-width: min(30rem, calc(100vw - 2rem)); padding: 1.5rem; background: var(--ink); color: var(--cream); border: 1.5px solid var(--cream); border-radius: 0; }
+/* Dialogs open with focus on themselves (autofocus), not on their first control: no ring there. */
+dialog:focus { outline: none; }
 dialog.dlg::backdrop { background: rgba(0, 0, 0, .72); }
 dialog.dlg h2 { font-size: 1.75rem; line-height: .95; margin-bottom: .75rem; }
 dialog.dlg > p, dialog.dlg li { color: var(--soft); line-height: 1.5; }

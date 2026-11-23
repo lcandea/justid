@@ -246,3 +246,7 @@ canvas.preview { display: block; width: 100%; height: auto; border-radius: var(-
   body.busy .top::after { animation: none; opacity: .6; }
   .switch i::before, .fld { transition: none; }
 }
+
+/* Privacy dialog: "learn more" (landing) and source code links */
+.privacy-links { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; }
+.privacy-links a { min-height: 44px; display: inline-flex; align-items: center; }
