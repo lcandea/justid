@@ -35,10 +35,6 @@
 </header>
 
 <main class="flow">
-  <!-- Shown on steps 1-2 when the photo looks like a different document version -->
-  <div class="tpl-warn hidden" id="tpl-warn" role="alert"></div>
-  <!-- Shown when a photo looks like the other side of the card (e.g. the back in the front slot) -->
-  <div class="tpl-warn hidden" id="side-warn" role="alert"></div>
 
   <!-- Step 1: photos -->
   <section class="step" data-step="0">
@@ -117,6 +113,17 @@
     <button type="button" class="primary" id="crop-use" data-i18n="crop.use"></button>
   </div>
 </div>
+
+<!-- Blocking question after a photo check fails (wrong side / wrong version): fix it or confirm it's fine -->
+<dialog class="decision" id="decision" closedby="none" aria-labelledby="decision-title" aria-describedby="decision-body">
+  <img class="decision-photo hidden" id="decision-photo" alt="">
+  <h2 id="decision-title"></h2>
+  <p id="decision-body"></p>
+  <div class="decision-actions">
+    <button type="button" class="primary big" id="decision-yes"></button>
+    <button type="button" class="big" id="decision-no"></button>
+  </div>
+</dialog>
 
 <!-- Privacy info, opened from the lock badge -->
 <dialog class="privacy" id="privacy" aria-labelledby="privacy-title">
