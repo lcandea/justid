@@ -6,6 +6,8 @@
 
 🌐 **https://justid.candea.es** · 🇪🇸 Spanish (default) and 🇬🇧 English
 
+The landing page explains JustID for everyone: [why it matters](https://justid.candea.es/#por-que), [how it works](https://justid.candea.es/#como) (simple and technical) and [how to check it yourself](https://justid.candea.es/#verifica). This README is for developers.
+
 > Not affiliated with the Policía Nacional, the Ministerio del Interior or any government body.
 
 ## Features
@@ -23,9 +25,11 @@
 1. **The Content Security Policy blocks all network access.** Every page sets `connect-src 'none'` and `form-action 'none'`. Even if malicious code ran on the page, the browser would refuse to send data anywhere. The test suite checks this in a real browser (`tests/e2e/app.spec.js`).
 2. **No dependencies, no build step.** The files in this repository are exactly what your browser runs: no bundler, no minifier, no third-party scripts, fonts or analytics.
 3. **Guard tests.** CI fails if any shipped code mentions a network API (`fetch`, `XMLHttpRequest`, `WebSocket`, `sendBeacon`…), if a page weakens the CSP, or if a page loads an external resource (`tests/unit/privacy.test.mjs`).
-4. **Check it yourself.** Open your browser's DevTools → *Network*, use the app, and confirm that no request leaves the site.
+4. **Check it yourself.** Open your browser's DevTools → *Network*, use the app, and confirm that no request leaves the site. The landing's [check it yourself](https://justid.candea.es/#verifica) section walks through this step by step and has a ready-made prompt for asking an AI to review the code.
 
 ## How it works
+
+The pipeline, with the module that does each part. Every module starts with a comment explaining what it does and why; that is the detailed documentation.
 
 1. **Photo.** The photo is decoded onto a `<canvas>`, which also drops its EXIF metadata.
 2. **Detection.** A gradient-based Hough transform finds the card's four edges (`app/js/core/detect.js`).
@@ -37,7 +41,8 @@
 ## Project structure
 
 ```
-index.html            entry point (landing page coming soon); 404.html, favicon.svg
+index.html            landing page; 404.html, favicon.svg
+landing/              landing.css, landing.js, img/ (covered specimen, made by tools/render-landing-specimen.mjs)
 _headers              HTTP security headers (CSP, anti-framing) for every response
 wrangler.jsonc        Cloudflare deployment config (static files only, no server code)
 app/                  the app: index.html (4-step flow), request.html (request builder), editor.html (zone editor)
@@ -51,16 +56,18 @@ app/                  the app: index.html (4-step flow), request.html (request b
       editor.js       controller of editor.html
   css/                common.css (header, small bits) + one sheet per page: flow.css, request.css, editor.css
 shared/               theme.css (colour/type tokens + shared components) and fonts/, used by the landing and the app
-locales/              es.js, en.js: every user-visible string
+locales/              es.js, en.js: every user-visible string (landing strings in landing-es.js / landing-en.js, merged in)
 templates/            document templates, pure data:
   dni_es.js           family: field catalogue + which fields are shown by default
   dni_es_v3.js        version: where each field is on the card + reference pictures
   dni_es_v4.js
   ref/                normalised reference pictures (made with tools/normalize_refs.py)
 img/                  original specimen scans (source for templates/ref)
-tests/unit/           Node tests: template purity, translations, privacy guards
-tests/e2e/            Playwright tests: full flow, CSP, detector, identification
-tools/                dev-only: local server, reference-picture normaliser (uv project)
+tests/unit/           Node tests: template purity, translations, privacy guards, core/ui architecture, flow rules
+tests/e2e/            Playwright tests (desktop Chrome, Android Chrome, iPhone WebKit): app flow, CSP, detector,
+                      request links, landing
+tools/                dev-only, never shipped: local server, reference-picture normaliser (uv project),
+                      template importer, landing specimen renderer
 ```
 
 ## Development
@@ -78,6 +85,13 @@ To regenerate the reference pictures after changing `img/`:
 
 ```sh
 cd tools && uv run normalize_refs.py
+```
+
+Other dev tools:
+
+```sh
+npm run import-template -- <editor.json> [templates/<id>.js] [--overrides]   # zone-editor export -> template file
+npm run render-landing-specimen   # landing hero's covered specimen, after changing redact.js, default visibility or v4 zones
 ```
 
 ### Hosting
