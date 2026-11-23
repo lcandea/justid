@@ -26,7 +26,7 @@ export function drawZones() {
     if (z.side !== side) continue;
     const hid = state.hidden.has(f.id);
     ctx.setLineDash(hid ? [] : [5, 4]); ctx.lineWidth = hid ? 1.5 : 2;
-    ctx.strokeStyle = hid ? 'rgba(255,255,255,.75)' : '#facc15';
+    ctx.strokeStyle = hid ? 'rgba(243,241,236,.85)' : '#d7ff3a'; // cream = covered, lime dashed = visible
     ctx.strokeRect(z.x * w + 1, z.y * h + 1, z.w * w - 2, z.h * h - 2);
   }
 }

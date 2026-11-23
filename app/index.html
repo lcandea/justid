@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#111317">
+<meta name="theme-color" content="#0d0d0c">
+<meta name="color-scheme" content="dark">
 <!--
   Content Security Policy: the core privacy guarantee.
   connect-src 'none' -> the page cannot send anything anywhere (no fetch, XHR, WebSocket, beacons).
@@ -13,25 +14,31 @@
 <meta name="referrer" content="no-referrer">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <title data-i18n="meta.title">JustID</title>
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/app.css">
+<link rel="preload" href="../shared/fonts/archivo-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../shared/theme.css">
+<link rel="stylesheet" href="css/flow.css">
 </head>
 <body class="flow-body">
 <noscript><p class="noscript" data-i18n="noscript">Esta herramienta necesita JavaScript. Todo se ejecuta en tu dispositivo: no se envía nada a ningún servidor.</p></noscript>
 <header class="top">
-  <div class="brand">
-    <strong>JustID <small class="tagline" data-i18n="brand.tagline"></small></strong>
-    <div class="brand-actions">
-      <div class="lang-switch" id="lang"></div>
-      <button type="button" class="lock" id="lock-btn" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="currentColor" d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5Zm-3 8V7a3 3 0 1 1 6 0v3H9Z"/></svg><span data-i18n="lock.badge"></span></button>
+  <div class="top-in">
+    <div class="brand">
+      <div class="brand-left">
+        <a class="logo" href="../" data-i18n-attr="aria-label:brand.home"><span>Just</span><span class="logo-id">ID</span></a>
+        <span class="tagline mono" data-i18n="brand.tagline"></span>
+      </div>
+      <div class="brand-actions">
+        <div class="lang-switch" id="lang"></div>
+        <button type="button" class="lock" id="lock-btn" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="currentColor" d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5Zm-3 8V7a3 3 0 1 1 6 0v3H9Z"/></svg><span data-i18n="lock.badge"></span></button>
+      </div>
     </div>
+    <ol class="steps" id="steps">
+      <li data-s="0"><span>01</span><b data-i18n="steps.photos"></b></li>
+      <li data-s="1"><span>02</span><b data-i18n="steps.hide"></b></li>
+      <li data-s="2"><span>03</span><b data-i18n="steps.purpose"></b></li>
+      <li data-s="3"><span>04</span><b data-i18n="steps.share"></b></li>
+    </ol>
   </div>
-  <ol class="steps" id="steps">
-    <li data-s="0"><span>1</span><b data-i18n="steps.photos"></b></li>
-    <li data-s="1"><span>2</span><b data-i18n="steps.hide"></b></li>
-    <li data-s="2"><span>3</span><b data-i18n="steps.purpose"></b></li>
-    <li data-s="3"><span>4</span><b data-i18n="steps.share"></b></li>
-  </ol>
 </header>
 
 <main class="flow">
@@ -41,8 +48,9 @@
     <!-- Request links (#req=…): summary of what is asked, filled by request-view.js -->
     <p class="status warn req-invalid hidden" id="req-invalid" role="alert" data-i18n="request.invalid"></p>
     <div class="req-panel hidden" id="req-panel" aria-live="polite"></div>
+    <p class="eyebrow eyebrow-dot"><span data-i18n="steps.label"></span> 1/4</p>
     <h2 data-i18n="photos.title"></h2>
-    <p class="muted" id="photos-tip" data-i18n="photos.tip"></p>
+    <p class="muted lede" id="photos-tip" data-i18n="photos.tip"></p>
     <div class="slots">
       <div class="slot" id="slot-front"></div>
       <div class="slot" id="slot-back"></div>
@@ -53,9 +61,9 @@
       <select id="tpl"></select>
       <div class="tpl-pv" id="tpl-pv"></div>
       <p class="muted tpl-pv-hint" id="tpl-pv-hint" data-i18n="zoom.hint"></p>
-      <div class="row" style="margin-top:8px">
-        <label class="btn file-btn"><span data-i18n="tpl.import"></span><input type="file" id="tpl-file" accept="application/json,.json"></label>
-        <a class="btn" href="editor.html" data-i18n="tpl.editor"></a>
+      <div class="row tpl-actions">
+        <label class="btn btn-secondary btn-sm file-btn"><span data-i18n="tpl.import"></span><input type="file" id="tpl-file" accept="application/json,.json"></label>
+        <a class="btn btn-secondary btn-sm" href="editor.html" data-i18n="tpl.editor"></a>
       </div>
       <p class="muted" id="tpl-note"></p>
     </details>
@@ -64,46 +72,64 @@
 
   <!-- Step 2: choose what to hide -->
   <section class="step hidden" data-step="1">
-    <div class="pv-sticky">
-      <div class="seg small hidden" id="pv-side"><button type="button" data-v="front" class="on" data-i18n="side.front"></button><button type="button" data-v="back" data-i18n="side.back"></button></div>
-      <div class="pv" id="pv-hide"></div>
-      <p class="hint" data-i18n="hide.hint"></p>
+    <p class="eyebrow eyebrow-dot"><span data-i18n="steps.label"></span> 2/4</p>
+    <h2 data-i18n="steps.hide"></h2>
+    <div class="split">
+      <div class="pv-sticky">
+        <div class="seg small hidden" id="pv-side"><button type="button" data-v="front" class="on" data-i18n="side.front"></button><button type="button" data-v="back" data-i18n="side.back"></button></div>
+        <div class="pv" id="pv-hide"></div>
+        <p class="hint" data-i18n="hide.hint"></p>
+      </div>
+      <div class="split-side">
+        <div id="fields"></div>
+        <h3 class="label mono" data-i18n="hide.method"></h3>
+        <div class="seg" id="mode"><button type="button" data-v="pixel" class="on" data-i18n="hide.pixel"></button><button type="button" data-v="solid" data-i18n="hide.solid"></button></div>
+      </div>
     </div>
-    <div id="fields"></div>
-    <h3 data-i18n="hide.method"></h3>
-    <div class="seg" id="mode"><button type="button" data-v="pixel" class="on" data-i18n="hide.pixel"></button><button type="button" data-v="solid" data-i18n="hide.solid"></button></div>
   </section>
 
   <!-- Step 3: purpose (watermark) -->
   <section class="step hidden" data-step="2">
+    <p class="eyebrow eyebrow-dot"><span data-i18n="steps.label"></span> 3/4</p>
     <h2 data-i18n="purpose.title"></h2>
-    <p class="muted" data-i18n="purpose.intro"></p>
-    <input type="text" id="purpose" data-i18n-attr="placeholder:purpose.placeholder" maxlength="80" autocomplete="off" enterkeyhint="next">
-    <div class="chips" id="chips"></div>
-    <label class="muted lbl" for="recipient" data-i18n="purpose.recipient_label"></label>
-    <input type="text" id="recipient" data-i18n-attr="placeholder:purpose.recipient_placeholder" maxlength="60" autocomplete="off" enterkeyhint="done">
-    <div class="pv" id="pv-wm" style="margin-top:14px"></div>
+    <p class="muted lede" data-i18n="purpose.intro"></p>
+    <div class="split">
+      <div class="purpose-form">
+        <input type="text" id="purpose" data-i18n-attr="placeholder:purpose.placeholder;aria-label:purpose.placeholder" maxlength="80" autocomplete="off" enterkeyhint="next">
+        <div class="chips" id="chips"></div>
+        <label class="label mono lbl" for="recipient" data-i18n="purpose.recipient_label"></label>
+        <input type="text" id="recipient" data-i18n-attr="placeholder:purpose.recipient_placeholder" maxlength="60" autocomplete="off" enterkeyhint="done">
+      </div>
+      <div class="pv" id="pv-wm"></div>
+    </div>
   </section>
 
   <!-- Step 4: share -->
   <section class="step hidden" data-step="3">
+    <p class="eyebrow eyebrow-dot"><span data-i18n="steps.label"></span> 4/4</p>
     <h2 data-i18n="share.title"></h2>
-    <div class="final" id="pv-final"></div>
-    <h3 data-i18n="share.color"></h3>
-    <div class="seg" id="color"><button type="button" data-v="color" class="on" data-i18n="share.color_original"></button><button type="button" data-v="bw" data-i18n="share.color_bw"></button></div>
-    <p class="summary" id="summary"></p>
-    <div class="share-actions">
-      <button type="button" class="primary big" id="btn-share" data-i18n="share.share_pdf"></button>
-      <button type="button" class="big" id="btn-dl" data-i18n="share.download_pdf"></button>
+    <div class="split">
+      <div class="final" id="pv-final"></div>
+      <div class="split-side">
+        <h3 class="label mono" data-i18n="share.color"></h3>
+        <div class="seg" id="color"><button type="button" data-v="color" class="on" data-i18n="share.color_original"></button><button type="button" data-v="bw" data-i18n="share.color_bw"></button></div>
+        <p class="summary mono" id="summary"></p>
+        <div class="share-actions">
+          <button type="button" class="btn btn-primary btn-md btn-block" id="btn-share" data-i18n="share.share_pdf"></button>
+          <button type="button" class="btn btn-secondary btn-md btn-block" id="btn-dl" data-i18n="share.download_pdf"></button>
+        </div>
+        <p class="status" id="out-status" role="status"></p>
+        <div class="req-send hidden" id="req-send"></div>
+      </div>
     </div>
-    <p class="status" id="out-status" role="status"></p>
-    <div class="req-send hidden" id="req-send"></div>
   </section>
 </main>
 
 <nav class="bottom-bar">
-  <button type="button" id="nav-back" data-i18n="nav.back"></button>
-  <button type="button" class="primary" id="nav-next"></button>
+  <div class="bottom-in">
+    <button type="button" class="btn btn-secondary btn-md" id="nav-back" data-i18n="nav.back"></button>
+    <button type="button" class="btn btn-primary btn-md" id="nav-next"></button>
+  </div>
 </nav>
 
 <!-- Full-screen framing (crop) -->
@@ -111,28 +137,28 @@
   <div class="ov-head"><strong id="crop-title"></strong><span id="crop-msg"></span></div>
   <div class="ov-canvas"><canvas id="crop-canvas"></canvas></div>
   <div class="ov-bar">
-    <button type="button" id="crop-cancel" data-i18n="crop.cancel"></button>
-    <button type="button" id="crop-rot" data-i18n="crop.rotate"></button>
-    <button type="button" id="crop-det" data-i18n="crop.detect"></button>
-    <button type="button" id="crop-full" data-i18n="crop.full"></button>
-    <button type="button" class="primary" id="crop-use" data-i18n="crop.use"></button>
+    <button type="button" class="btn btn-secondary btn-md" id="crop-cancel" data-i18n="crop.cancel"></button>
+    <button type="button" class="btn btn-secondary btn-md" id="crop-rot" data-i18n="crop.rotate"></button>
+    <button type="button" class="btn btn-secondary btn-md" id="crop-det" data-i18n="crop.detect"></button>
+    <button type="button" class="btn btn-secondary btn-md" id="crop-full" data-i18n="crop.full"></button>
+    <button type="button" class="btn btn-primary btn-md" id="crop-use" data-i18n="crop.use"></button>
   </div>
 </div>
 
 <!-- Blocking question after a photo check fails (wrong side / wrong version): fix it or confirm it's fine -->
-<dialog class="decision" id="decision" closedby="none" aria-labelledby="decision-title" aria-describedby="decision-body">
+<dialog class="decision dlg" id="decision" closedby="none" aria-labelledby="decision-title" aria-describedby="decision-body">
   <img class="decision-photo hidden" id="decision-photo" alt="">
-  <h2 id="decision-title"></h2>
+  <h2 class="display" id="decision-title"></h2>
   <p id="decision-body"></p>
   <div class="decision-actions">
-    <button type="button" class="primary big" id="decision-yes"></button>
-    <button type="button" class="big" id="decision-no"></button>
+    <button type="button" class="btn btn-primary btn-md btn-block" id="decision-yes"></button>
+    <button type="button" class="btn btn-secondary btn-md btn-block" id="decision-no"></button>
   </div>
 </dialog>
 
 <!-- Privacy info, opened from the lock badge -->
-<dialog class="privacy" id="privacy" aria-labelledby="privacy-title">
-  <h2 id="privacy-title" data-i18n="privacy.title"></h2>
+<dialog class="privacy dlg" id="privacy" aria-labelledby="privacy-title">
+  <h2 class="display" id="privacy-title" data-i18n="privacy.title"></h2>
   <p data-i18n="privacy.intro"></p>
   <ul>
     <li data-i18n="privacy.point1"></li>
@@ -142,7 +168,7 @@
   </ul>
   <p data-i18n="privacy.open_source"></p>
   <p><a id="privacy-repo" target="_blank" rel="noopener noreferrer" data-i18n="privacy.repo_link"></a></p>
-  <button type="button" class="primary" id="privacy-close" data-i18n="privacy.close"></button>
+  <button type="button" class="btn btn-primary btn-md btn-block" id="privacy-close" data-i18n="privacy.close"></button>
 </dialog>
 
 <script type="module" src="js/ui/app.js"></script>

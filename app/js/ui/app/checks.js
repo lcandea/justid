@@ -125,14 +125,19 @@ export async function reviewChecks() {
 
 /** Resolves once the checks for the latest photo are done (Next waits for it). */
 let checksDone = Promise.resolve();
+let checkRuns = 0;
 export const whenChecksDone = () => checksDone;
 
 /** Run side + version checks for a slot, then ask about anything wrong. @param {Side} [slot] */
 export function runChecks(slot) {
+  const run = ++checkRuns;
+  document.body.classList.add('busy'); // thin progress line under the header while checking
   checksDone = (async () => {
-    if (slot) await checkSide(slot);
-    await autoIdentify();
-    await reviewChecks();
+    try {
+      if (slot) await checkSide(slot);
+      await autoIdentify();
+    } finally { if (run === checkRuns) document.body.classList.remove('busy'); }
+    await reviewChecks(); // questions to the user do not count as busy
   })();
   return checksDone;
 }

@@ -27,6 +27,8 @@ export default {
   'steps.hide': 'Ocultar',
   'steps.purpose': 'Motivo',
   'steps.share': 'Compartir',
+  'steps.label': 'Paso',
+  'brand.home': 'JustID, página de inicio',
 
   'side.front': 'Anverso',
   'side.back': 'Reverso',

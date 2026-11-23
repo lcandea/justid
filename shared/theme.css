@@ -1,0 +1,165 @@
+/* JustID shared theme: "Tachado" style. Ink ground, cream text, one lime accent, redaction bars as the motif.
+   Used by the landing, the app and the request / editor pages. Plain CSS, no build step.
+   Fonts are self-hosted (shared/fonts, SIL OFL). Page-specific styles live next to each page. */
+
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  src: url('fonts/archivo-var-latin.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('fonts/jetbrains-mono-latin.woff2') format('woff2');
+}
+
+:root {
+  /* colour */
+  --ink: #0d0d0c;
+  --cream: #f3f1ec;
+  --lime: #d7ff3a;
+  --soft: #d9d6cf;
+  --mute: #a8a49b;
+  --line: #2c2b28;
+  --line-2: #3a3935;
+  --panel: #141412;
+  --warn: #ffb454;   /* attention: AA on ink */
+  --ok: #7be39a;     /* confirmation: AA on ink */
+  /* spacing */
+  --gutter: clamp(1rem, 4.5vw, 4rem);
+  --section-y: clamp(3.75rem, 8vw, 6rem);
+  --tap: 44px;       /* minimum touch target */
+  /* type */
+  --sans: 'Archivo', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  /* shape: the style is square, a radius is only for photographs / scans */
+  --radius: 0;
+  --radius-img: 6px;
+  --ring: 2px solid var(--lime);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--cream);
+  font-family: var(--sans);
+  font-size: 1rem;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+h1, h2, h3, h4, p, figure, blockquote, ol, ul { margin: 0; }
+ol, ul { padding: 0; list-style: none; }
+a { color: var(--cream); }
+a:hover { color: var(--lime); }
+.mono { font-family: var(--mono); }
+.muted { color: var(--mute); }
+.accent { color: var(--lime); }
+.hidden { display: none !important; }
+
+/* Focus: always visible, lime on dark, cream on lime */
+:focus-visible { outline: var(--ring); outline-offset: 3px; }
+.btn-primary:focus-visible { outline-color: var(--cream); }
+
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.skip { position: absolute; left: 1rem; top: -4rem; z-index: 10; background: var(--lime); color: var(--ink); padding: .75rem 1rem; font-weight: 800; text-decoration: none; }
+.skip:focus { top: 1rem; }
+
+/* ---------- Type ---------- */
+/* Mono label / eyebrow: the small uppercase meta text */
+.eyebrow { font-family: var(--mono); font-size: .8125rem; letter-spacing: .08em; text-transform: uppercase; color: var(--lime); }
+.eyebrow-dot::before { content: '● '; }
+.label { font-size: .8125rem; letter-spacing: .02em; text-transform: uppercase; color: var(--mute); }
+/* Section heading: Archivo condensed, black, uppercase (size is set where it is used) */
+.display { font-weight: 900; font-stretch: 70%; text-transform: uppercase; letter-spacing: -.01em; line-height: .88; text-wrap: balance; overflow-wrap: break-word; }
+mark { background: var(--cream); color: var(--ink); padding: 1px 6px; font-weight: 600; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+code { font-family: var(--mono); font-size: .88em; color: var(--lime); overflow-wrap: anywhere; }
+kbd { font-family: var(--mono); font-size: .85em; border: 1px solid #4a4843; border-bottom-width: 2px; padding: 1px 6px; color: var(--cream); white-space: nowrap; }
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; gap: .75rem; min-height: 44px;
+  font-family: var(--sans); font-weight: 800; font-size: 1.125rem; line-height: 1.2; text-decoration: none; cursor: pointer;
+  padding: 1.25rem 1.75rem; border: 0;
+}
+.btn-primary { background: var(--lime); color: var(--ink); }
+.btn-primary:hover { background: var(--cream); color: var(--ink); }
+.btn-dark { background: var(--ink); color: var(--cream); }
+.btn-dark:hover { background: var(--cream); color: var(--ink); }
+.btn-link { font-weight: 600; padding: 1.25rem .5rem; border-bottom: 2px solid var(--line-2); }
+.btn-link:hover { border-bottom-color: var(--lime); }
+/* Outlined secondary action */
+.btn-secondary { background: transparent; color: var(--cream); box-shadow: inset 0 0 0 1.5px var(--line-2); }
+.btn-secondary:hover { color: var(--cream); box-shadow: inset 0 0 0 1.5px var(--lime); }
+/* Compact size for app UI (still a 48px target) */
+.btn-md { min-height: 48px; padding: .75rem 1.25rem; font-size: 1rem; justify-content: center; }
+.btn-block { display: flex; width: 100%; justify-content: center; }
+.btn:disabled, .btn[aria-disabled="true"] { background: var(--line); color: var(--mute); box-shadow: none; cursor: not-allowed; }
+
+/* ---------- Redaction bars ---------- */
+.bar { display: inline-block; height: .95em; vertical-align: -.12em; background: var(--cream); }
+.bar-sig { width: 3.8em; }
+.bar-addr { width: 5.3em; }
+.bar-dark { background: #000; box-shadow: 0 0 0 1px var(--line-2); }
+
+/* ---------- Logo ---------- */
+.logo { display: inline-flex; align-items: center; gap: .6rem; text-decoration: none; font-family: var(--sans); font-size: 1.375rem; font-weight: 800; font-stretch: 110%; letter-spacing: -.01em; line-height: 1.2; }
+.logo > span:first-child { margin-right: -.4rem; }
+.logo-id { background: var(--cream); color: var(--ink); padding: 0 .4rem; }
+.logo:hover { color: var(--cream); }
+
+/* ---------- Language switch ---------- */
+.lang-switch { display: inline-flex; align-items: center; }
+.lang-switch button {
+  font: inherit; font-family: var(--mono); font-size: .8125rem; letter-spacing: .04em; cursor: pointer;
+  background: transparent; color: var(--mute); border: 0; border-bottom: 2px solid transparent; border-radius: 0;
+  min-width: 44px; min-height: 44px; padding: 0 .5rem;
+}
+.lang-switch button:hover { color: var(--cream); }
+.lang-switch button[aria-pressed="true"] { color: var(--cream); border-bottom-color: var(--lime); }
+
+/* ---------- Segmented control: one active option ---------- */
+.seg { display: inline-flex; flex-wrap: wrap; box-shadow: inset 0 0 0 1.5px var(--line-2); }
+.seg button {
+  font: inherit; font-family: var(--mono); font-size: .8125rem; letter-spacing: .06em; text-transform: uppercase; cursor: pointer;
+  min-height: 44px; padding: 0 1rem; border: 0; border-radius: 0; background: transparent; color: var(--soft);
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.seg button:hover { color: var(--lime); }
+.seg button.on { background: var(--cream); color: var(--ink); }
+.seg button:focus-visible { outline-offset: -3px; }
+
+/* ---------- Chips (quick picks) ---------- */
+.chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+.chips button {
+  font: inherit; font-size: .9375rem; font-weight: 600; cursor: pointer; min-height: 44px; padding: 0 .9rem;
+  background: transparent; color: var(--cream); border: 1.5px solid var(--line-2); border-radius: 0;
+}
+.chips button:hover { border-color: var(--lime); }
+.chips button.on { background: var(--cream); color: var(--ink); border-color: var(--cream); }
+
+/* ---------- Form fields ---------- */
+.field-label { display: block; margin: 0 0 .5rem; }
+input[type="text"], input[type="search"], select, textarea, .input {
+  font: inherit; font-size: 1rem; width: 100%; min-height: 48px; padding: .75rem .875rem; border-radius: 0;
+  background: var(--panel); color: var(--cream); border: 1.5px solid var(--line-2);
+}
+textarea { min-height: 6rem; }
+input::placeholder, textarea::placeholder { color: #8d897f; }
+input[type="text"]:hover, select:hover, textarea:hover { border-color: #55534d; }
+input[type="text"]:focus-visible, input[type="search"]:focus-visible, select:focus-visible, textarea:focus-visible { outline: 0; border-color: var(--lime); box-shadow: 0 0 0 1px var(--lime); }
+select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--lime) 50%), linear-gradient(135deg, var(--lime) 50%, transparent 50%); background-position: calc(100% - 1.1rem) 55%, calc(100% - .8rem) 55%; background-size: .3rem .3rem; background-repeat: no-repeat; padding-right: 2.25rem; }
+
+/* ---------- Dialogs ---------- */
+dialog.dlg { max-width: min(30rem, calc(100vw - 2rem)); padding: 1.5rem; background: var(--ink); color: var(--cream); border: 1.5px solid var(--cream); border-radius: 0; }
+dialog.dlg::backdrop { background: rgba(0, 0, 0, .72); }
+dialog.dlg h2 { font-size: 1.75rem; line-height: .95; margin-bottom: .75rem; }
+dialog.dlg > p, dialog.dlg li { color: var(--soft); line-height: 1.5; }

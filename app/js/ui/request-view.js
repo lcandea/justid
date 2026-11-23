@@ -79,7 +79,7 @@ export function renderSendBlock(box, req, purpose) {
   const host = d.kind === 'upload' ? uploadHost(d.value) : '';
   const label = t('request.open_' + d.kind, { value: d.value, host });
   // Not target=_blank for mailto: (it would leave an empty tab behind on some browsers).
-  const link = el('a', { class: 'btn big req-send-btn', href, id: 'req-send-link',
+  const link = el('a', { class: 'btn btn-primary btn-md btn-block req-send-btn', href, id: 'req-send-link',
     ...(d.kind === 'email' ? {} : { target: '_blank', rel: 'noopener noreferrer' }) }, label);
   box.replaceChildren(
     el('h3', {}, t('request.send_title', { name })),

@@ -59,8 +59,8 @@ export function renderSlot(side) {
     return;
   }
   base.classList.add('thumb');
-  const adjust = el('button', { type: 'button' }, t('photos.adjust')); adjust.addEventListener('click', () => openCrop(side));
-  const remove = el('button', { type: 'button' }, t('photos.remove'));
+  const adjust = el('button', { type: 'button', class: 'btn btn-secondary btn-sm' }, t('photos.adjust')); adjust.addEventListener('click', () => openCrop(side));
+  const remove = el('button', { type: 'button', class: 'btn btn-secondary btn-sm' }, t('photos.remove'));
   remove.addEventListener('click', () => {
     state.base[side] = state.src[side] = null;
     if (state.pvSide === side) state.pvSide = sides()[0] || 'front';
@@ -68,9 +68,9 @@ export function renderSlot(side) {
     state.wrongSide[side] = false;
     handlers.runChecks(); // re-evaluate with the remaining photo
   });
-  box.replaceChildren(base, el('div', { class: 'bar' }, el('span', { class: 't' }, t('photos.done', { side: sideName(side) })),
+  box.replaceChildren(base, el('div', { class: 'slot-bar' }, el('span', { class: 't mono' }, t('photos.done', { side: sideName(side) })),
     el('div', { class: 'row' }, adjust,
-      el('label', { class: 'btn file-btn' }, t('photos.retake'), fileInput(true, f => takeFile(side, f))), remove)));
+      el('label', { class: 'btn btn-secondary btn-sm file-btn' }, t('photos.retake'), fileInput(true, f => takeFile(side, f))), remove)));
 }
 
 /* ---------- full-screen framing ---------- */

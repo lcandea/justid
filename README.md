@@ -49,7 +49,8 @@ app/                  the app: index.html (4-step flow), editor.html (zone edito
       app.js          boot file of app/index.html (steps in ui/app/: photos, hide, purpose, share...)
       request-page.js controller of request.html
       editor.js       controller of editor.html
-  css/
+  css/                flow.css (the 4-step app); base.css + app.css (request builder and zone editor)
+shared/               theme.css (colour/type tokens + shared components) and fonts/, used by the landing and the app
 locales/              es.js, en.js: every user-visible string
 templates/            document templates, pure data:
   dni_es.js           family: field catalogue + which fields are shown by default

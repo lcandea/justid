@@ -47,6 +47,7 @@ export function updateNav() {
   document.querySelectorAll('#steps li').forEach(li => {
     const i = Number(/** @type {HTMLElement} */ (li).dataset.s);
     li.classList.toggle('cur', i === s);
+    if (i === s) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
     li.classList.toggle('done', i < s);
     li.classList.toggle('reach', i > s && [...Array(i).keys()].every(k => canAdvance(k)));
   });
