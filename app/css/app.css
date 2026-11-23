@@ -106,11 +106,13 @@ section.step { background: none; border: 0; padding: 0; border-radius: 0; }
 .slot .empty.has-sample { overflow: hidden; }
 .slot .empty .ghost { position: absolute; inset: 10%; width: 80%; height: 80%; object-fit: contain; opacity: .1; pointer-events: none; }
 .slot .empty > :not(.ghost):not(input) { position: relative; }
-/* Document version mismatch warning */
-.tpl-warn { margin: 0 0 14px; padding: 10px 14px; border: 1px solid var(--warn); border-radius: 12px; background: color-mix(in srgb, var(--warn) 12%, var(--card)); }
-.tpl-warn p { margin: 0 0 8px; }
-.tpl-warn strong { color: var(--warn); }
-.tpl-warn .row { gap: 8px; flex-wrap: wrap; }
+/* Blocking decision dialog (wrong side / wrong version) */
+.decision { max-width: min(420px, calc(100vw - 32px)); border: 1px solid var(--warn); border-radius: 16px; padding: 18px; background: var(--card); color: var(--fg); }
+.decision::backdrop { background: rgba(0, 0, 0, .65); }
+.decision h2 { margin: 0 0 8px; font-size: 18px; color: var(--warn); }
+.decision p { margin: 0 0 14px; font-size: 15px; line-height: 1.45; }
+.decision-photo { display: block; width: 100%; height: auto; border-radius: 10px; margin-bottom: 12px; }
+.decision-actions { display: grid; gap: 8px; }
 
 /* Privacy badge: a button that wiggles now and then until it's opened */
 button.lock { background: none; border: 1px solid color-mix(in srgb, var(--ok) 45%, transparent); border-radius: 999px; padding: 3px 9px; font: inherit; font-size: 12px; color: var(--ok); cursor: pointer; }

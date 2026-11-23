@@ -74,18 +74,37 @@ test('the page cannot send data anywhere (CSP blocks network APIs)', async ({ pa
   expect(outside).toEqual([]); // nothing ever left for another host
 });
 
-test('warns when the manually chosen version does not match the photo', async ({ page }) => {
+test('blocks with a question when the manually chosen version does not match the photo', async ({ page }) => {
   await page.goto('/app/');
   await page.locator('.tpl-box summary').click();
   await page.locator('#tpl').selectOption('dni_es_v4'); // manual choice
   await addPhoto(page, 'front', 'img/dni_es_v3_front.webp');
-  const warn = page.locator('#tpl-warn');
-  await expect(warn).toBeVisible();
-  await expect(warn).toContainText('DNI España v3');
+  const dlg = page.locator('#decision');
+  await expect(dlg).toBeVisible();
+  await expect(dlg).toContainText('DNI España v3');
   await expect(page.locator('#tpl-name')).toHaveText('DNI España v4 (desde 2021)'); // not switched silently
-  await warn.getByRole('button', { name: /Cambiar a/ }).click();
+  // it can't be dismissed without answering: Escape, a forced close, or tapping outside
+  await page.keyboard.press('Escape');
+  await expect(dlg).toBeVisible();
+  await page.evaluate(() => /** @type {HTMLDialogElement} */ (document.querySelector('#decision')).close());
+  await expect(dlg).toBeVisible();
+  await page.mouse.click(5, 5);
+  await expect(dlg).toBeVisible();
+  await dlg.getByRole('button', { name: /Cambiar a/ }).click();
+  await expect(dlg).toBeHidden();
   await expect(page.locator('#tpl-name')).toHaveText('DNI España v3 (2015–2021)');
-  await expect(warn).toBeHidden();
+});
+
+test('"it\'s fine" keeps the chosen version and lets you continue', async ({ page }) => {
+  await page.goto('/app/');
+  await page.locator('.tpl-box summary').click();
+  await page.locator('#tpl').selectOption('dni_es_v4');
+  await addPhoto(page, 'front', 'img/dni_es_v3_front.webp');
+  await page.locator('#decision').getByRole('button', { name: 'Mantener' }).click();
+  await expect(page.locator('#decision')).toBeHidden();
+  await expect(page.locator('#tpl-name')).toHaveText('DNI España v4 (desde 2021)');
+  await page.locator('#nav-next').click();
+  await expect(page.locator('section[data-step="1"]')).toBeVisible();
 });
 
 test.describe('english browser', () => {
@@ -171,4 +190,43 @@ test('pinch gesture zooms the reference picture', async ({ page }) => {
     return new DOMMatrix(getComputedStyle(/** @type {Element} */ (document.querySelector('.zoom-img'))).transform).a;
   });
   expect(scale).toBeCloseTo(3, 1); // 240 / 80
+});
+
+test('blocks when the back is put in the front slot, and moves it with one tap', async ({ page }) => {
+  await page.goto('/app/');
+  await addPhoto(page, 'front', 'img/dni_es_v3_back.webp');
+  const dlg = page.locator('#decision');
+  await expect(dlg).toBeVisible();
+  await expect(dlg).toContainText('parece el reverso');
+  await expect(page.locator('#decision-photo')).toBeVisible(); // shows which photo it means
+  await dlg.getByRole('button', { name: 'Moverla al reverso' }).click();
+  await expect(dlg).toBeHidden();
+  await expect(page.locator('#slot-front .empty')).toBeVisible();
+  await expect(page.locator('#slot-back canvas.thumb')).toBeVisible();
+  // the version is still recognised from the (now correctly placed) back
+  await expect(page.locator('#tpl-name')).toHaveText('DNI España v3 (2015–2021)');
+});
+
+test('offers to swap when both photos are in the wrong slots', async ({ page }) => {
+  await page.goto('/app/');
+  await page.locator('#slot-front .gal input[type=file]').setInputFiles('img/dni_es_v4_back.webp');
+  await page.locator('#crop-use').click();
+  const dlg = page.locator('#decision');
+  await dlg.getByRole('button', { name: 'Está bien así' }).click(); // keep it for now
+  await addPhoto(page, 'back', 'img/dni_es_v4_front.webp');
+  await dlg.getByRole('button', { name: 'Intercambiar las fotos' }).click();
+  await expect(dlg).toBeHidden();
+  await expect(page.locator('#tpl-name')).toHaveText('DNI España v4 (desde 2021)');
+  await page.waitForTimeout(500);
+  await expect(dlg).toBeHidden(); // nothing left to ask after the swap
+});
+
+test('no question for correctly placed photos', async ({ page }) => {
+  await page.goto('/app/');
+  await addPhoto(page, 'front', 'img/dni_es_v4_front.webp');
+  await addPhoto(page, 'back', 'img/dni_es_v4_back.webp');
+  await page.waitForTimeout(500);
+  await expect(page.locator('#decision')).toBeHidden();
+  await page.locator('#nav-next').click();
+  await expect(page.locator('section[data-step="1"]')).toBeVisible();
 });

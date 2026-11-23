@@ -9,5 +9,8 @@
     "not_found_handling": "404-page"
   },
   "workers_dev": true,
-  "preview_urls": true
+  "preview_urls": true,
+  // Required by `wrangler preview` (non-production branch builds get their own Preview).
+  // Empty on purpose: assets and settings above apply to previews too.
+  "previews": {}
 }

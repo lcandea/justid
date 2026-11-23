@@ -6,7 +6,7 @@ import { t, getLang, applyI18n, mountLangSwitch } from './i18n.js';
 import { loadImageFile, warpToCard } from './image.js';
 import { CropEditor } from './crop-editor.js';
 import { allTemplates, templateName, fieldLabel, normalizeCustom, saveCustomTemplate, assetUrl } from './templates.js';
-import { identifyDocument } from './identify.js';
+import { identifyDocument, detectSide } from './identify.js';
 import { renderRedacted } from './redact.js';
 import { makePdf, canvasToJpeg } from './pdf.js';
 import { openZoom } from './zoom-viewer.js';
@@ -35,6 +35,10 @@ const state = {
   /** confident identification result @type {ResolvedTemplate | null} */ idGuess: null,
   /** template id the user chose to keep despite the warning @type {string | null} */ idDismissed: null,
   /** template was set by auto-identification */ tplAuto: false,
+  /** true when that slot holds a photo that looks like the other side of the card @type {Record<Side, boolean>} */
+  wrongSide: { front: false, back: false },
+  /** the user said "it's fine" for that slot's photo @type {Record<Side, boolean>} */
+  wrongSideOk: { front: false, back: false },
 };
 const zonesCanvas = el('canvas', { class: 'zones' });
 const sides = () => SIDE_LIST.filter(s => state.base[s]);
@@ -75,17 +79,42 @@ function renderTemplateInfo() {
   $('#tpl-pv').replaceChildren(...items);
   $('#tpl-pv').classList.toggle('hidden', !items.length);
   $('#tpl-pv-hint').classList.toggle('hidden', !items.length);
-  renderTplWarning();
 }
 
-// Guess the document type from the straightened photos. Always runs; the guess is only
-// trusted when it's clearly better than the rest (r.confident).
-//  - no manual choice yet -> switch to the guessed template silently (+ "detected" badge)
-//  - manual choice differs -> keep it, but show a mismatch warning with a one-tap fix
+// Two automatic checks run after every photo, and each problem is shown as a blocking dialog
+// that can only be closed by fixing it or by saying it's fine:
+//   1. side:    is the photo in the "front" slot really the front (and vice versa)?
+//   2. version: does the photo match the chosen template (v3 / v4)?
+// With no manual template choice yet, a confident version guess is applied silently instead.
 let identifyRun = 0;
+const otherSide = (/** @type {Side} */ s) => (s === 'front' ? 'back' : 'front');
+
+/** Cards keyed by the side they really are (a front photo put in the back slot counts as front). */
+function cardsByRealSide() {
+  /** @type {Partial<Record<Side, HTMLCanvasElement>>} */
+  const out = {};
+  for (const s of sides()) {
+    const real = state.wrongSide[s] && !state.wrongSideOk[s] ? otherSide(s) : s;
+    out[real] ??= /** @type {HTMLCanvasElement} */ (state.base[s]);
+  }
+  return out;
+}
+
+/** Detect whether the photo in `slot` is really that side of the card. @param {Side} slot */
+async function checkSide(slot) {
+  const base = state.base[slot];
+  state.wrongSide[slot] = false; state.wrongSideOk[slot] = false;
+  if (!base) return;
+  const r = await detectSide(base, state.templates);
+  if (state.base[slot] !== base) return; // replaced meanwhile
+  console.debug('[side]', slot, `front=${r.front.toFixed(3)} back=${r.back.toFixed(3)}`, r.confident ? r.side : 'unsure');
+  state.wrongSide[slot] = r.confident && r.side !== slot;
+}
+
+/** Guess the template from the photos (using each photo's real side). */
 async function autoIdentify() {
   const run = ++identifyRun;
-  const r = sides().length ? await identifyDocument(state.base, state.templates) : null;
+  const r = sides().length ? await identifyDocument(cardsByRealSide(), state.templates) : null;
   if (run !== identifyRun) return; // a newer photo superseded this run
   if (r) console.debug('[identify]', r.ranking.map(x => `${x.template.id}=${x.score.toFixed(3)}`).join(' '), r.confident ? 'confident' : 'unsure');
   state.idGuess = r?.confident ? r.template : null;
@@ -93,22 +122,105 @@ async function autoIdentify() {
     if (state.idGuess !== state.template) { $select('#tpl').value = state.idGuess.id; setTemplate(state.idGuess, { auto: true }); return; }
     state.tplAuto = true; $('#tpl-auto').classList.remove('hidden');
   }
-  renderTplWarning();
 }
 
-function renderTplWarning() {
-  const g = state.idGuess, box = $('#tpl-warn');
-  const show = !!g && g !== state.template && state.idDismissed !== g.id && state.step <= 1;
-  box.classList.toggle('hidden', !show);
-  if (!g || !show) return;
-  const fix = el('button', { class: 'primary', type: 'button' }, t('tpl.warn_switch', { name: templateName(g) }));
-  fix.addEventListener('click', () => { $select('#tpl').value = g.id; state.tplManual = true; setTemplate(g, { auto: true }); });
-  const keep = el('button', { type: 'button' }, t('tpl.warn_keep'));
-  keep.addEventListener('click', () => { state.idDismissed = g.id; renderTplWarning(); });
-  box.replaceChildren(
-    el('p', {}, el('strong', {}, t('tpl.warn_title') + ' '),
-      t('tpl.warn_body', { detected: templateName(g), chosen: templateName(state.template) })),
-    el('div', { class: 'row' }, fix, keep));
+/** Exchange everything between the two slots (photos and framing), then re-run the checks. */
+async function swapSides() {
+  for (const key of /** @type {const} */ (['src', 'base'])) [state[key].front, state[key].back] = [state[key].back, state[key].front];
+  [crop.lastQuad.front, crop.lastQuad.back] = [crop.lastQuad.back, crop.lastQuad.front];
+  for (const s of SIDE_LIST) if (crop.lastQuad[s] === undefined) delete crop.lastQuad[s];
+  if (!state.base[state.pvSide]) state.pvSide = sides()[0] || 'front';
+  renderSlot('front'); renderSlot('back'); renderAll(); updateNav();
+  await Promise.all([checkSide('front'), checkSide('back')]);
+  await autoIdentify();
+}
+
+/**
+ * Show the blocking decision dialog and resolve with the button pressed.
+ * Escape and clicks outside are ignored on purpose: the user has to choose.
+ * @param {{ title: string, body: string, photo?: HTMLCanvasElement | null, yes: string, no: string }} o
+ * @returns {Promise<boolean>} true = fix it (primary), false = it's fine
+ */
+function decide({ title, body, photo, yes, no }) {
+  const dlg = /** @type {HTMLDialogElement} */ ($('#decision'));
+  $('#decision-title').textContent = title;
+  $('#decision-body').textContent = body;
+  const img = /** @type {HTMLImageElement} */ ($('#decision-photo'));
+  img.classList.toggle('hidden', !photo);
+  if (photo) img.src = photo.toDataURL('image/jpeg', 0.7); // local data: URL, never leaves the page
+  $button('#decision-yes').textContent = yes;
+  $button('#decision-no').textContent = no;
+  dlg.showModal();
+  $button('#decision-yes').focus();
+  return new Promise(resolve => {
+    let answered = false;
+    const done = (/** @type {boolean} */ v) => () => { answered = true; dlg.onclose = null; dlg.close(); resolve(v); };
+    $button('#decision-yes').onclick = done(true);
+    $button('#decision-no').onclick = done(false);
+    // Browsers may force-close a modal (e.g. pressing Escape twice): put the question back.
+    dlg.onclose = () => { if (!answered) requestAnimationFrame(() => dlg.showModal()); };
+  });
+}
+
+/** The first slot whose photo looks like the other side and wasn't accepted. */
+const pendingSideSlot = () => SIDE_LIST.find(s => state.base[s] && state.wrongSide[s] && !state.wrongSideOk[s]);
+/** A confident version guess that differs from the chosen template and wasn't accepted. */
+const pendingVersion = () => {
+  const g = state.idGuess;
+  return g && g !== state.template && state.idDismissed !== g.id ? g : null;
+};
+
+let reviewing = false, reviewAgain = false;
+/** Walk through pending problems one dialog at a time (side first: the version check depends on it). */
+async function reviewChecks() {
+  if (reviewing) { reviewAgain = true; return; }
+  reviewing = true;
+  try {
+    do {
+      reviewAgain = false;
+      const slot = pendingSideSlot();
+      if (slot) {
+        const target = otherSide(slot);
+        const swap = !!state.base[target]; // the other slot is taken too: they were simply swapped
+        const fix = await decide({
+          title: t('side.warn_title'),
+          body: t(slot === 'front' ? 'side.warn_body_front' : 'side.warn_body_back'),
+          photo: state.base[slot],
+          yes: t(swap ? 'side.warn_swap' : target === 'front' ? 'side.warn_move_front' : 'side.warn_move_back'),
+          no: t('side.warn_keep'),
+        });
+        if (fix) await swapSides();
+        else { state.wrongSideOk[slot] = true; await autoIdentify(); }
+        reviewAgain = true;
+        continue;
+      }
+      const g = pendingVersion();
+      if (g) {
+        const fix = await decide({
+          title: t('tpl.warn_title'),
+          body: t('tpl.warn_body', { detected: templateName(g), chosen: templateName(state.template) }),
+          photo: state.base.front || state.base.back,
+          yes: t('tpl.warn_switch', { name: templateName(g) }),
+          no: t('tpl.warn_keep'),
+        });
+        if (fix) { $select('#tpl').value = g.id; state.tplManual = true; setTemplate(g, { auto: true }); }
+        else state.idDismissed = g.id;
+        reviewAgain = true;
+      }
+    } while (reviewAgain);
+  } finally { reviewing = false; }
+}
+
+/** Resolves once the checks for the latest photo are done (Next waits for it). */
+let checksDone = Promise.resolve();
+/** Run side + version checks for a slot, then ask about anything wrong. @param {Side} [slot] */
+function runChecks(slot) {
+  checksDone = (async () => {
+    if (slot) await checkSide(slot);
+    await autoIdentify();
+    await reviewChecks();
+  })();
+  return checksDone;
 }
 
 /* ---------- step 1: photo slots ---------- */
@@ -147,7 +259,8 @@ function renderSlot(side) {
     state.base[side] = state.src[side] = null;
     if (state.pvSide === side) state.pvSide = sides()[0] || 'front';
     renderSlot(side); renderAll(); updateNav();
-    autoIdentify(); // re-evaluate with the remaining photo (clears the warning if none left)
+    state.wrongSide[side] = false;
+    runChecks(); // re-evaluate with the remaining photo
   });
   box.replaceChildren(base, el('div', { class: 'bar' }, el('span', { class: 't' }, t('photos.done', { side: sideName(side) })),
     el('div', { class: 'row' }, adjust,
@@ -196,7 +309,7 @@ $('#crop-use').addEventListener('click', () => {
   if (!state.base[state.pvSide]) state.pvSide = side;
   leaveCrop();
   renderSlot(side); renderAll(); updateNav();
-  autoIdentify();
+  runChecks(side);
   if (side === 'front' && !state.base.back) setTimeout(() => $('#slot-back').scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
 });
 
@@ -307,7 +420,6 @@ function goStep(n, push = true) {
   document.querySelectorAll('.step').forEach(sec => sec.classList.toggle('hidden', Number(/** @type {HTMLElement} */ (sec).dataset.step) !== n));
   mountPreviews();
   updateNav();
-  renderTplWarning();
   window.scrollTo(0, 0);
   if (push) history.pushState({ step: n }, '');
   if (n === 2 && !$input('#purpose').value) setTimeout(() => $input('#purpose').focus(), 100);
@@ -333,7 +445,11 @@ function updateSummary() {
   const list = sides().map(sideName).join(t('share.sides_join'));
   $('#summary').textContent = t('share.summary', { sides: list, count, watermark: watermarkText() });
 }
-$('#nav-next').addEventListener('click', () => state.step === STEPS - 1 ? share(!CAN_SHARE) : goStep(state.step + 1));
+$('#nav-next').addEventListener('click', async () => {
+  if (state.step === STEPS - 1) return share(!CAN_SHARE);
+  await checksDone; // don't move on while a photo is still being checked
+  if (!reviewing) goStep(state.step + 1);
+});
 $('#nav-back').addEventListener('click', () => history.back());
 $('#steps').addEventListener('click', e => {
   const li = /** @type {HTMLElement | null} */ (/** @type {HTMLElement} */ (e.target).closest('li.done, li.reach'));
@@ -405,9 +521,10 @@ seg('mode', v => { state.mode = /** @type {'pixel' | 'solid'} */ (v); renderAll(
 seg('color', v => { state.bw = v === 'bw'; renderAll(); });
 seg('pv-side', v => { state.pvSide = /** @type {Side} */ (v); mountPreviews(); });
 $('#tpl').addEventListener('change', e => {
-  state.tplManual = true; // a manual choice always wins over auto-identification
+  state.tplManual = true; // a manual choice is never auto-switched, but a mismatch is still flagged
   const id = /** @type {HTMLSelectElement} */ (e.target).value;
   setTemplate(/** @type {ResolvedTemplate} */ (state.templates.find(x => x.id === id)));
+  reviewChecks();
 });
 $('#tpl-file').addEventListener('change', async e => {
   const input = /** @type {HTMLInputElement} */ (e.target);
@@ -448,6 +565,9 @@ window.addEventListener('langchange', () => {
   renderTemplateInfo(); renderSlot('front'); renderSlot('back'); renderFields(); renderChips(); updateNav(); renderAll();
   if (crop.editor) { crop.editor.opts.topLabel = t('crop.top_label'); crop.editor.draw(); $('#crop-title').textContent = t(crop.side === 'front' ? 'crop.title_front' : 'crop.title_back'); }
 });
+
+// Escape must not dismiss a decision: the user has to pick one of the two answers.
+$('#decision').addEventListener('cancel', e => e.preventDefault());
 
 applyI18n();
 mountLangSwitch($('#lang'));

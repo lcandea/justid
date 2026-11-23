@@ -27,6 +27,14 @@ export default {
   'side.front': 'Anverso',
   'side.back': 'Reverso',
 
+  'side.warn_title': '¿Es la cara correcta?',
+  'side.warn_body_front': 'La foto del anverso parece el reverso del DNI (el lado con el chip y las 3 líneas de letras y números).',
+  'side.warn_body_back': 'La foto del reverso parece el anverso del DNI (el lado con tu foto).',
+  'side.warn_move_front': 'Moverla al anverso',
+  'side.warn_move_back': 'Moverla al reverso',
+  'side.warn_swap': 'Intercambiar las fotos',
+  'side.warn_keep': 'Está bien así',
+
   'photos.title': 'Haz una foto de cada cara',
   'photos.tip': 'Sobre una mesa lisa que contraste y con buena luz. Reconoceremos automáticamente la versión de tu DNI. El reverso es opcional.',
   'photos.tap_front': 'Toca para hacer la foto',

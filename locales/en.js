@@ -26,6 +26,14 @@ export default {
   'side.front': 'Front',
   'side.back': 'Back',
 
+  'side.warn_title': 'Is this the right side?',
+  'side.warn_body_front': 'The front photo looks like the back of the ID (the side with the chip and the 3 lines of letters and numbers).',
+  'side.warn_body_back': 'The back photo looks like the front of the ID (the side with your photo).',
+  'side.warn_move_front': 'Move it to the front',
+  'side.warn_move_back': 'Move it to the back',
+  'side.warn_swap': 'Swap the photos',
+  'side.warn_keep': 'It’s fine',
+
   'photos.title': 'Take a photo of each side',
   'photos.tip': 'On a plain, contrasting table with good light. We’ll recognise your ID version automatically. The back is optional.',
   'photos.tap_front': 'Tap to take the photo',
