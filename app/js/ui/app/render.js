@@ -60,7 +60,8 @@ function renderSide(side, base, watermark) {
   if (c.base !== base || c.bw !== state.bw || !c.card) {
     c.base = base; c.bw = state.bw; c.card = prepareCard(base, state.bw); cacheGen++;
   }
-  const wmKey = `${base.width}x${base.height}|${state.bw}|${watermark}`;
+  // The font is part of the key: if the watermark was drawn before Archivo loaded, redraw it once it has.
+  const wmKey = `${base.width}x${base.height}|${state.bw}|${watermark}|${document.fonts.check('500 12px Archivo')}`;
   if (c.wmKey !== wmKey) {
     c.wmKey = wmKey; c.wm = watermark ? watermarkLayer(base.width, base.height, watermark, state.bw, SEED) : null; cacheGen++;
   }

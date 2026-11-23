@@ -4,7 +4,7 @@
 // The output of one side is built from three layers, composited in this order:
 //   1. the card itself, optionally converted to greyscale        (prepareCard: changes rarely),
 //   2. the cover of every zone of every hidden field             (pixelation with noise, or a solid block),
-//   3. the purpose watermark across the whole card               (watermarkLayer: changes rarely).
+//   3. the purpose watermark across the whole card, darken-blended (watermarkLayer: changes rarely).
 // Layers 1 and 3 are separate canvases so the caller can cache them and only redo step 2 when a
 // field is toggled. All randomness is seeded, so redrawing the same input gives the same pixels
 // (nothing flickers), while the seed itself stays secret to the caller.
@@ -70,8 +70,11 @@ function pixelate(ctx, x, y, w, h, rand) {
 }
 
 /**
- * Layer 3: the watermark on a transparent canvas of the card's size. Two layers of repeated text
- * at different angles, sizes and colours, with seeded jitter, so it is hard to remove cleanly.
+ * Layer 3: the watermark on a transparent canvas of the card's size. One dense pattern of small,
+ * medium-weight text (the purpose line repeated with a "::" separator) in diagonal rows, each row
+ * shifted by a seeded random amount so the pattern doesn't line up and is harder to remove.
+ * It is meant to be composited with the 'darken' blend (see composeRedacted): it greys out light
+ * areas but never covers dark ones, so the card's own text stays black and readable.
  * @param {number} W @param {number} H @param {string} text @param {boolean} bw @param {number} seed
  * @returns {HTMLCanvasElement}
  */
@@ -79,24 +82,15 @@ export function watermarkLayer(W, H, text, bw, seed) {
   const c = createCanvas(W, H);
   const ctx = /** @type {CanvasRenderingContext2D} */ (c.getContext('2d'));
   const rand = rng(hashSeed(text, seed));
-  const layer = (/** @type {number} */ fs, /** @type {number} */ deg, /** @type {number} */ alpha, /** @type {string} */ rgb, /** @type {boolean} */ stroke) => {
-    ctx.save();
-    ctx.font = `700 ${fs}px system-ui, -apple-system, sans-serif`; ctx.textBaseline = 'middle';
-    ctx.translate(W / 2, H / 2); ctx.rotate(deg * Math.PI / 180);
-    const D = Math.hypot(W, H), tw = ctx.measureText(text).width + fs * 1.5;
-    let row = 0;
-    for (let y = -D / 2; y < D / 2; y += fs * 2, row++) {
-      const off = (row % 2) * tw / 2 + rand() * fs * 2;
-      for (let x = -D / 2 - tw + off; x < D / 2; x += tw) {
-        const a = alpha * (0.8 + rand() * 0.4), jy = y + (rand() - 0.5) * fs * 0.3;
-        if (stroke) { ctx.lineWidth = Math.max(1, fs * 0.08); ctx.strokeStyle = `rgba(255,255,255,${a})`; ctx.strokeText(text, x, jy); }
-        ctx.fillStyle = `rgba(${rgb},${a})`; ctx.fillText(text, x, jy);
-      }
-    }
-    ctx.restore();
-  };
-  layer(Math.round(H * 0.05), -22, 0.34, bw ? '40,40,40' : '25,40,160', true);
-  layer(Math.round(H * 0.022), 17, 0.2, bw ? '0,0,0' : '160,20,40', false);
+  const fs = Math.max(8, Math.round(H * 0.027)), pitch = fs * 1.5;
+  ctx.font = `500 ${fs}px Archivo, system-ui, -apple-system, sans-serif`;
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = bw ? 'rgba(90,90,90,.6)' : 'rgba(30,110,98,.6)'; // teal-grey, like printed security ink
+  ctx.translate(W / 2, H / 2); ctx.rotate(-30 * Math.PI / 180);
+  const unit = text + '  ::  ', tw = ctx.measureText(unit).width, D = Math.hypot(W, H);
+  for (let y = -D / 2; y < D / 2 + pitch; y += pitch) {
+    for (let x = -D / 2 - rand() * tw; x < D / 2; x += tw) ctx.fillText(unit, x, y);
+  }
   return c;
 }
 
@@ -126,7 +120,11 @@ export function composeRedacted(out, card, side, { template, hidden, mode, seed 
       else pixelate(ctx, x, y, w, h, rng(hashSeed(`${f.id}:${side}:${i}`, seed)));
     });
   }
-  if (watermark) ctx.drawImage(watermark, 0, 0);
+  if (watermark) {
+    ctx.globalCompositeOperation = 'darken'; // only greys out what is lighter than the ink
+    ctx.drawImage(watermark, 0, 0);
+    ctx.globalCompositeOperation = 'source-over';
+  }
 }
 
 /**
