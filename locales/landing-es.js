@@ -123,7 +123,7 @@ export default {
   'landing.inside.simple_b': 'por internet, y es tu navegador quien hace cumplir esa prohibición, no nosotros.',
   'landing.inside.t1_a': 'La foto se dibuja en un',
   'landing.inside.t1_b': ', lo que elimina sus metadatos EXIF (ubicación, modelo de móvil…).',
-  'landing.inside.t2': 'Una transformada de Hough basada en gradientes encuentra los bordes de la tarjeta, y una homografía la endereza a 1012 × 638 px (tamaño ID-1 a unos 300 ppp).',
+  'landing.inside.t2': 'Una transformada de Hough basada en gradientes propone posibles bordes; los cuadriláteros candidatos se ordenan comparándolos con las imágenes de referencia de las plantillas, y las esquinas se afinan al subpíxel en la foto a más resolución. Una homografía endereza la tarjeta a 1012 × 638 px (tamaño ID-1 a unos 300 ppp).',
   'landing.inside.t3': 'La versión del DNI se reconoce comparando una «firma» en escala de grises con imágenes de referencia.',
   'landing.inside.t4': 'Las zonas ocultas se pixelan con ruido o se tapan; la marca de agua se dibuja encima. Los píxeles originales no quedan en el PDF.',
   'landing.inside.t5': 'Un generador de PDF propio, sin dependencias, incrusta las imágenes ya tapadas.',

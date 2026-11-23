@@ -32,7 +32,7 @@ The landing page explains JustID for everyone: [why it matters](https://justid.c
 The pipeline, with the module that does each part. Every module starts with a comment explaining what it does and why; that is the detailed documentation.
 
 1. **Photo.** The photo is decoded onto a `<canvas>`, which also drops its EXIF metadata.
-2. **Detection.** A gradient-based Hough transform finds the card's four edges (`app/js/core/detect.js`).
+2. **Detection.** A gradient-based Hough transform proposes edges and candidate quadrilaterals (`app/js/core/detect.js`); the candidates are ranked against the templates' reference pictures (`app/js/core/card-match.js`), and the corners are refined to sub-pixel accuracy on a sharper copy of the photo (`app/js/core/refine.js`).
 3. **Straightening.** A homography warps the card to 1012 × 638 px, which is ID-1 size at about 300 dpi (`app/js/core/image.js`).
 4. **Identification.** A small grey "signature" of the card is compared against each template's reference picture (`app/js/core/identify.js`).
 5. **Redaction.** Each hidden field's zones are pixelated or covered, and the watermark is drawn on top (`app/js/core/redact.js`).

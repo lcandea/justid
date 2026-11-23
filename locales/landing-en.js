@@ -123,7 +123,7 @@ export default {
   'landing.inside.simple_b': 'over the internet, and it is your browser that enforces that ban, not us.',
   'landing.inside.t1_a': 'The photo is drawn onto a',
   'landing.inside.t1_b': ', which strips its EXIF metadata (location, phone model…).',
-  'landing.inside.t2': 'A gradient-based Hough transform finds the card’s edges, and a homography straightens it to 1012 × 638 px (ID-1 size at about 300 dpi).',
+  'landing.inside.t2': 'A gradient-based Hough transform proposes candidate edges; the candidate quadrilaterals are ranked against the templates’ reference pictures, and the corners are refined to sub-pixel accuracy on a sharper copy of the photo. A homography straightens the card to 1012 × 638 px (ID-1 size at about 300 dpi).',
   'landing.inside.t3': 'The ID version is recognised by comparing a greyscale “signature” with reference images.',
   'landing.inside.t4': 'Hidden zones are pixelated with noise or covered; the watermark is drawn on top. The original pixels never reach the PDF.',
   'landing.inside.t5': 'A dependency-free PDF writer of our own embeds the already-covered images.',
