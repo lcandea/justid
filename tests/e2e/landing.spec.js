@@ -166,7 +166,7 @@ test('the hero specimen can be dragged (also with reduced motion) and moved with
   expect(await pos()).toBe(5);
 });
 
-test('after a drag the specimen animation resumes 5 s later, from where the line was left', async ({ page }) => {
+test('after a drag the specimen animation resumes 2 s later, from where the line was left', async ({ page }) => {
   await page.clock.install();
   await page.goto('/');
   const card = page.locator('.id-card');
@@ -175,9 +175,9 @@ test('after a drag the specimen animation resumes 5 s later, from where the line
   await fire('pointerdown', 0.4);
   await fire('pointerup', 0.4);
   await expect(card).toHaveClass(/is-manual/);
-  await page.clock.runFor(4000);
-  await expect(card).toHaveClass(/is-manual/);
   await page.clock.runFor(1500);
+  await expect(card).toHaveClass(/is-manual/);
+  await page.clock.runFor(700);
   await expect(card).not.toHaveClass(/is-manual/);
   // The animation restarts at the phase where the line sits where it was left (about 40 %), not at the edge.
   const left = await page.locator('.scan').evaluate(el => el.offsetLeft / /** @type {HTMLElement} */ (el.parentElement).offsetWidth * 100);

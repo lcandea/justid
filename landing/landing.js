@@ -111,7 +111,7 @@ function setupSpecimenSlider() {
   const card = /** @type {HTMLElement | null} */ (document.querySelector('.id-card'));
   if (!card) return;
   const ANGLE = -4 * Math.PI / 180; // must match the rotate() in landing.css
-  const RESUME_MS = 5000, SWEEP_S = 3; // half of the 6 s animation in landing.css: the left-to-right sweep
+  const RESUME_MS = 2000, SWEEP_S = 3; // half of the 6 s animation in landing.css: the left-to-right sweep
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const animated = /** @type {HTMLElement[]} */ ([...card.querySelectorAll('.card-covered, .scan')]);
   let pos = 62, resumeTimer = 0;
