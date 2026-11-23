@@ -243,6 +243,10 @@ test('country code picker: searchable by name or prefix, keyboard friendly, full
   await expect(pop).toBeVisible();
   await expect(btn).toHaveAttribute('aria-expanded', 'true');
   await expect(search).toBeFocused();
+  // opens upwards (the field sits near the end of the page; on phones the keyboard covers what's below)
+  const popBox = await pop.boundingBox(), btnBox = await btn.boundingBox();
+  expect(popBox && btnBox && popBox.y + popBox.height <= btnBox.y + 1).toBe(true);
+  expect(popBox && popBox.y >= 0).toBe(true); // fully on screen
   await search.fill('portu');
   await expect(page.locator('#b-dial-list li')).toHaveCount(1);
   await expect(page.locator('#b-dial-list li')).toContainText('Portugal');

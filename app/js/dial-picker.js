@@ -106,7 +106,9 @@ export class DialPicker {
     this.shown = this.all;
     this.active = Math.max(0, this.all.indexOf(this.selected));
     this.renderList();
-    this.els.search.focus();
+    // The list opens upwards: keep the whole popup on screen, then focus without a second scroll.
+    this.els.pop.scrollIntoView({ block: 'nearest' });
+    this.els.search.focus({ preventScroll: true });
   }
 
   /** @param {boolean} focusButton */

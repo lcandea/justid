@@ -51,6 +51,9 @@
     <button type="button" data-v="whatsapp" class="on" data-i18n="builder.delivery_whatsapp"></button><button type="button" data-v="email" data-i18n="builder.delivery_email"></button><button type="button" data-v="upload" data-i18n="builder.delivery_upload"></button>
   </div>
   <label class="lbl b-contact-lbl" for="b-contact" id="b-contact-label"></label>
+  <!-- Wrapper anchors the country list, which opens upwards over the content above (the field is
+       near the end of the page, and on phones the keyboard covers anything below it). -->
+  <div class="phone-wrap">
   <div class="phone-row">
     <!-- Country calling code (WhatsApp only): opens a searchable list, see js/dial-picker.js -->
     <button type="button" class="dial-btn" id="b-dial" aria-haspopup="listbox" aria-expanded="false" aria-controls="b-dial-pop"></button>
@@ -60,6 +63,7 @@
     <input type="text" id="b-dial-search" role="combobox" aria-expanded="true" aria-controls="b-dial-list" aria-autocomplete="list" autocomplete="off" data-i18n-attr="placeholder:builder.dial_search;aria-label:builder.dial_search">
     <ul class="dial-list" id="b-dial-list" role="listbox" data-i18n-attr="aria-label:builder.dial_list"></ul>
     <p class="muted dial-empty hidden" id="b-dial-empty" data-i18n="builder.dial_none"></p>
+  </div>
   </div>
   <p class="muted b-phone-preview hidden" id="b-phone-preview" aria-live="polite"></p>
 
