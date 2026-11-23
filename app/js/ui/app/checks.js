@@ -69,7 +69,6 @@ function decide({ title, body, photo, yes, no }) {
   $button('#decision-yes').textContent = yes;
   $button('#decision-no').textContent = no;
   openModal(dlg);
-  $button('#decision-yes').focus();
   return new Promise(resolve => {
     let answered = false;
     const done = (/** @type {boolean} */ v) => () => { answered = true; dlg.onclose = null; dlg.close(); resolve(v); };

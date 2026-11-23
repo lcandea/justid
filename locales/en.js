@@ -171,6 +171,10 @@ export default {
   'editor.field_prompt': 'Field name',
   'editor.field_default_name': 'New field',
   'editor.field_delete': 'Delete field',
+  'editor.field_delete_title': 'Delete this field?',
+  'editor.field_delete_yes': 'Delete',
+  'editor.field_add_title': 'New field',
+  'editor.field_add_ok': 'Add',
   'editor.field_delete_confirm': 'Delete the field “{field}” and its {count} zones?',
   'editor.hide_default': 'hide by default',
   'editor.new_template_name': 'New template',
@@ -290,4 +294,6 @@ export default {
   'builder.preview': 'See what they will see',
   'builder.message_subject': 'Request for a copy of your ID',
   'builder.message_body': 'Hi, for “{purpose}” I need a copy of your ID. You can prepare it with JustID: it only includes the necessary data and everything happens on your phone.',
+
+  'dialog.cancel': 'Cancel',
 };

@@ -149,6 +149,34 @@ test('zone editor loads the default template with its reference picture', async 
   expect(errors).toEqual([]);
 });
 
+test('zone editor asks with our own dialogs, not the browser\'s', async ({ page }) => {
+  let native = 0;
+  page.on('dialog', d => { native++; d.dismiss(); });
+  await page.goto('/app/editor.html');
+  const rows = page.locator('.field-row');
+  await expect(rows).not.toHaveCount(0);
+  const before = await rows.count();
+
+  // add a field: a themed dialog with the name field, not window.prompt()
+  await page.locator('#field-add').click();
+  const ask = page.locator('dialog.ask');
+  await expect(ask).toBeVisible();
+  expect(await page.evaluate(() => document.activeElement?.tagName)).toBe('DIALOG'); // nothing auto-focused
+  await ask.locator('input').fill('Mi campo');
+  await ask.locator('input').press('Enter');
+  await expect(ask).toHaveCount(0);
+  await expect(rows).toHaveCount(before + 1);
+
+  // delete it: cancel keeps it, confirming removes it
+  await rows.last().locator('.ed-del').click();
+  await ask.getByRole('button', { name: 'Cancelar' }).click();
+  await expect(rows).toHaveCount(before + 1);
+  await rows.last().locator('.ed-del').click();
+  await ask.getByRole('button', { name: 'Borrar' }).click();
+  await expect(rows).toHaveCount(before);
+  expect(native).toBe(0);
+});
+
 for (const width of [360, 412]) {
   test(`no horizontal overflow at ${width}px, in both languages`, async ({ page }) => {
     await page.setViewportSize({ width, height: 800 });

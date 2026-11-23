@@ -172,6 +172,10 @@ export default {
   'editor.field_prompt': 'Nombre del campo',
   'editor.field_default_name': 'Nuevo campo',
   'editor.field_delete': 'Borrar campo',
+  'editor.field_delete_title': '¿Borrar el campo?',
+  'editor.field_delete_yes': 'Borrar',
+  'editor.field_add_title': 'Nuevo campo',
+  'editor.field_add_ok': 'Añadir',
   'editor.field_delete_confirm': '¿Borrar el campo «{field}» y sus {count} zonas?',
   'editor.hide_default': 'ocultar por defecto',
   'editor.new_template_name': 'Nueva plantilla',
@@ -291,4 +295,6 @@ export default {
   'builder.preview': 'Ver lo que verá',
   'builder.message_subject': 'Solicitud de copia de DNI',
   'builder.message_body': 'Hola, para «{purpose}» necesito una copia de tu DNI. Puedes prepararla con JustID: solo incluye los datos necesarios y todo se hace en tu móvil.',
+
+  'dialog.cancel': 'Cancelar',
 };
