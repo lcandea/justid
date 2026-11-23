@@ -73,8 +73,8 @@ export default {
 
   'crop.title_front': 'Encuadra el anverso',
   'crop.title_back': 'Encuadra el reverso',
-  'crop.msg_adjust': 'Arrastra las esquinas si hace falta. La línea amarilla es el borde superior.',
-  'crop.msg_found': 'Tarjeta detectada. Revisa las esquinas; la línea amarilla es el borde superior.',
+  'crop.msg_adjust': 'Arrastra las esquinas si hace falta. La línea gruesa es el borde superior.',
+  'crop.msg_found': 'Tarjeta detectada. Revisa las esquinas; la línea gruesa es el borde superior.',
   'crop.msg_not_found': 'No la he encontrado: arrastra las 4 esquinas. Ayuda un fondo liso que contraste.',
   'crop.cancel': 'Cancelar',
   'crop.rotate': 'Girar',

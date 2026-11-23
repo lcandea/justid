@@ -72,8 +72,8 @@ export default {
 
   'crop.title_front': 'Frame the front',
   'crop.title_back': 'Frame the back',
-  'crop.msg_adjust': 'Drag the corners if needed. The yellow line is the top edge.',
-  'crop.msg_found': 'Card detected. Check the corners; the yellow line is the top edge.',
+  'crop.msg_adjust': 'Drag the corners if needed. The thick line is the top edge.',
+  'crop.msg_found': 'Card detected. Check the corners; the thick line is the top edge.',
   'crop.msg_not_found': 'Couldn’t find it: drag the 4 corners. A plain contrasting background helps.',
   'crop.cancel': 'Cancel',
   'crop.rotate': 'Rotate',

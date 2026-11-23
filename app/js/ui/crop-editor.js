@@ -83,17 +83,17 @@ export class CropEditor {
     ctx.rect(0, 0, this.src.width, this.src.height);
     ctx.moveTo(q[0][0], q[0][1]); q.slice(1).forEach(p => ctx.lineTo(p[0], p[1])); ctx.closePath();
     ctx.fill('evenodd');
-    ctx.lineWidth = 2 * u; ctx.strokeStyle = '#4ade80';
+    ctx.lineWidth = 2 * u; ctx.strokeStyle = '#f3f1ec';
     ctx.beginPath(); ctx.moveTo(q[0][0], q[0][1]); q.slice(1).forEach(p => ctx.lineTo(p[0], p[1])); ctx.closePath(); ctx.stroke();
     // highlight the top edge so the user can tell the orientation
-    ctx.lineWidth = 5 * u; ctx.strokeStyle = '#facc15';
+    ctx.lineWidth = 5 * u; ctx.strokeStyle = '#d7ff3a';
     ctx.beginPath(); ctx.moveTo(q[0][0], q[0][1]); ctx.lineTo(q[1][0], q[1][1]); ctx.stroke();
     ctx.font = `600 ${13 * u}px system-ui, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     const mid = [(q[0][0] + q[1][0]) / 2, (q[0][1] + q[1][1]) / 2];
-    ctx.fillStyle = '#facc15'; ctx.fillText(this.opts.topLabel || 'TOP', mid[0], mid[1] - 14 * u);
+    ctx.fillStyle = '#d7ff3a'; ctx.fillText(this.opts.topLabel || 'TOP', mid[0], mid[1] - 14 * u);
     q.forEach((p, i) => {
       ctx.beginPath(); ctx.arc(p[0], p[1], 14 * u, 0, Math.PI * 2);
-      ctx.fillStyle = i === 0 ? '#facc15' : '#4ade80'; ctx.fill();
+      ctx.fillStyle = i === 0 ? '#d7ff3a' : '#f3f1ec'; ctx.fill();
       ctx.lineWidth = 2 * u; ctx.strokeStyle = '#000'; ctx.stroke();
       ctx.fillStyle = '#000'; ctx.fillText(String(i + 1), p[0], p[1]);
     });
@@ -114,12 +114,12 @@ export class CropEditor {
     ctx.drawImage(this.src, p[0] - sr, p[1] - sr, 2 * sr, 2 * sr, cx - R, cy - R, 2 * R, 2 * R);
     // quad edges inside the magnifier
     ctx.translate(cx - p[0] * Z, cy - p[1] * Z); ctx.scale(Z, Z);
-    ctx.lineWidth = 1.5 * u / Z; ctx.strokeStyle = '#4ade80';
+    ctx.lineWidth = 1.5 * u / Z; ctx.strokeStyle = '#f3f1ec';
     ctx.beginPath(); ctx.moveTo(this.quad[0][0], this.quad[0][1]); this.quad.slice(1).forEach(q => ctx.lineTo(q[0], q[1])); ctx.closePath(); ctx.stroke();
     ctx.restore();
     ctx.strokeStyle = '#fff'; ctx.lineWidth = 3 * u;
     ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
-    ctx.lineWidth = 1.5 * u; ctx.strokeStyle = '#facc15';
+    ctx.lineWidth = 1.5 * u; ctx.strokeStyle = '#d7ff3a';
     ctx.beginPath(); ctx.moveTo(cx - 10 * u, cy); ctx.lineTo(cx + 10 * u, cy); ctx.moveTo(cx, cy - 10 * u); ctx.lineTo(cx, cy + 10 * u); ctx.stroke();
   }
 }
