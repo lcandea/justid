@@ -7,7 +7,7 @@ import { ROOT, walk } from './helpers.mjs';
 import { relative } from 'node:path';
 
 const shipped = [...walk('app', '.js'), ...walk('locales', '.js'), ...walk('templates', '.js')];
-const pages = [...walk('app', '.html'), `${ROOT}/index.html`];
+const pages = [...walk('app', '.html'), `${ROOT}/index.html`, `${ROOT}/404.html`];
 
 test('no network APIs anywhere in the shipped JavaScript', () => {
   const banned = [/\bfetch\s*\(/, /XMLHttpRequest/, /WebSocket/, /EventSource/, /sendBeacon/, /RTCPeerConnection/,
@@ -47,4 +47,22 @@ test('no innerHTML with dynamic content (only the static icon helper may use it)
     const allowed = relative(ROOT, file) === 'app/js/dom.js' ? 1 : 0;
     assert.ok(uses <= allowed, `${relative(ROOT, file)}: innerHTML assignment`);
   }
+});
+
+test('the deployed _headers file sends the strict CSP and anti-framing headers on every path', () => {
+  const headers = readFileSync(`${ROOT}/_headers`, 'utf8');
+  assert.match(headers, /^\/\*$/m, '_headers must have a rule for /*');
+  const csp = headers.match(/Content-Security-Policy: (.+)/)?.[1] || '';
+  assert.match(csp, /connect-src 'none'/);
+  assert.match(csp, /form-action 'none'/);
+  assert.match(csp, /frame-ancestors 'none'/);
+  assert.doesNotMatch(csp, /https?:|\*|'unsafe-eval'/);
+  assert.match(headers, /X-Frame-Options: DENY/);
+  assert.match(headers, /Referrer-Policy: no-referrer/);
+});
+
+test('the build script publishes only the public folders', () => {
+  const script = readFileSync(`${ROOT}/tools/build-site.sh`, 'utf8');
+  const cp = script.match(/^cp -R (.+) _site\/$/m)?.[1].split(/\s+/) || [];
+  assert.deepEqual(cp.sort(), ['404.html', '_headers', 'app', 'favicon.svg', 'index.html', 'locales', 'templates']);
 });

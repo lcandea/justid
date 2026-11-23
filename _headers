@@ -1,0 +1,13 @@
+# HTTP security headers for every file (Cloudflare static assets).
+# The CSP repeats the one in each page's <meta> tag and adds what only a header can enforce:
+#   connect-src 'none'      the page cannot send data anywhere (fetch, XHR, WebSocket, beacons)
+#   frame-ancestors 'none'  no other site can embed JustID in a frame (clickjacking)
+# Permissions-Policy turns off device APIs the app never uses. Taking a photo still works:
+# it goes through the system file picker / camera app, not the camera API.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: no-referrer
+  Cross-Origin-Opener-Policy: same-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), serial=(), bluetooth=(), browsing-topics=()

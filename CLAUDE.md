@@ -6,4 +6,5 @@
 - **Types:** plain JS with JSDoc and `// @ts-check`. `npm run typecheck` must pass.
 - **Templates** (`templates/`) are pure JSON inside `export default …;`. A family file is the field catalogue plus default visibility; a version file holds geometry, reference pictures and optional `overrides`. Register new files in `templates/index.js`.
 - Text is set with `textContent` / `el()`. Never `innerHTML` with dynamic data.
+- Deploys: Cloudflare builds with `tools/build-site.sh` (copy only) + `wrangler deploy`. If a new top-level public folder is added, add it to the script AND to the build-script test.
 - Before committing, run `npm test` (typecheck + unit + Playwright).

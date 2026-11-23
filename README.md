@@ -36,7 +36,9 @@
 ## Project structure
 
 ```
-index.html            entry point (landing page coming soon)
+index.html            entry point (landing page coming soon); 404.html, favicon.svg
+_headers              HTTP security headers (CSP, anti-framing) for every response
+wrangler.jsonc        Cloudflare deployment config (static files only, no server code)
 app/                  the app: index.html (4-step flow), editor.html (zone editor)
   js/                 ES modules, plain JavaScript with JSDoc types (type-checked, never compiled)
   css/
@@ -67,6 +69,14 @@ To regenerate the reference pictures after changing `img/`:
 ```sh
 cd tools && uv run normalize_refs.py
 ```
+
+### Hosting
+
+Cloudflare (Workers static assets) deploys straight from this repository:
+- `main` goes to production at https://justid.candea.es. Every other branch gets its own preview URL.
+- Build: `sh tools/build-site.sh` copies the public files into `_site/` as-is (no compilation). Deploy: `npx wrangler deploy` (config in `wrangler.jsonc`).
+- `_headers` adds HTTP security headers to every response. That includes the same no-network CSP plus `frame-ancestors 'none'`, which only a header can enforce.
+- GitHub Actions runs the tests on every push and PR. Protect `main` so it only accepts merges once CI passes.
 
 ### Conventions
 

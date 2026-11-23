@@ -1,0 +1,13 @@
+// Cloudflare Workers static-assets deployment. There is no Worker script: Cloudflare serves the
+// files in _site/ (made by tools/build-site.sh) as-is, with the headers from _headers.
+{
+  "name": "justid",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./_site",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  },
+  "workers_dev": true,
+  "preview_urls": true
+}
