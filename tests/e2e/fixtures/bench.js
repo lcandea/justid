@@ -91,7 +91,7 @@ const CARD_URLS = { v4f: 'dni_es_v4_front', v4b: 'dni_es_v4_back', v3f: 'dni_es_
 /**
  * Render every case and time the detector on it.
  * @param {(c: HTMLCanvasElement) => ({ quad: number[][] } | null)} detectCard
- * @param {{ only?: string, reps?: number }} opts
+ * @param {{ only?: string, reps?: number, photos?: boolean }} opts photos: false leaves out the private real photos
  */
 export async function runBench(detectCard, opts = {}) {
   const cards = { fake: makeCard() };
@@ -101,7 +101,7 @@ export async function runBench(detectCard, opts = {}) {
     ...SPECIMEN_CASES,
   ];
   const reps = opts.reps ?? 3, out = [];
-  for (const c of await privatePhotos()) all.push([`photo · ${c.file}`, null, 0, 0, null, null, { photo: c }]);
+  if (opts.photos !== false) for (const c of await privatePhotos()) all.push([`photo · ${c.file}`, null, 0, 0, null, null, { photo: c }]);
   for (const [name, cardKey, W0, H0, q0, bgDef, o = {}] of all) {
     if (opts.only && !name.includes(opts.only)) continue;
     let s, W = W0, H = H0, q = q0;

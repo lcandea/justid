@@ -79,16 +79,6 @@ test('matchQuad: a wrong rectangle scores low', () => {
   assert.ok(M.matchQuad(px, wrong, refs).score < 0.5);
 });
 
-test('alignQuad: pulls a near-miss corner (a few % of the card off) back onto the card', () => {
-  const px = photo(card, QUAD);
-  const off = QUAD.map(p => [...p]); off[2] = [402, 303]; // bottom-right on a nearby wrong line (~5% of the card diagonal)
-  const before = M.matchQuad(px, off, refs).score;
-  const al = M.alignQuad(px, off, refs[0].sig);
-  assert.ok(al.score > before, `${before} → ${al.score}`);
-  const err = Math.max(...al.quad.map((p, i) => Math.hypot(p[0] - QUAD[i][0], p[1] - QUAD[i][1])));
-  assert.ok(err < 6, `corner error ${err.toFixed(1)} px`);
-});
-
 const { refineQuadPixels } = await import(join(ROOT, 'app/js/core/refine.js'));
 const worst = (a, b) => Math.max(...a.map((p, i) => Math.hypot(p[0] - b[i][0], p[1] - b[i][1])));
 

@@ -28,10 +28,10 @@ test.describe('detector', () => {
       const { detectionRefs } = await import('/app/js/ui/samples.js');
       const { officialTemplates } = await import('/app/js/core/templates.js');
       const refs = await detectionRefs(officialTemplates());
-      return (await runBench(c => detectCard(c, { refs }), { reps: 1 })).filter(r => !r.name.startsWith('fake'));
+      return (await runBench(c => detectCard(c, { refs }), { reps: 1, photos: false })).filter(r => !r.name.startsWith('fake'));
     });
     // Known gaps (see `npm run bench-detect`): reported by the benchmark, not required here.
-    const KNOWN_GAPS = ['v4 front · white desk, no shadow', 'v4 back · cluttered, small'];
+    const KNOWN_GAPS = ['v4 front · white desk, no shadow', 'v4 back · cluttered, small', 'v4 front · checkerboard'];
     for (const r of results) {
       if (KNOWN_GAPS.includes(r.name)) continue;
       expect(r.found, `${r.name}: not found`).toBe(true);

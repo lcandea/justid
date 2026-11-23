@@ -8,7 +8,7 @@
 //    and its aspect ratio (ID-1 ≈ 1.586).
 
 import { createCanvas } from './canvas.js';
-import { matchQuad, alignQuad } from './card-match.js';
+import { matchQuad } from './card-match.js';
 import { refineQuad } from './refine.js';
 
 const CARD_RATIO = 85.6 / 54;
@@ -23,8 +23,10 @@ const DEFAULTS = {
   maxLines: 80,
   minPol: 0.3, // colour-step consistency a side needs (grids and fabric flip sign: ~0)
   matchPool: 30, // with reference pictures: how many distinct top candidates are compared with them
-  matchMin: 0.5, // best match below this: no known card in the photo, geometry alone decides
-  alignMin: 0.2, alignTop: 1, // no clear match: align the best partial matches (≥ alignMin) to the reference
+  outer: true, // geometry only: prefer a bigger candidate that contains the best one and shares 2 lines
+  matchMin: 0.35, // best match below this: no known card in the photo, geometry alone decides.
+  // Real cards score 0.35-0.6 against their reference (their photo and data differ), synthetic
+  // scenes of the reference itself 0.8-0.96.
   refine: true, refineReach: 4, // re-measure the sides on a sharper copy, searching ± this many detection pixels
 };
 
@@ -359,27 +361,13 @@ export function detectCard(src, opts = {}) {
       const p = pool[i]; p.m = matchQuad(px, p.q, o.refs);
       bestComb = Math.max(bestComb, p.c.score * matchWeight(p.m.score));
     }
-    let top = Math.max(...pool.map(p => p.m.score));
-    if (top < o.matchMin && top >= o.alignMin) {
-      // Partial matches: candidates with one side on a wrong line (a paper edge, a grid line).
-      // Align the best few to their reference and keep them if they now match.
-      const sigs = Object.fromEntries(o.refs.map(r => [r.id, r.sig]));
-      const tries = [...pool].sort((a, b) => b.m.score - a.m.score).slice(0, o.alignTop);
-      if (opts.debug) detectCard.lastAlignFrom = tries.map(p => p.m.score);
-      for (const p of tries) {
-        const r = p.m.rot, start = [0, 1, 2, 3].map(i => p.q[(i + r) % 4]);
-        const al = alignQuad(px, start, sigs[p.m.ref]);
-        p.q = al.quad; p.m = { score: al.score, rot: 0, ref: p.m.ref }; p.aligned = true;
-      }
-      top = Math.max(...pool.map(p => p.m.score));
-      if (opts.debug) detectCard.lastAlign = tries.map(p => p.m.score);
-    }
+    const top = Math.max(...pool.map(p => p.m.score));
     if (top >= o.matchMin) {
       matched = pool.reduce((a, b) => (b.c.score * matchWeight(b.m.score) > a.c.score * matchWeight(a.m.score) ? b : a));
       best = matched.c;
     }
   }
-  if (!matched) {
+  if (!matched && o.outer) {
     // Inner structures (photo, header...) form rectangles inside the card that share lines with it.
     // If a bigger candidate contains the best one and shares ≥ 2 lines, it's the real card border.
     for (let guard = 0; best && guard < 5; guard++) {

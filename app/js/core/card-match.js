@@ -67,26 +67,3 @@ export function matchQuad(px, quad, refs) {
   return best;
 }
 
-/**
- * Template alignment: move the corners (one at a time, coarse to fine) while the straightened quad
- * matches the reference better. Pulls a side that sits on a wrong line back onto the card.
- * @param {Pixels} px @param {number[][]} quad in the card's reading orientation (TL, TR, BR, BL)
- * @param {Signature} ref
- * @returns {{ quad: number[][], score: number, evals: number }}
- */
-export function alignQuad(px, quad, ref, { from = 0.08, to = 0.004, maxIter = 6 } = {}) {
-  const score = (/** @type {number[][]} */ q) => signatureScore(greySignature(straightenGrey(px, q)), ref);
-  let q = quad.map(p => [...p]), best = score(q), evals = 1;
-  const size = Math.hypot(q[0][0] - q[2][0], q[0][1] - q[2][1]);
-  for (let step = from * size; step >= to * size; step /= 2) {
-    for (let it = 0, improved = true; improved && it < maxIter; it++) {
-      improved = false;
-      for (let i = 0; i < 4; i++) for (let c = 0; c < 2; c++) for (const d of [-1, 1]) {
-        const t = q.map(p => [...p]); t[i][c] += d * step;
-        const s = score(t); evals++;
-        if (s > best) { best = s; q = t; improved = true; }
-      }
-    }
-  }
-  return { quad: q, score: best, evals };
-}
