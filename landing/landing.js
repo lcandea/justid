@@ -103,17 +103,43 @@ function setupExampleRequest() {
 /**
  * The hero's specimen: the CSS animation sweeps the scan line until the visitor takes over. Pressing
  * (mouse or touch) moves the line to the pointer and dragging follows it; arrow keys, Home and End
- * work too. It then stays where it was left. With reduced motion there is no animation, but
- * dragging still works. The card is rotated, so the pointer is mapped into the card's own axes.
+ * work too. RESUME_MS after the last interaction the animation picks up again from where the line
+ * was left (not while the slider has keyboard focus). With reduced motion there is no animation,
+ * but dragging still works. The card is rotated, so the pointer is mapped into the card's own axes.
  */
 function setupSpecimenSlider() {
   const card = /** @type {HTMLElement | null} */ (document.querySelector('.id-card'));
   if (!card) return;
   const ANGLE = -4 * Math.PI / 180; // must match the rotate() in landing.css
-  let pos = 62;
+  const RESUME_MS = 5000, SWEEP_S = 3; // half of the 6 s animation in landing.css: the left-to-right sweep
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const animated = /** @type {HTMLElement[]} */ ([...card.querySelectorAll('.card-covered, .scan')]);
+  let pos = 62, resumeTimer = 0;
+  /** The pointer currently dragging, if any. @type {number | null} */
+  let dragging = null;
+
+  /**
+   * Seconds into the animation at which the line is at `p` % while sweeping right. The keyframes go
+   * from -4% to 100% in the first half with cubic-bezier(.6, 0, .4, 1): invert it by bisection.
+   * @param {number} p
+   */
+  const phaseAt = p => {
+    const target = Math.min(1, Math.max(0, (p + 4) / 104));
+    const bez = (/** @type {number} */ s, /** @type {number} */ a, /** @type {number} */ b) => 3 * (1 - s) ** 2 * s * a + 3 * (1 - s) * s * s * b + s ** 3;
+    let lo = 0, hi = 1;
+    for (let i = 0; i < 30; i++) { const mid = (lo + hi) / 2; if (bez(mid, 0, 1) < target) lo = mid; else hi = mid; }
+    return bez(lo, 0.6, 0.4) * SWEEP_S;
+  };
+  const resume = () => {
+    if (reducedMotion.matches || dragging !== null || card.matches(':focus-visible')) return;
+    for (const el of animated) el.style.animationDelay = `-${phaseAt(pos).toFixed(3)}s`;
+    card.classList.remove('is-manual');
+  };
+  const scheduleResume = () => { clearTimeout(resumeTimer); resumeTimer = window.setTimeout(resume, RESUME_MS); };
 
   /** @param {number} value percentage of the card showing the covered copy */
   const set = value => {
+    clearTimeout(resumeTimer);
     pos = Math.round(Math.min(100, Math.max(0, value)));
     card.classList.add('is-manual');
     card.style.setProperty('--pos', pos + '%');
@@ -127,8 +153,6 @@ function setupSpecimenSlider() {
     return (local / card.offsetWidth + 0.5) * 100;
   };
 
-  /** The pointer currently dragging, if any. @type {number | null} */
-  let dragging = null;
   card.addEventListener('pointerdown', e => {
     if (e.button !== 0) return;
     dragging = e.pointerId;
@@ -136,13 +160,15 @@ function setupSpecimenSlider() {
     set(fromPointer(e));
   });
   card.addEventListener('pointermove', e => { if (e.pointerId === dragging) set(fromPointer(e)); });
-  for (const type of ['pointerup', 'pointercancel']) card.addEventListener(type, () => { dragging = null; });
+  for (const type of ['pointerup', 'pointercancel']) card.addEventListener(type, () => { dragging = null; scheduleResume(); });
+  card.addEventListener('blur', scheduleResume);
   card.addEventListener('keydown', e => {
     const step = e.shiftKey ? 10 : 5;
     const next = { ArrowLeft: pos - step, ArrowDown: pos - step, ArrowRight: pos + step, ArrowUp: pos + step, Home: 0, End: 100 }[e.key];
     if (next === undefined) return;
     e.preventDefault();
     set(next);
+    scheduleResume();
   });
   window.addEventListener('langchange', () => card.setAttribute('aria-valuetext', t('landing.hero.slider_value', { n: pos })));
   card.setAttribute('aria-valuetext', t('landing.hero.slider_value', { n: pos }));
