@@ -15,77 +15,93 @@
 <title data-i18n="meta.request_title">JustID</title>
 <link rel="preload" href="../shared/fonts/archivo-var-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../shared/theme.css">
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/common.css">
+<link rel="stylesheet" href="css/request.css">
 </head>
 <body class="builder-body">
 <noscript><p class="noscript" data-i18n="noscript">Esta herramienta necesita JavaScript. Todo se ejecuta en tu dispositivo: no se envía nada a ningún servidor.</p></noscript>
 <header class="top">
-  <div class="brand">
-    <strong>JustID <small class="tagline" data-i18n="brand.tagline"></small></strong>
-    <div class="brand-actions"><div class="lang-switch" id="lang"></div></div>
+  <div class="top-in">
+    <div class="brand">
+      <div class="brand-left">
+        <a class="logo" href="../" data-i18n-attr="aria-label:brand.home"><span>Just</span><span class="logo-id">ID</span></a>
+        <span class="tagline mono" data-i18n="brand.tagline"></span>
+      </div>
+      <div class="brand-actions"><div class="lang-switch" id="lang"></div></div>
+    </div>
   </div>
 </header>
 
-<main class="flow builder">
-  <p class="builder-nav"><a href="./" data-i18n="builder.back_to_app"></a></p>
-  <h2 data-i18n="builder.title"></h2>
-  <p class="muted" data-i18n="builder.intro"></p>
+<main class="builder">
+  <p class="builder-nav mono"><a href="./" data-i18n="builder.back_to_app"></a></p>
+  <p class="eyebrow eyebrow-dot" data-i18n="builder.eyebrow"></p>
+  <h2 class="page-title" data-i18n="builder.title"></h2>
+  <p class="muted lede" data-i18n="builder.intro"></p>
 
-  <label class="lbl" for="b-from" data-i18n="builder.from_label"></label>
-  <input type="text" id="b-from" maxlength="60" autocomplete="organization" data-i18n-attr="placeholder:builder.from_placeholder">
+  <section class="b-sec" aria-labelledby="b-who-title">
+    <h3 class="label mono" id="b-who-title" data-i18n="builder.who_title"></h3>
+    <label class="lbl" for="b-from" data-i18n="builder.from_label"></label>
+    <input type="text" id="b-from" maxlength="60" autocomplete="organization" data-i18n-attr="placeholder:builder.from_placeholder">
 
-  <label class="lbl" for="b-purpose" data-i18n="builder.purpose_label"></label>
-  <input type="text" id="b-purpose" maxlength="80" autocomplete="off" data-i18n-attr="placeholder:builder.purpose_placeholder">
-  <div class="chips" id="b-chips"></div>
+    <label class="lbl" for="b-purpose" data-i18n="builder.purpose_label"></label>
+    <input type="text" id="b-purpose" maxlength="80" autocomplete="off" data-i18n-attr="placeholder:builder.purpose_placeholder">
+    <div class="chips" id="b-chips"></div>
+  </section>
 
-  <h3 data-i18n="builder.fields_title"></h3>
-  <p class="muted" data-i18n="builder.fields_hint"></p>
-  <div id="b-fields"></div>
-  <label class="chk b-back"><input type="checkbox" id="b-back"><span><span data-i18n="builder.back"></span> <small class="muted hidden" id="b-back-forced" data-i18n="builder.back_forced"></small></span></label>
+  <section class="b-sec" aria-labelledby="b-fields-title">
+    <h3 class="label mono" id="b-fields-title" data-i18n="builder.fields_title"></h3>
+    <p class="muted" data-i18n="builder.fields_hint"></p>
+    <div id="b-fields"></div>
+    <label class="chk b-back"><input type="checkbox" id="b-back"><span><span data-i18n="builder.back"></span> <small class="muted hidden" id="b-back-forced" data-i18n="builder.back_forced"></small></span></label>
 
-  <label class="lbl" for="b-why" id="b-why-label"></label>
-  <textarea id="b-why" maxlength="240" rows="3" data-i18n-attr="placeholder:builder.why_placeholder"></textarea>
-  <p class="muted b-count" id="b-why-count" aria-live="polite"></p>
+    <label class="lbl" for="b-why" id="b-why-label"></label>
+    <textarea id="b-why" maxlength="240" rows="3" data-i18n-attr="placeholder:builder.why_placeholder"></textarea>
+    <p class="muted b-count mono" id="b-why-count" aria-live="polite"></p>
+  </section>
 
-  <h3 data-i18n="builder.delivery_title"></h3>
-  <div class="seg" id="b-delivery">
-    <button type="button" data-v="whatsapp" class="on" data-i18n="builder.delivery_whatsapp"></button><button type="button" data-v="email" data-i18n="builder.delivery_email"></button><button type="button" data-v="upload" data-i18n="builder.delivery_upload"></button>
-  </div>
-  <label class="lbl b-contact-lbl" for="b-contact" id="b-contact-label"></label>
-  <!-- Wrapper anchors the country list, which opens upwards over the content above (the field is
-       near the end of the page, and on phones the keyboard covers anything below it). -->
-  <div class="phone-wrap">
-  <div class="phone-row">
-    <!-- Country calling code (WhatsApp only): opens a searchable list, see js/dial-picker.js -->
-    <button type="button" class="dial-btn" id="b-dial" aria-haspopup="listbox" aria-expanded="false" aria-controls="b-dial-pop"></button>
-    <input type="text" id="b-contact" maxlength="300" autocomplete="off">
-  </div>
-  <div class="dial-pop hidden" id="b-dial-pop">
-    <div class="dial-head">
-    <input type="text" id="b-dial-search" role="combobox" aria-expanded="true" aria-controls="b-dial-list" aria-autocomplete="list" autocomplete="off" data-i18n-attr="placeholder:builder.dial_search;aria-label:builder.dial_search">
-      <!-- Only shown in the full-screen sheet on phones (no Escape key there) -->
-      <button type="button" class="dial-close" id="b-dial-close" data-i18n="builder.dial_close"></button>
+  <section class="b-sec" aria-labelledby="b-delivery-title">
+    <h3 class="label mono" id="b-delivery-title" data-i18n="builder.delivery_title"></h3>
+    <div class="seg" id="b-delivery" role="group" aria-labelledby="b-delivery-title">
+      <button type="button" data-v="whatsapp" class="on" data-i18n="builder.delivery_whatsapp"></button><button type="button" data-v="email" data-i18n="builder.delivery_email"></button><button type="button" data-v="upload" data-i18n="builder.delivery_upload"></button>
     </div>
-    <ul class="dial-list" id="b-dial-list" role="listbox" data-i18n-attr="aria-label:builder.dial_list"></ul>
-    <p class="muted dial-empty hidden" id="b-dial-empty" data-i18n="builder.dial_none"></p>
-  </div>
-  </div>
-  <p class="muted b-phone-preview hidden" id="b-phone-preview" aria-live="polite"></p>
+    <label class="lbl b-contact-lbl" for="b-contact" id="b-contact-label"></label>
+    <!-- Wrapper anchors the country list, which opens upwards over the content above (the field is
+         near the end of the page, and on phones the keyboard covers anything below it). -->
+    <div class="phone-wrap">
+      <div class="phone-row">
+        <!-- Country calling code (WhatsApp only): opens a searchable list, see js/ui/dial-picker.js -->
+        <button type="button" class="dial-btn" id="b-dial" aria-haspopup="listbox" aria-expanded="false" aria-controls="b-dial-pop"></button>
+        <input type="text" id="b-contact" maxlength="300" autocomplete="off">
+      </div>
+      <div class="dial-pop hidden" id="b-dial-pop">
+        <div class="dial-head">
+          <input type="text" id="b-dial-search" role="combobox" aria-expanded="true" aria-controls="b-dial-list" aria-autocomplete="list" autocomplete="off" data-i18n-attr="placeholder:builder.dial_search;aria-label:builder.dial_search">
+          <!-- Only shown in the full-screen sheet on phones (no Escape key there) -->
+          <button type="button" class="dial-close btn btn-secondary btn-sm" id="b-dial-close" data-i18n="builder.dial_close"></button>
+        </div>
+        <ul class="dial-list" id="b-dial-list" role="listbox" data-i18n-attr="aria-label:builder.dial_list"></ul>
+        <p class="muted dial-empty hidden" id="b-dial-empty" data-i18n="builder.dial_none"></p>
+      </div>
+    </div>
+    <p class="muted b-phone-preview mono hidden" id="b-phone-preview" aria-live="polite"></p>
+  </section>
 
-  <p class="status warn" id="b-error" role="alert"></p>
-  <button type="button" class="primary big" id="b-create" data-i18n="builder.create"></button>
+  <div class="b-create-row">
+    <p class="status warn b-error" id="b-error" role="alert"></p>
+    <button type="button" class="btn btn-primary btn-md btn-block" id="b-create" data-i18n="builder.create"></button>
+  </div>
 
   <section class="b-result hidden" id="b-result" aria-labelledby="b-result-title">
-    <h3 id="b-result-title" data-i18n="builder.result_title"></h3>
+    <p class="eyebrow eyebrow-dot" data-i18n="builder.ready"></p>
+    <h3 class="page-title" id="b-result-title" data-i18n="builder.result_title"></h3>
     <p class="muted" data-i18n="builder.result_hint"></p>
-    <input type="text" id="b-link" readonly aria-labelledby="b-result-title">
-    <div class="share-actions">
-      <button type="button" class="primary big hidden" id="b-share" data-i18n="builder.share"></button>
-      <button type="button" class="big" id="b-copy" data-i18n="builder.copy"></button>
-      <a class="btn big" id="b-wa" target="_blank" rel="noopener noreferrer" data-i18n="builder.send_whatsapp"></a>
-      <a class="btn big" id="b-mail" data-i18n="builder.send_email"></a>
-      <a class="btn big" id="b-preview" target="_blank" rel="noopener" data-i18n="builder.preview"></a>
+    <input type="text" id="b-link" readonly data-i18n-attr="aria-label:builder.result_title">
+    <div class="b-actions">
+      <button type="button" class="btn btn-primary btn-md btn-block hidden" id="b-share" data-i18n="builder.share"></button>
+      <button type="button" class="btn btn-secondary btn-md" id="b-copy" data-i18n="builder.copy"></button>
+      <a class="btn btn-secondary btn-md" id="b-wa" target="_blank" rel="noopener noreferrer" data-i18n="builder.send_whatsapp"></a>
+      <a class="btn btn-secondary btn-md" id="b-mail" data-i18n="builder.send_email"></a>
+      <a class="btn btn-secondary btn-md" id="b-preview" target="_blank" rel="noopener" data-i18n="builder.preview"></a>
     </div>
     <p class="status" id="b-status" role="status"></p>
   </section>

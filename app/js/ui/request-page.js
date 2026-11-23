@@ -91,10 +91,23 @@ function renderPhonePreview() {
 
 /** Any edit makes a previously built link stale: hide it so it can't be sent by mistake. */
 function onChange() {
+  clearInvalid();
   renderBack(); renderWhy(); renderPhonePreview();
   state.link = null;
   $('#b-result').classList.add('hidden');
   $('#b-error').textContent = '';
+}
+
+/** Which control an error code is about, to mark it and bring it into view. @param {string} code */
+function invalidTarget(code) {
+  if (code.startsWith('from_')) return $('#b-from');
+  if (code.startsWith('purpose_')) return $('#b-purpose');
+  if (code.startsWith('why_')) return $('#b-why');
+  if (code === 'fields_required') return $('#b-fields');
+  return $('#b-contact'); // phone / email / url / delivery
+}
+function clearInvalid() {
+  document.querySelectorAll('.builder [aria-invalid]').forEach(n => n.removeAttribute('aria-invalid'));
 }
 
 function buildLink() {
@@ -116,6 +129,9 @@ function buildLink() {
   catch (e) {
     if (!(e instanceof RequestError)) throw e;
     err.textContent = t(builderErrorKey(e.code), { code: e.code });
+    const target = invalidTarget(e.code);
+    target.setAttribute('aria-invalid', 'true');
+    target.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); // no focus: that would pop the keyboard up
     return;
   }
   const link = new URL('./', location.href).href + '#' + fragment;

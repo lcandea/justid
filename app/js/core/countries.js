@@ -8,7 +8,7 @@ import DIAL_CODES from './dial-codes.js';
 export const flagEmoji = iso => String.fromCodePoint(...[...iso.toUpperCase()].map(c => 0x1F1E6 + c.charCodeAt(0) - 65));
 
 /** Lower-case, accents removed: "Perú" matches "peru". @param {string} s */
-export const foldText = s => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+const foldText = s => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
 
 /**
  * Every country with its name in `lang`, sorted by that name.

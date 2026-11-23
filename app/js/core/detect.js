@@ -6,7 +6,7 @@
 
 import { createCanvas } from './canvas.js';
 
-export const CARD_RATIO = 85.6 / 54;
+const CARD_RATIO = 85.6 / 54;
 
 export function detectCard(src, opts = {}) {
   const MAXS = opts.maxSide || 480;

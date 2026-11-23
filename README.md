@@ -40,7 +40,7 @@
 index.html            entry point (landing page coming soon); 404.html, favicon.svg
 _headers              HTTP security headers (CSP, anti-framing) for every response
 wrangler.jsonc        Cloudflare deployment config (static files only, no server code)
-app/                  the app: index.html (4-step flow), editor.html (zone editor)
+app/                  the app: index.html (4-step flow), request.html (request builder), editor.html (zone editor)
   js/                 ES modules, plain JavaScript with JSDoc types (type-checked, never compiled)
     core/             pure logic, no UI: card detection, warp, identification, redaction, PDF,
                       request links, template model, flow rules (tests/unit/architecture.test.mjs
@@ -49,7 +49,7 @@ app/                  the app: index.html (4-step flow), editor.html (zone edito
       app.js          boot file of app/index.html (steps in ui/app/: photos, hide, purpose, share...)
       request-page.js controller of request.html
       editor.js       controller of editor.html
-  css/                flow.css (the 4-step app); base.css + app.css (request builder and zone editor)
+  css/                common.css (header, small bits) + one sheet per page: flow.css, request.css, editor.css
 shared/               theme.css (colour/type tokens + shared components) and fonts/, used by the landing and the app
 locales/              es.js, en.js: every user-visible string
 templates/            document templates, pure data:

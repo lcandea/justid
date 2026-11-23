@@ -238,6 +238,9 @@ export default {
 
   // Request builder (app/request.html): the person who asks for an ID
   'meta.request_title': 'JustID — Request an ID',
+  'builder.eyebrow': 'Request a copy',
+  'builder.who_title': 'Who is asking',
+  'builder.ready': 'Ready to send',
   'builder.title': 'Ask for a copy of an ID, just enough',
   'builder.intro': 'Create a link to ask someone for a copy of their Spanish ID. They open it in JustID, see what you ask for and why, and prepare the copy on their phone. The request is stored inside the link itself (after the #) and never reaches any server.',
   'builder.back_to_app': '← Go to the app',

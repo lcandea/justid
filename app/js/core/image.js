@@ -3,7 +3,7 @@
 import { createCanvas } from './canvas.js';
 
 /** Output size of a straightened card: ISO/IEC 7810 ID-1 (85.6 × 54 mm) at ~300 dpi. */
-export const CARD_W = 1012, CARD_H = 638;
+const CARD_W = 1012, CARD_H = 638;
 
 /** Gauss-Jordan elimination with partial pivoting. @param {number[][]} A @param {number[]} b */
 function solveLinear(A, b) {

@@ -11,7 +11,7 @@ import en from '../../../locales/en.js';
 
 /** @type {Record<Lang, Record<string, string>>} */
 const DICTS = { es, en };
-export const LANGS = /** @type {Lang[]} */ (['es', 'en']);
+const LANGS = /** @type {Lang[]} */ (['es', 'en']);
 const STORAGE_KEY = 'justid.lang';
 
 /** @returns {Lang} */
@@ -55,7 +55,7 @@ export function applyI18n(root = document) {
 }
 
 /** @param {Lang} lang */
-export function setLang(lang) {
+function setLang(lang) {
   if (!DICTS[lang] || lang === current) return;
   current = lang;
   try { localStorage.setItem(STORAGE_KEY, lang); } catch { /* not persisted: fine */ }

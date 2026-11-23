@@ -1,6 +1,6 @@
 // @ts-check
 // Spanish UI strings (default language). Keys must match locales/en.js exactly (checked by tests).
-// Placeholders use {name} and are filled by t() in app/js/i18n.js.
+// Placeholders use {name} and are filled by t() in app/js/ui/i18n.js.
 import landing from './landing-es.js';
 
 // Landing page strings live in landing-es.js.
@@ -239,6 +239,9 @@ export default {
 
   // Request builder (app/request.html): the person who asks for a DNI
   'meta.request_title': 'JustID — Pedir un DNI',
+  'builder.eyebrow': 'Solicitar una copia',
+  'builder.who_title': 'Quién la pide',
+  'builder.ready': 'Listo para enviar',
   'builder.title': 'Pide una copia de DNI, solo con lo justo',
   'builder.intro': 'Crea un enlace para pedirle a alguien una copia de su DNI. Lo abrirá en JustID, verá qué le pides y por qué, y preparará la copia en su móvil. Los datos de la solicitud van dentro del propio enlace (detrás del #) y nunca llegan a ningún servidor.',
   'builder.back_to_app': '← Ir a la app',

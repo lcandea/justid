@@ -68,11 +68,11 @@ function renderFields() {
     // Official templates take labels from locales/*.js; only custom ones have editable labels.
     const label = el('input', { type: 'text', value: fieldLabel(f), disabled: !M.tpl.custom });
     label.addEventListener('input', () => { f.label = label.value; draw(); $textarea('#json').value = jsonText(); });
-    const idIn = el('input', { type: 'text', value: f.id, style: 'width:140px;font-size:12px' });
+    const idIn = el('input', { type: 'text', value: f.id, class: 'ed-id' });
     idIn.addEventListener('change', () => { f.id = slug(idIn.value); idIn.value = f.id; refresh(); });
     const hide = el('input', { type: 'checkbox', checked: f.hide });
     hide.addEventListener('change', () => { f.hide = hide.checked; refresh(); });
-    const del = el('button', { type: 'button', title: t('editor.field_delete') }, '✕');
+    const del = el('button', { type: 'button', class: 'ed-del', title: t('editor.field_delete'), 'aria-label': t('editor.field_delete') }, '✕');
     del.addEventListener('click', (/** @type {Event} */ e) => {
       e.stopPropagation();
       if (!confirm(t('editor.field_delete_confirm', { field: fieldLabel(f), count: f.zones.length }))) return;
@@ -81,7 +81,7 @@ function renderFields() {
     const nf = f.zones.filter(z => z.side === 'front').length, nb = f.zones.length - nf;
     const row = el('div', { class: 'field-row' + (i === M.active ? ' active' : '') },
       el('span', { class: 'sw', style: `background:${fieldColor(f.id)}` }), label, del,
-      el('div', { class: 'meta' }, idIn, el('label', { class: 'chk', style: 'padding:0' }, hide, t('editor.hide_default')),
+      el('div', { class: 'meta' }, idIn, el('label', { class: 'chk ed-chk' }, hide, t('editor.hide_default')),
         el('span', {}, `${t('side.front')[0]}:${nf} ${t('side.back')[0]}:${nb}`)));
     row.addEventListener('click', (/** @type {MouseEvent} */ e) => {
       const tag = /** @type {HTMLElement} */ (e.target).tagName;

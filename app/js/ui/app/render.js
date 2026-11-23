@@ -8,7 +8,7 @@ import { SIDE_LIST, hiddenFieldCount } from '../../core/flow.js';
 import { state, zonesCanvas, sides, sideName } from './state.js';
 
 /** The watermark for the purpose / recipient currently typed ('' without a purpose). */
-export function currentWatermark() {
+function currentWatermark() {
   return watermarkText({
     purpose: $input('#purpose').value, recipient: $input('#recipient').value,
     date: new Date().toLocaleDateString(getLang()), onlyFor: purpose => t('wm.only_for', { purpose }),

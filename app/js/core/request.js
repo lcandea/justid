@@ -18,10 +18,10 @@
 // This module is pure (no DOM, no i18n) so the unit tests can run it in Node.
 
 /** Format version written as `req=`; links with another value are rejected. */
-export const REQUEST_VERSION = '1';
+const REQUEST_VERSION = '1';
 
 /** Document families a request can be made for. */
-export const SUPPORTED_DOCS = ['dni_es'];
+const SUPPORTED_DOCS = ['dni_es'];
 
 /**
  * Length limits, in UTF-16 code units (what <input maxlength> counts).
@@ -83,7 +83,7 @@ const stripSeparators = s => s.replace(/[\s().-]/g, '');
  * Throws `phone_invalid`.
  * @param {unknown} value @returns {string}
  */
-export function normalizePhone(value) {
+function normalizePhone(value) {
   if (typeof value !== 'string' || value.length > 40) throw new RequestError('phone_invalid');
   let s = stripSeparators(value);
   if (s.startsWith('+')) s = s.slice(1);
@@ -119,7 +119,7 @@ const EMAIL = /^[A-Za-z0-9_+-]+(?:\.[A-Za-z0-9_+-]+)*@[A-Za-z0-9](?:[A-Za-z0-9-]
 const TLD = /\.(?:[A-Za-z]{2,63}|xn--[A-Za-z0-9-]+)$/;
 
 /** @param {unknown} value @returns {string} */
-export function normalizeEmail(value) {
+function normalizeEmail(value) {
   if (typeof value !== 'string') throw new RequestError('email_invalid');
   const s = value.trim();
   if (s.length > LIMITS.email || !EMAIL.test(s) || !TLD.test(s)) throw new RequestError('email_invalid');
@@ -132,7 +132,7 @@ export function normalizeEmail(value) {
  * look-alike domain shows as what it really is).
  * @param {unknown} value @returns {string}
  */
-export function normalizeUploadUrl(value) {
+function normalizeUploadUrl(value) {
   if (typeof value !== 'string') throw new RequestError('url_invalid');
   const s = value.trim();
   if (!s || s.length > LIMITS.url || BAD_CHARS.test(s)) throw new RequestError('url_invalid');

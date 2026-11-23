@@ -41,7 +41,7 @@ export function requestContext(request, families) {
  * asked for are hidden, even the usual ones.
  * @param {Field} f @param {RequestContext} ctx @param {Set<string>} accepted extras the user agreed to show
  */
-export function startsHidden(f, ctx, accepted) {
+function startsHidden(f, ctx, accepted) {
   if (!ctx.request) return f.hide;
   if (ctx.extras.has(f.id)) return !accepted.has(f.id);
   return !ctx.fields.has(f.id);

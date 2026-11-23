@@ -28,7 +28,7 @@ const SITE_ROOT = new URL('../../../', import.meta.url);
 export const assetUrl = path => new URL(path, SITE_ROOT).href;
 
 /** @param {any} version @returns {ResolvedTemplate} */
-export function resolveVersion(version) {
+function resolveVersion(version) {
   const family = FAMILIES.find(f => f.id === version.family);
   if (!family) throw new Error(`Unknown template family: ${version.family}`);
   const overrides = version.overrides || {};

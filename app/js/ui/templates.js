@@ -22,7 +22,7 @@ export function normalizeCustom(raw) {
 }
 
 /** @returns {ResolvedTemplate[]} */
-export function loadCustomTemplates() {
+function loadCustomTemplates() {
   try {
     return JSON.parse(localStorage.getItem(CUSTOM_KEY) || '[]').map(normalizeCustom);
   } catch { return []; }

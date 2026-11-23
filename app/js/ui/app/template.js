@@ -40,7 +40,7 @@ export function setTemplate(tpl, { auto = false } = {}) {
   renderFields(); renderAll();
 }
 
-export function renderTemplateInfo() {
+function renderTemplateInfo() {
   const tpl = state.template;
   $('#tpl-name').textContent = templateName(tpl);
   $('#tpl-auto').classList.toggle('hidden', !state.tplAuto);
@@ -59,7 +59,7 @@ export function renderTemplateInfo() {
   $('#tpl-pv-hint').classList.toggle('hidden', !items.length);
 }
 
-export function renderRequest() {
+function renderRequest() {
   $('#req-invalid').classList.toggle('hidden', !requestResult || requestResult.ok);
   $('#req-cta').classList.toggle('hidden', !!request);
   // The photo tip says the back is optional, unless the request asks for it.
