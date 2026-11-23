@@ -298,6 +298,10 @@ export default {
 
   'dialog.cancel': 'Cancelar',
 
+  'demo.try': '¿Quieres probar sin tu DNI? Carga un',
+  'demo.try_v3': 'DNI v3',
+  'demo.try_or': 'o un',
+  'demo.try_v4': 'DNI v4',
   'demo.note': 'Modo de prueba: estás usando las fotos del DNI de muestra oficial (espécimen), no las tuyas.',
   'demo.exit': 'Usar mis fotos',
 };

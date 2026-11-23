@@ -230,6 +230,8 @@ canvas.preview { display: block; width: 100%; height: auto; border-radius: var(-
 .privacy-links { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; }
 .privacy-links a { min-height: 44px; display: inline-flex; align-items: center; }
 
-/* Specimen test mode notice (ui/app/demo.js) */
+/* Specimen test mode: step 1's try links and the notice (ui/app/demo.js) */
+.demo-try { margin: -.5rem 0 1.25rem; font-size: .9375rem; line-height: 1.5; }
+.demo-try a { color: var(--cream); font-weight: 600; display: inline-block; padding-block: .625rem; margin-block: -.625rem; } /* 44px tap height without moving the text */
 .demo-note { margin: 0 0 1rem; padding: .75rem 1rem; border-left: 4px solid var(--lime); background: var(--panel); color: var(--soft); line-height: 1.5; }
 .demo-note a { color: var(--cream); font-weight: 600; white-space: nowrap; }

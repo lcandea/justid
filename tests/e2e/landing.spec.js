@@ -115,3 +115,12 @@ test('?demo=specimenv3 loads the v3 specimen and identifies it as v3', async ({ 
   await expect(page.locator('#slot-back .slot-bar')).toBeVisible();
   await expect(page.locator('#tpl-name')).toHaveText('DNI España v3 (2015–2021)');
 });
+
+test('step 1 offers to try with a v3 or v4 sample ID, keeping the request link', async ({ page }) => {
+  await page.goto('/app/#keep-me');
+  await expect(page.locator('#demo-v3')).toHaveAttribute('href', '/app/?demo=specimenv3#keep-me');
+  await page.locator('#demo-v4').click();
+  await expect(page).toHaveURL(/\/app\/\?demo=specimenv4#keep-me$/);
+  await expect(page.locator('#demo-note')).toBeVisible();
+  await expect(page.locator('#tpl-name')).toHaveText('DNI España v4 (desde 2021)');
+});

@@ -16,7 +16,7 @@ import { initChecks, runChecks, reviewChecks, whenChecksDone, isReviewing } from
 import { initPurpose, renderChips } from './app/purpose.js';
 import { initShare, share } from './app/share.js';
 import { initPrivacy } from './app/privacy.js';
-import { isDemo, loadDemo } from './app/demo.js';
+import { isDemo, loadDemo, initDemoLinks } from './app/demo.js';
 
 /** @typedef {import('../core/templates.js').Side} Side */
 
@@ -59,5 +59,6 @@ if (request) { // the requester's purpose and name become the watermark; the use
 renderChips();
 fillTemplateSelect();
 history.replaceState({ step: 0 }, '');
+initDemoLinks();
 if (isDemo()) loadDemo();
 goStep(0, false);

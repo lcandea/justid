@@ -22,6 +22,16 @@ function demoTemplateId() {
   return v && Object.hasOwn(DEMO_TEMPLATES, v) ? DEMO_TEMPLATES[/** @type {keyof typeof DEMO_TEMPLATES} */ (v)] : null;
 }
 
+/**
+ * Step 1's "Want to try? Load a v3 or v4 ID" links: same page with ?demo=…, keeping any request
+ * link in the #fragment (a different query string reloads the page, which starts the test mode).
+ */
+export function initDemoLinks() {
+  for (const v of ['v3', 'v4']) {
+    /** @type {HTMLAnchorElement} */ ($('#demo-' + v)).href = location.pathname + '?demo=specimen' + v + location.hash;
+  }
+}
+
 /** True when the page was opened in specimen test mode. */
 export const isDemo = () => demoTemplateId() !== null;
 

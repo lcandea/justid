@@ -297,6 +297,10 @@ export default {
 
   'dialog.cancel': 'Cancel',
 
+  'demo.try': 'Want to try it without your ID? Load a',
+  'demo.try_v3': 'v3 ID',
+  'demo.try_or': 'or a',
+  'demo.try_v4': 'v4 ID',
   'demo.note': 'Test mode: you are using the official sample ID (specimen) photos, not yours.',
   'demo.exit': 'Use my photos',
 };
