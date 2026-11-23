@@ -183,7 +183,7 @@ export default {
   'landing.request.demo_from': 'JustID (ejemplo)',
   'landing.request.demo_purpose': 'Probar JustID',
   'landing.request.demo_why': 'Es un ejemplo: así se ve cuando alguien pide un dato extra. Tú decides si lo compartes.',
-  'landing.request.note': 'La petición viaja dentro del enlace. No se guarda en ningún servidor.',
+  'landing.request.note': 'La petición viaja dentro del enlace. No se guarda en ningún servidor y no caduca: créalo una vez y reutilízalo con todos tus clientes.',
 
   // 8. FAQ
   'landing.faq.eyebrow': 'Preguntas',

@@ -67,9 +67,9 @@ export default {
   'why.request.eyebrow': 'Gratis · Sin registro',
   'why.request.title': 'Pide el próximo DNI así',
   'why.request.body': 'Crea un enlace de petición: escribes para qué lo necesitas y qué datos pides. Al abrirlo, JustID le propone a tu cliente tapar todo lo demás y marcar la copia con tu finalidad, y te llega un PDF como el que has recibido.',
-  'why.request.s1': 'Crea la petición',
-  'why.request.s2': 'Envía el enlace por WhatsApp o correo',
+  'why.request.s1': 'Crea la petición una vez',
+  'why.request.s2': 'Envía el mismo enlace a cada cliente',
   'why.request.s3': 'Recibe el PDF con solo lo justo',
   'why.request.cta': 'Crear una petición',
-  'why.request.note': 'Nada pasa por ningún servidor: la petición viaja dentro del enlace y la copia se hace en el móvil de tu cliente.',
+  'why.request.note': 'Nada pasa por ningún servidor: la petición viaja dentro del enlace, que no caduca, y la copia se hace en el móvil de tu cliente.',
 };

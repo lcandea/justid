@@ -183,7 +183,7 @@ export default {
   'landing.request.demo_from': 'JustID (example)',
   'landing.request.demo_purpose': 'Try JustID',
   'landing.request.demo_why': 'This is an example: this is what it looks like when someone asks for extra data. You decide whether to share it.',
-  'landing.request.note': 'The request travels inside the link. It is not stored on any server.',
+  'landing.request.note': 'The request travels inside the link. It is not stored on any server and never expires: create it once and reuse it with all your customers.',
 
   // 8. FAQ
   'landing.faq.eyebrow': 'Questions',

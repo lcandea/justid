@@ -67,9 +67,9 @@ export default {
   'why.request.eyebrow': 'Free · No sign-up',
   'why.request.title': 'Ask for the next ID like this',
   'why.request.body': 'Create a request link: write what you need it for and which data you ask for. When your customer opens it, JustID offers to cover everything else and mark the copy with your purpose, and you get a PDF like the one you received.',
-  'why.request.s1': 'Create the request',
-  'why.request.s2': 'Send the link by WhatsApp or email',
+  'why.request.s1': 'Create the request once',
+  'why.request.s2': 'Send the same link to every customer',
   'why.request.s3': 'Get the PDF with just enough',
   'why.request.cta': 'Create a request',
-  'why.request.note': 'Nothing goes through any server: the request travels inside the link and the copy is made on your customer’s phone.',
+  'why.request.note': 'Nothing goes through any server: the request travels inside the link, which never expires, and the copy is made on your customer’s phone.',
 };
