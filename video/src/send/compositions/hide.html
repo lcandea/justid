@@ -1,0 +1,144 @@
+<template>
+  <!-- SEND 5–9 s · Hide. Picks up the straightened card where the photo scene left it. The template's default
+       hidden fields are covered with the real redaction output (patches of send-card-<side>-nowm.png, wiped in);
+       the three sensitive ones get a lime dashed ring (as in the app's preview) and a label pill. The card flips to
+       the back (address, parents' names), flips back, and a tap covers the birth date: "you decide".
+       End state = send-card-front-nowm.png exactly (the purpose scene starts on it). The lock badge stays docked. -->
+  <style>
+    #root { position: absolute; inset: 0; }
+    #hide-glow { left: 100px; top: 300px; }
+    #hide-flip { position: absolute; perspective: 2600px; }
+    .hide-face { position: absolute; left: 0; top: 0; width: 100%; box-shadow: 0 40px 90px rgba(0, 0, 0, .55); }
+    .hide-face .patch { clip-path: inset(0% 100% 0% 0%); }
+    .hide-face .zone-ring { opacity: 0; }
+    .hide-row { position: absolute; left: 0; top: 0; display: flex; gap: 12px; }
+    .hide-pill.pill { padding: 12px 16px; gap: 10px; font-size: 28px; letter-spacing: .02em; }
+    .hide-pill { opacity: 0; background: var(--ink); white-space: nowrap; }
+    #hide-pills-f .hide-pill { position: absolute; left: 0; top: 0; }
+    .hide-pill .sq { display: inline-block; width: 22px; height: 22px; background: var(--lime); }
+    #hide-cap2 { opacity: 0; }
+    .hide-band { position: absolute; }
+    /* Same lock badge as photo.html / purpose.html (copied: scene styles are scoped). */
+    .jv-lock { position: absolute; display: inline-flex; align-items: center; gap: 12px; padding: 10px 20px; border: 3px solid var(--lime);
+      background: var(--ink); color: var(--lime); font-family: var(--mono); font-size: 28px; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; z-index: 22; }
+    .jv-lock svg { width: 28px; height: 28px; flex: none; }
+    <!--if:9x16-->
+    .hide-band { left: 120px; top: 300px; width: 768px; }
+    #hide-flip { left: 120px; top: 500px; width: 840px; height: 529.6px; }
+    #hide-pills { position: absolute; left: 120px; top: 1060px; }
+    #hide-lock { left: 120px; top: 1170px; }
+    <!--endif--><!--if:16x9-->
+    .hide-band { left: 980px; top: 300px; width: 800px; }
+    #hide-flip { left: 160px; top: 300px; width: 700px; height: 441.3px; }
+    #hide-pills { position: absolute; left: 160px; top: 790px; }
+    #hide-lock { left: 980px; top: 640px; }
+    <!--endif-->
+  </style>
+  <div id="root" class="stage" data-composition-id="hide" data-width="{{W}}" data-height="{{H}}">
+    <div class="stage-grid"></div>
+    <div class="stage-glow" id="hide-glow"></div>
+    <div id="hide-flip">
+      <div class="card hide-face" id="hide-back"><img src="assets/cap/card-back-clean.png" alt="">
+        {{patch:hide-b:back:support_number:send-card-back-nowm}}
+        {{patch:hide-b:back:birth_place:send-card-back-nowm}}
+        {{patch:hide-b:back:issuing_office:send-card-back-nowm}}
+        {{patch:hide-b:back:mrz:send-card-back-nowm}}
+        {{patch:hide-b:back:address:send-card-back-nowm}}
+        {{patch:hide-b:back:parents_names:send-card-back-nowm}}
+        {{ring:hide-br:back:address}}
+        {{ring:hide-br:back:parents_names}}
+      </div>
+      <div class="card hide-face" id="hide-front"><img src="assets/cap/card-front-clean.png" alt="">
+        {{patch:hide-f:front:issue_date:send-card-front-nowm}}
+        {{patch:hide-f:front:sex:send-card-front-nowm}}
+        {{patch:hide-f:front:nationality:send-card-front-nowm}}
+        {{patch:hide-f:front:support_number:send-card-front-nowm}}
+        {{patch:hide-f:front:can:send-card-front-nowm}}
+        {{patch:hide-f:front:cli:send-card-front-nowm}}
+        {{patch:hide-f:front:signature:send-card-front-nowm}}
+        {{patch:hide-f:front:birth_date:send-card-front-nowm}}
+        {{ring:hide-fr:front:signature}}
+        {{ring:hide-fr:front:birth_date}}
+      </div>
+    </div>
+    <div id="hide-pills">
+      <div class="hide-row" id="hide-pills-f">
+        <div class="pill lime hide-pill" id="hide-p-signature"><span class="sq"></span><span>{{t:send.field_signature}}</span></div>
+        <div class="pill lime hide-pill" id="hide-p-birth"><span class="sq"></span><span>{{t:send.field_birth_date}}</span></div>
+      </div>
+      <div class="hide-row" id="hide-pills-b">
+        <div class="pill lime hide-pill" id="hide-p-address"><span class="sq"></span><span>{{t:send.field_address}}</span></div>
+        <div class="pill lime hide-pill" id="hide-p-parents"><span class="sq"></span><span>{{t:send.field_parents_names}}</span></div>
+      </div>
+    </div>
+    <div class="jv-lock" id="hide-lock"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5Zm-3 8V7a3 3 0 1 1 6 0v3H9Z"/></svg><span>{{t:common.lock_badge_app}}</span></div>
+    <div class="tap" id="hide-tap"></div>
+    <div class="hide-band">
+      <h2 class="cap cap-m" id="hide-cap1">{{words:send.hide_cap}}</h2>
+      <h2 class="cap cap-m" id="hide-cap2">{{words:send.toggle_cap}}</h2>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const root = document.querySelector('[data-composition-id="hide"]');
+      const tl = gsap.timeline({ paused: true });
+      const D = window.JV_DATA;
+      // Card box per aspect (same as photo.html's target).
+      const card = { '9x16': { x: 120, y: 500, w: 840 }, '16x9': { x: 160, y: 300, w: 700 } }[D.aspect];
+      card.h = card.w * 638 / 1012;
+      const toggle = D.zones.sides.front.birth_date.rects[0];
+
+      const wipe = (sel, at, dur = 0.16, stagger = 0) =>
+        tl.fromTo(sel, { clipPath: 'inset(0% 100% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: dur, ease: 'power3.out', stagger }, at);
+      const ring = (sel, at) =>
+        tl.fromTo(sel, { opacity: 0, scale: 1.35 }, { opacity: 1, scale: 1, duration: 0.18, ease: 'expo.out' }, at);
+      const pillIn = (sel, at) =>
+        tl.fromTo(sel, { opacity: 0, x: -24, filter: 'blur(6px)' }, { opacity: 1, x: 0, filter: 'blur(0px)', duration: 0.2, ease: 'expo.out' }, at);
+      const pillOut = (sel, at) =>
+        tl.fromTo(sel, { opacity: 1, filter: 'blur(0px)' }, { opacity: 0, filter: 'blur(6px)', duration: 0.12, ease: 'power3.in', immediateRender: false }, at);
+
+      // 0.00 · Caption; the template's default fields on the front are covered in a quick cascade.
+      JV.wordsIn(tl, root, '#hide-cap1 .w', 0.02, 0.07, 0.16);
+      wipe(['issue_date', 'sex', 'nationality', 'support_number', 'can', 'cli'].map(f => `#hide-front .patch[data-field="${f}"]`).join(','), 0.12, 0.14, 0.035);
+
+      // 0.30 · Signature: ring, pixel wipe, label (held ~0.85 s).
+      ring('#hide-front .zone-ring[data-field="signature"]', 0.3);
+      wipe('#hide-front .patch[data-field="signature"]', 0.36, 0.24);
+      pillIn('#hide-p-signature', 0.36);
+      pillOut('#hide-p-signature', 1.2);
+
+      // 1.15 · Flip to the back (edge-on at the midpoint, faces swapped there).
+      tl.fromTo('#hide-front', { rotationY: 0 }, { rotationY: 90, duration: 0.15, ease: 'power2.in' }, 1.15);
+      tl.fromTo('#hide-back', { rotationY: -90 }, { rotationY: 0, duration: 0.2, ease: 'power3.out' }, 1.3);
+      wipe(['support_number', 'birth_place', 'issuing_office', 'mrz'].map(f => `#hide-back .patch[data-field="${f}"]`).join(','), 1.42, 0.14, 0.04);
+
+      // 1.50 · Address, then parents' names; their pills sit side by side and leave together (≥ 0.8 s each).
+      ring('#hide-back .zone-ring[data-field="address"]', 1.5);
+      wipe('#hide-back .patch[data-field="address"]', 1.55, 0.24);
+      pillIn('#hide-p-address', 1.55);
+      ring('#hide-back .zone-ring[data-field="parents_names"]', 1.72);
+      wipe('#hide-back .patch[data-field="parents_names"]', 1.77, 0.24);
+      pillIn('#hide-p-parents', 1.77);
+      pillOut(['#hide-p-address', '#hide-p-parents'], 2.6);
+
+      // 2.30 · Caption swap; flip back to the front.
+      JV.blurOut(tl, '#hide-cap1', 2.3, 0.15);
+      tl.fromTo('#hide-cap2', { opacity: 0 }, { opacity: 1, duration: 0.01 }, 2.42);
+      JV.wordsIn(tl, root, '#hide-cap2 .w', 2.42, 0.09, 0.16);
+      tl.fromTo('#hide-back', { rotationY: 0 }, { rotationY: 90, duration: 0.15, ease: 'power2.in', immediateRender: false }, 2.6);
+      tl.fromTo('#hide-front', { rotationY: -90 }, { rotationY: 0, duration: 0.2, ease: 'power3.out', immediateRender: false }, 2.75);
+
+      // 2.70 · The user taps the birth date on the preview: it gets covered.
+      const tx = card.x + (toggle.x + toggle.w / 2) * card.w, ty = card.y + (toggle.y + toggle.h / 2) * card.h;
+      const press = JV.tap(tl, '#hide-tap', { x: tx + 120, y: ty + 260 }, { x: tx, y: ty }, 2.6, 0.3);
+      ring('#hide-front .zone-ring[data-field="birth_date"]', press);
+      wipe('#hide-front .patch[data-field="birth_date"]', press + 0.04, 0.22);
+      pillIn('#hide-p-birth', press + 0.04);
+      tl.to('#hide-tap', { opacity: 0, duration: 0.15, ease: 'power2.in' }, press + 0.3);
+
+      // 3.82 · Clear rings and labels so the purpose scene starts on the bare redacted card (lock badge stays).
+      JV.blurOut(tl, ['#hide-front .zone-ring', '#hide-p-birth', '#hide-cap2'], 3.82, 0.18);
+      window.__timelines["hide"] = tl;
+    })();
+  </script>
+</template>

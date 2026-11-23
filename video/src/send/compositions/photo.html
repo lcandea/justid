@@ -1,0 +1,165 @@
+<template>
+  <!-- SEND 2–5 s · Photo. The phone arrives (continuing the hook's push toward camera) on the app's framing
+       screen with the synthetic photo; a shutter flash, then the detected corners snap on (the real detection
+       result from the capture) and "Tarjeta detectada" appears. The card un-warps out of the photo (a true
+       perspective interpolation from the detected quad to the flat card) and lifts out of the phone while the
+       phone drops away: the flat card lands where the hide scene picks it up. Chip: version recognised. -->
+  <style>
+    #root { position: absolute; inset: 0; }
+    #photo-glow { left: -200px; top: 500px; }
+    #photo-cap2 { opacity: 0; }
+    /* Rebuilt framing overlay, in the capture's CSS px (scaled with the phone). */
+    #photo-ui { transform: scale(var(--phone-scale)); }
+    #photo-shot { position: absolute; left: 0; top: 0; width: 390px; height: auto; display: block; }
+    /* The live camera image sits over the canvas of the screenshot (cropCanvas box), hiding its static handles. */
+    #photo-cam { position: absolute; left: 8px; top: 180.2px; width: 374px; height: 498.7px; display: block; }
+    /* Covers the "card detected" message until detection happens. */
+    #photo-msgmask { position: absolute; left: 0; top: 34px; width: 390px; height: 48px; background: #000; }
+    #photo-quad { position: absolute; left: 0; top: 0; width: 390px; height: 844px; overflow: visible; }
+    #photo-quad polygon { fill: rgba(215, 255, 58, .10); stroke: var(--lime); stroke-width: 2.5; stroke-linejoin: round; }
+    #photo-quad line { stroke: var(--lime); stroke-width: 5; stroke-linecap: round; }
+    /* Corner handles as in the app's crop editor (crop-editor.js): numbered discs, the first one lime. */
+    .photo-h { position: absolute; left: 0; top: 0; width: 28px; height: 28px; margin: -14px 0 0 -14px; border-radius: 50%;
+      background: var(--cream); color: var(--ink); border: 2px solid var(--ink); font: 800 14px/24px var(--sans); text-align: center; }
+    .photo-h.first { background: var(--lime); }
+    #photo-flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+    /* The card being straightened: native render size, mapped by a matrix3d computed from the corners. */
+    #photo-warp { position: absolute; left: 0; top: 0; width: 1012px; height: 638px; transform-origin: 0 0;
+      border-radius: 3.6% / 5.7%; overflow: hidden; z-index: 20; box-shadow: 0 40px 90px rgba(0, 0, 0, .55); }
+    #photo-warp img { width: 100%; height: 100%; display: block; }
+    #photo-chip { position: absolute; z-index: 21; }
+    #photo-chip .ck { font-weight: 700; }
+    /* The app's lock badge (app/index.html #lock-btn: padlock + lock.badge), as a lime pill docked under the
+       card from here through hide and purpose (same box in those scenes). */
+    .jv-lock { position: absolute; display: inline-flex; align-items: center; gap: 12px; padding: 10px 20px; border: 3px solid var(--lime);
+      background: var(--ink); color: var(--lime); font-family: var(--mono); font-size: 28px; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; z-index: 22; }
+    .jv-lock svg { width: 28px; height: 28px; flex: none; }
+    .photo-band { position: absolute; }
+    <!--if:9x16-->
+    .photo-band { left: 120px; top: 300px; width: 768px; }
+    #photo-phone { --phone-scale: 1.3; left: 268px; top: 450px; }
+    #photo-chip { left: 120px; top: 1060px; }
+    #photo-lock { left: 120px; top: 1170px; }
+    <!--endif--><!--if:16x9-->
+    .photo-band { left: 980px; top: 300px; width: 800px; }
+    #photo-phone { --phone-scale: 1.1; left: 300px; top: 58px; }
+    #photo-chip { left: 160px; top: 790px; }
+    #photo-lock { left: 980px; top: 640px; }
+    <!--endif-->
+  </style>
+  <div id="root" class="stage" data-composition-id="photo" data-width="{{W}}" data-height="{{H}}">
+    <div class="stage-grid"></div>
+    <div class="stage-glow" id="photo-glow"></div>
+    <div class="phone" id="photo-phone">
+      <div class="phone-screen">
+        <div class="phone-ui" id="photo-ui">
+          <img id="photo-shot" src="assets/cap/send-01b-crop-detected.png" alt="">
+          <img id="photo-cam" src="assets/cap/synthetic-photo-front.png" alt="">
+          <div id="photo-msgmask"></div>
+          <svg id="photo-quad" viewBox="0 0 390 844"><polygon id="photo-poly" points="0,0 0,0 0,0 0,0"></polygon><line id="photo-top" x1="0" y1="0" x2="0" y2="0"></line></svg>
+          <div class="photo-h first" id="photo-h1" data-layout-ignore>1</div>
+          <div class="photo-h" id="photo-h2" data-layout-ignore>2</div>
+          <div class="photo-h" id="photo-h3" data-layout-ignore>3</div>
+          <div class="photo-h" id="photo-h4" data-layout-ignore>4</div>
+          <div id="photo-flash"></div>
+        </div>
+      </div>
+    </div>
+    <div id="photo-warp"><img src="assets/cap/card-front-clean.png" alt=""></div>
+    <div class="pill solid" id="photo-chip"><span class="ck">✓</span><span>{{t:send.version_chip}}</span></div>
+    <div class="jv-lock" id="photo-lock"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5Zm-3 8V7a3 3 0 1 1 6 0v3H9Z"/></svg><span>{{t:common.lock_badge_app}}</span></div>
+    <div class="photo-band">
+      <h2 class="cap cap-m" id="photo-cap1">{{words:send.photo_cap}}</h2>
+      <h2 class="cap cap-m" id="photo-cap2">{{words:send.straighten_cap}}</h2>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const root = document.querySelector('[data-composition-id="photo"]');
+      const tl = gsap.timeline({ paused: true });
+      const D = window.JV_DATA;
+      // Per-aspect geometry (keep in sync with the CSS above and with hide.html's card box).
+      const L = {
+        '9x16': { phone: { x: 268, y: 450, s: 1.3 }, card: { x: 120, y: 500, w: 840 } },
+        '16x9': { phone: { x: 300, y: 58, s: 1.1 }, card: { x: 160, y: 300, w: 700 } },
+      }[D.aspect];
+      const CW = 1012, CH = 638;
+      L.card.h = L.card.w * CH / CW;
+
+      // Detected corners on the framing screen (CSS px of the capture), TL TR BR BL, and the boxes of the crop
+      // canvas and the message, all from the capture manifest (they move if the app's layout or fonts change).
+      const shot = D.manifest.files['send-01b-crop-detected.png'];
+      const q = shot.trueCornersOnScreen.css;
+      const cv = shot.boxes.cropCanvas.viewport.css, msg = shot.boxes.cropMsg.viewport.css;
+      Object.assign(root.querySelector('#photo-cam').style, { left: `${cv.x}px`, top: `${cv.y}px`, width: `${cv.w}px`, height: `${cv.h}px` });
+      Object.assign(root.querySelector('#photo-msgmask').style, { top: `${msg.y - 4}px`, height: `${msg.h + 8}px` });
+      const poly = q.map(p => p.join(',')).join(' ');
+      root.querySelector('#photo-poly').setAttribute('points', poly);
+      const top = root.querySelector('#photo-top');
+      top.setAttribute('x1', q[0][0]); top.setAttribute('y1', q[0][1]); top.setAttribute('x2', q[1][0]); top.setAttribute('y2', q[1][1]);
+      let per = 0;
+      for (let i = 0; i < 4; i++) { const a = q[i], b = q[(i + 1) % 4]; per += Math.hypot(b[0] - a[0], b[1] - a[1]); }
+      gsap.set('#photo-poly', { attr: { 'stroke-dasharray': per } });
+
+      // Screen px → scene px (phone at rest: padding 18 px, then the screen scale).
+      const toScene = p => [L.phone.x + 18 + p[0] * L.phone.s, L.phone.y + 18 + p[1] * L.phone.s];
+      const from = q.map(toScene);
+      const to = [[L.card.x, L.card.y], [L.card.x + L.card.w, L.card.y], [L.card.x + L.card.w, L.card.y + L.card.h], [L.card.x, L.card.y + L.card.h]];
+
+      // Homography from the native card rect (CW × CH) to a quad, as a CSS matrix3d (transform-origin 0 0).
+      const warpEl = root.querySelector('#photo-warp');
+      function setWarp(t) {
+        const c = from.map((p, i) => [p[0] + (to[i][0] - p[0]) * t, p[1] + (to[i][1] - p[1]) * t]);
+        const [x0, y0] = c[0], [x1, y1] = c[1], [x2, y2] = c[2], [x3, y3] = c[3];
+        const dx1 = x1 - x2, dx2 = x3 - x2, dx3 = x0 - x1 + x2 - x3;
+        const dy1 = y1 - y2, dy2 = y3 - y2, dy3 = y0 - y1 + y2 - y3;
+        const den = dx1 * dy2 - dx2 * dy1;
+        const g = (dx3 * dy2 - dx2 * dy3) / den, h = (dx1 * dy3 - dx3 * dy1) / den;
+        const a = x1 - x0 + g * x1, b = x3 - x0 + h * x3, d = y1 - y0 + g * y1, e = y3 - y0 + h * y3;
+        const m = [a / CW, d / CW, 0, g / CW, b / CH, e / CH, 0, h / CH, 0, 0, 1, 0, x0, y0, 0, 1];
+        warpEl.style.transform = `matrix3d(${m.map(v => +v.toFixed(8)).join(',')})`;
+      }
+      setWarp(0);
+
+      // 0.00 · The phone arrives, still carrying the hook's push (large and blurred → settled).
+      tl.fromTo('#photo-phone', { scale: 1.14, y: -60, filter: 'blur(8px)' }, { scale: 1, y: 0, filter: 'blur(0px)', duration: 0.45, ease: 'expo.out', transformOrigin: '50% 40%' }, 0);
+      JV.wordsIn(tl, root, '#photo-cap1 .w', 0.02, 0.07, 0.16);
+
+      // 0.50 · Shutter.
+      tl.fromTo('#photo-flash', { opacity: 0 }, { opacity: 0.85, duration: 0.05, ease: 'none' }, 0.5);
+      tl.to('#photo-flash', { opacity: 0, duration: 0.2, ease: 'power2.out' }, 0.56);
+
+      // 0.62 · Detection: handles fly from the frame edges onto the four corners, the outline draws, the message shows.
+      const start = [[24, 200], [366, 200], [366, 660], [24, 660]];
+      ['#photo-h1', '#photo-h2', '#photo-h3', '#photo-h4'].forEach((id, i) => {
+        tl.fromTo(id, { x: start[i][0], y: start[i][1], opacity: 0, scale: 1.6 },
+          { x: q[i][0], y: q[i][1], opacity: 1, scale: 1, duration: 0.32, ease: 'expo.out' }, 0.62 + i * 0.04);
+      });
+      tl.fromTo('#photo-poly', { attr: { 'stroke-dashoffset': per }, opacity: 0 }, { attr: { 'stroke-dashoffset': 0 }, opacity: 1, duration: 0.3, ease: 'power2.out' }, 0.72);
+      tl.fromTo('#photo-top', { opacity: 0 }, { opacity: 1, duration: 0.12, ease: 'power2.out' }, 0.9);
+      tl.fromTo('#photo-msgmask', { clipPath: 'inset(0% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 100%)', duration: 0.3, ease: 'power2.inOut' }, 0.85);
+
+      // 1.20 · Caption swap.
+      JV.blurOut(tl, '#photo-cap1', 1.2, 0.15);
+      tl.fromTo('#photo-cap2', { opacity: 0 }, { opacity: 1, duration: 0.01 }, 1.3);
+      JV.wordsIn(tl, root, '#photo-cap2 .w', 1.3, 0.08, 0.16);
+
+      // 1.25 · The flat card takes over the photo's card exactly on the detected quad, then straightens and lifts out.
+      tl.fromTo('#photo-warp', { opacity: 0 }, { opacity: 1, duration: 0.08, ease: 'none' }, 1.25);
+      tl.to(['#photo-quad', '.photo-h'], { opacity: 0, duration: 0.1, ease: 'power2.in' }, 1.3);
+      const warp = { t: 0 };
+      tl.fromTo(warp, { t: 0 }, { t: 1, duration: 0.6, ease: 'power3.inOut', immediateRender: false, onUpdate: () => setWarp(warp.t) }, 1.3);
+      // The phone falls out of frame fast (blur, shrink, fade) so the straightened card is the only subject.
+      tl.to('#photo-phone', { y: D.size.height - L.phone.y + 200, scale: 0.9, opacity: 0, filter: 'blur(18px)', duration: 0.32, ease: 'power3.in' }, 1.28);
+
+      // 1.92 · Version recognised.
+      tl.fromTo('#photo-chip', { clipPath: 'inset(0% 100% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.26, ease: 'power3.out' }, 1.92);
+      // 2.15 · The claim: everything happens on the phone. The app's lock badge stamps in and stays docked.
+      tl.fromTo('#photo-lock', { opacity: 0, scale: 1.4, filter: 'blur(8px)' }, { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 0.3, ease: 'expo.out', transformOrigin: '0% 50%' }, 2.15);
+
+      // 2.80 · Clear everything but the card and the lock badge for the hide scene.
+      JV.blurOut(tl, ['#photo-chip', '#photo-cap2'], 2.8, 0.18);
+      window.__timelines["photo"] = tl;
+    })();
+  </script>
+</template>

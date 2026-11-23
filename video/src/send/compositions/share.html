@@ -1,0 +1,170 @@
+<template>
+  <!-- SEND 12.5–16 s · Share. The cream bar from the purpose scene pulls away to reveal the final cards (step 4) and
+       the "Compartir PDF" button (the app's bottom-bar #nav-next, rebuilt). Tap → the cards fly onto an A4 page at
+       real size (after app/js/core/pdf.js: logo, eyebrow, rule, two cards side by side, "Finalidad" + purpose in
+       lime, recipient panel; text enlarged so it reads) and the page holds as the hero → the page drops into a share sheet (generic, in the app's dark style, no brand logos) → WhatsApp →
+       the file goes out as a sent message. Ends on ink for the end card. -->
+  <style>
+    #root { position: absolute; inset: 0; }
+    #share-glow { left: 100px; top: 400px; }
+    .share-band { position: absolute; }
+    #share-cap2 { opacity: 0; }
+    #share-doc { position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: 5; }
+    .share-card { position: absolute; box-shadow: 0 30px 70px rgba(0, 0, 0, .5); z-index: 2; }
+    /* A4 page, white like the real PDF. Inner sizes in % / em of the page (font-size set from its width). */
+    #share-page { position: absolute; background: #fff; box-shadow: 0 40px 100px rgba(0, 0, 0, .6); z-index: 1; color: var(--ink); }
+    #share-page .pg-logo { position: absolute; left: 7.8%; top: 3%; font-size: 1.2em; color: var(--ink); }
+    #share-page .pg-eyebrow { position: absolute; left: 7.8%; top: 9.4%; margin: 0; font: 600 1em/1 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: #5f5b54; }
+    #share-page .pg-label { position: absolute; left: 7.8%; top: 40%; margin: 0; font: 600 1em/1 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: #5f5b54; }
+    #share-page .pg-logo .logo-id { background: var(--ink); color: #fff; }
+    #share-page .pg-rule { position: absolute; left: 7.8%; right: 7.8%; top: 14.2%; height: .5%; background: var(--ink); }
+    #share-page .pg-purpose { position: absolute; left: 7.8%; top: 44.5%; font: 800 1.6em/1.25 var(--sans); background: var(--lime); padding: 0 .25em; }
+    #share-page .pg-line { position: absolute; left: 7.8%; height: .9%; background: #c9c6be; }
+    #share-page .pg-panel { position: absolute; left: 7.8%; right: 7.8%; top: 67%; height: 13%; background: var(--cream); border-left: .3em solid var(--lime); }
+    #share-page .pg-foot { position: absolute; left: 7.8%; right: 7.8%; top: 91%; height: .2%; background: #c9c6be; }
+    #share-btn { position: absolute; display: flex; align-items: center; justify-content: center; background: var(--cream); color: var(--ink);
+      font-family: var(--sans); font-weight: 800; font-size: 44px; }
+    /* Share sheet: dark panel, square like the app (no radius on UI), apps as plain lettered discs. */
+    #share-sheet { position: absolute; z-index: 4; background: var(--panel); border-top: 3px solid var(--line-2); box-shadow: 0 -30px 80px rgba(0, 0, 0, .5); }
+    #share-sheet .sh-grab { position: absolute; left: 50%; top: 18px; width: 96px; height: 8px; margin-left: -48px; background: var(--line-2); }
+    #share-sheet .sh-in { position: absolute; top: 0; width: 780px; height: 100%; }
+    #share-sheet .sh-title { position: absolute; left: 0; top: 52px; margin: 0; font: 800 44px/1 var(--sans); }
+    #share-sheet .sh-thumb { position: absolute; left: 0; top: 140px; width: 96px; height: 136px; background: var(--line); }
+    #share-sheet .sh-file { position: absolute; left: 126px; top: 160px; margin: 0; font: 500 30px/1.3 var(--mono); color: var(--cream); }
+    #share-sheet .sh-rule { position: absolute; left: 0; right: 0; top: 306px; height: 2px; background: var(--line-2); }
+    #share-sheet .sh-app { position: absolute; top: 340px; width: 180px; text-align: center; }
+    #share-sheet .sh-dot { width: 116px; height: 116px; margin: 0 auto; border-radius: 50%; font: 800 52px/116px var(--sans); color: var(--ink); }
+    #share-sheet .sh-name { margin: 14px 0 0; font: 600 30px/1.2 var(--sans); color: var(--cream); white-space: nowrap; }
+    /* Sent message bubble. */
+    #share-msg { position: absolute; z-index: 6; display: flex; align-items: center; gap: 24px; padding: 24px; background: #1c1c1a; border: 2px solid var(--line-2); opacity: 0; }
+    #share-msg .m-thumb { flex: none; width: 72px; height: 102px; background: #fff; position: relative; }
+    #share-msg .m-thumb::before { content: ''; position: absolute; left: 10%; right: 10%; top: 14%; height: 18%; background: #b9b5ab; }
+    #share-msg .m-thumb::after { content: ''; position: absolute; left: 10%; width: 45%; top: 40%; height: 7%; background: var(--lime); }
+    #share-msg .m-body { min-width: 0; }
+    #share-msg .m-file { margin: 0; font: 500 28px/1.3 var(--mono); color: var(--cream); overflow-wrap: anywhere; }
+    #share-msg .m-tick { margin: 8px 0 0; font: 700 30px/1 var(--mono); color: var(--lime); text-align: right; }
+  </style>
+  <div id="root" class="stage" data-composition-id="share" data-width="{{W}}" data-height="{{H}}">
+    <div class="stage-grid"></div>
+    <div class="stage-glow" id="share-glow"></div>
+    <div id="share-btn">{{t:send.share_pdf_app}}</div>
+    <div id="share-doc">
+      <div id="share-page">
+        <div class="logo-v pg-logo"><span>Just</span><span class="logo-id">ID</span></div>
+        <p class="pg-eyebrow">{{t:send.pdf_eyebrow_app}}</p>
+        <div class="pg-rule"></div>
+        <p class="pg-label">{{t:send.pdf_purpose_label_app}}</p>
+        <div class="pg-purpose">{{cfg:send.purpose}}</div>
+        <div class="pg-line" style="top:56%;width:24%"></div>
+        <div class="pg-line" style="top:56%;left:36%;width:30%"></div>
+        <div class="pg-line" style="top:60%;width:56%"></div>
+        <div class="pg-panel"></div>
+        <div class="pg-foot"></div>
+      </div>
+      <div class="card share-card" id="share-front"><img src="assets/cap/send-card-front-final.png" alt=""></div>
+      <div class="card share-card" id="share-back"><img src="assets/cap/send-card-back-final.png" alt=""></div>
+    </div>
+    <div id="share-sheet">
+      <div class="sh-grab"></div>
+      <div class="sh-in">
+        <p class="sh-title">{{t:send.sheet_title}}</p>
+        <div class="sh-thumb"></div>
+        <p class="sh-file">{{t:send.pdf_file}}</p>
+        <div class="sh-rule"></div>
+        <div class="sh-app" style="left:0"><div class="sh-dot" id="share-wa" style="background:var(--ok)"></div><p class="sh-name">{{t:send.sheet_whatsapp}}</p></div>
+        <div class="sh-app" style="left:200px"><div class="sh-dot" style="background:#8ec5ff"></div><p class="sh-name">{{t:send.sheet_mail}}</p></div>
+        <div class="sh-app" style="left:400px"><div class="sh-dot" style="background:var(--warn)"></div><p class="sh-name">{{t:send.sheet_drive}}</p></div>
+        <div class="sh-app" style="left:600px"><div class="sh-dot" style="background:var(--soft)"></div><p class="sh-name">{{t:send.sheet_copy}}</p></div>
+      </div>
+    </div>
+    <div id="share-msg">
+      <div class="m-thumb"></div>
+      <div class="m-body"><p class="m-file">{{t:send.pdf_file}}</p><p class="m-tick">✓✓</p></div>
+    </div>
+    <div class="tap" id="share-tap"></div>
+    <div class="share-band">
+      <h2 class="cap cap-m" id="share-cap1">{{words:send.share_cap}}</h2>
+      <h2 class="cap cap-m" id="share-cap2">{{words:send.sent_cap}}</h2>
+    </div>
+    <div class="bar-wipe" id="share-bar"></div>
+  </div>
+  <script>
+    (function () {
+      const root = document.querySelector('[data-composition-id="share"]');
+      const tl = gsap.timeline({ paused: true });
+      const D = window.JV_DATA, H = D.size.height;
+      // Geometry per aspect, applied here so motion targets and layout come from one place.
+      const L = {
+        '9x16': { band: { x: 120, y: 300, w: 768 }, cardW: 520, front: { x: 244, y: 420 }, back: { x: 244, y: 766 },
+          btn: { x: 244, y: 1130, w: 520, h: 96 }, page: { x: 214, y: 410, w: 580 },
+          sheet: { x: 0, y: 720, w: 1080, inX: 150 }, msg: { x: 188, y: 640, w: 700 } },
+        '16x9': { band: { x: 980, y: 300, w: 800 }, cardW: 380, front: { x: 160, y: 150 }, back: { x: 160, y: 410 },
+          btn: { x: 160, y: 690, w: 380, h: 90 }, page: { x: 230, y: 110, w: 420 },
+          sheet: { x: 100, y: 470, w: 880, inX: 50 }, msg: { x: 160, y: 420, w: 700 } },
+      }[D.aspect];
+      const px = v => `${v}px`;
+      const place = (sel, b) => { const el = root.querySelector(sel); el.style.left = px(b.x); el.style.top = px(b.y); if (b.w) el.style.width = px(b.w); if (b.h) el.style.height = px(b.h); return el; };
+      place('.share-band', L.band);
+      place('#share-front', { ...L.front, w: L.cardW });
+      place('#share-back', { ...L.back, w: L.cardW });
+      place('#share-btn', L.btn);
+      const pageH = L.page.w * 297 / 210;
+      const page = place('#share-page', { ...L.page, h: pageH });
+      page.style.fontSize = px(L.page.w / 20);
+      place('#share-sheet', { x: L.sheet.x, y: L.sheet.y, w: L.sheet.w, h: H - L.sheet.y + 40 });
+      root.querySelector('#share-sheet .sh-in').style.left = px(L.sheet.inX);
+      place('#share-msg', L.msg);
+      // Generic app discs: the first letter of each (localised) name, no brand marks.
+      root.querySelectorAll('#share-sheet .sh-app').forEach(app => { app.querySelector('.sh-dot').textContent = app.querySelector('.sh-name').textContent.trim().charAt(0); });
+
+      // Cards on the page at real size: ID-1 (85.6 mm) on A4 (210 mm), side by side, 6 mm apart, under the header.
+      const cw = L.page.w * 85.6 / 210, gap = L.page.w * 6 / 210, m = (L.page.w - 2 * cw - gap) / 2;
+      const cy = L.page.y + pageH * 0.17, s = cw / L.cardW;
+      const onPage = [{ x: L.page.x + m, y: cy }, { x: L.page.x + m + cw + gap, y: cy }];
+      // Sheet thumbnail slot (scene px) and the doc wrapper move that drops the page into it.
+      const thumb = { x: L.sheet.x + L.sheet.inX, y: L.sheet.y + 140, w: 96 };
+      const z = thumb.w / L.page.w;
+      const btnC = { x: L.btn.x + L.btn.w / 2, y: L.btn.y + L.btn.h / 2 };
+      const waC = { x: thumb.x + 90, y: L.sheet.y + 340 + 58 };
+
+      // 0.00 · The cream bar leaves to the right, revealing step 4.
+      tl.fromTo('#share-bar', { xPercent: 0 }, { xPercent: 110, duration: 0.3, ease: 'power3.out' }, 0);
+      JV.wordsIn(tl, root, '#share-cap1 .w', 0.1, 0.08, 0.16);
+
+      // 0.15 · Tap "Compartir PDF".
+      const press = JV.tap(tl, '#share-tap', { x: btnC.x + 200, y: btnC.y + 240 }, btnC, 0.15, 0.25);
+      tl.fromTo('#share-btn', { backgroundColor: '#f3f1ec' }, { backgroundColor: '#d7ff3a', duration: 0.06, ease: 'none' }, press);
+      tl.fromTo('#share-btn', { opacity: 1, filter: 'blur(0px)' }, { opacity: 0, filter: 'blur(8px)', duration: 0.15, ease: 'power3.in', immediateRender: false }, press + 0.1);
+      tl.to('#share-tap', { opacity: 0, duration: 0.12 }, press + 0.18);
+
+      // 0.53 · The cards fly onto an A4 page at real size (carry across), the page builds behind them and holds as the hero.
+      const fly = press + 0.08;
+      tl.fromTo('#share-page', { opacity: 0, scale: 0.9, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, duration: 0.32, ease: 'expo.out' }, fly + 0.08);
+      tl.fromTo('#share-front', { x: 0, y: 0, scale: 1 }, { x: onPage[0].x - L.front.x, y: onPage[0].y - L.front.y, scale: s, duration: 0.4, ease: 'power3.inOut', transformOrigin: '0 0' }, fly);
+      tl.fromTo('#share-back', { x: 0, y: 0, scale: 1 }, { x: onPage[1].x - L.back.x, y: onPage[1].y - L.back.y, scale: s, duration: 0.4, ease: 'power3.inOut', transformOrigin: '0 0' }, fly + 0.03);
+
+      // 1.80 · Share sheet slides up; the page drops into its thumbnail slot.
+      const up = 1.8; // the page holds as the hero from ~0.95 to here
+      tl.fromTo('#share-sheet', { y: H - L.sheet.y + 60 }, { y: 0, duration: 0.32, ease: 'expo.out' }, up);
+      tl.fromTo('#share-doc', { x: 0, y: 0, scale: 1 }, { x: thumb.x - L.page.x * z, y: thumb.y - L.page.y * z, scale: z, duration: 0.3, ease: 'power3.inOut', transformOrigin: '0 0' }, up);
+
+      // 1.85 · Tap WhatsApp (while the sheet settles).
+      const press2 = JV.tap(tl, '#share-tap', { x: waC.x + 70, y: waC.y + 160 }, waC, up + 0.14, 0.18);
+      JV.blurOut(tl, '#share-cap1', press2 - 0.15, 0.15);
+
+      // 2.15 · Sent: the sheet drops away and the file appears as a sent message.
+      const drop = H - L.sheet.y + 60, docY = thumb.y - L.page.y * z;
+      tl.fromTo('#share-sheet', { y: 0 }, { y: drop, duration: 0.24, ease: 'power3.in', immediateRender: false }, press2 + 0.08);
+      tl.fromTo('#share-doc', { y: docY }, { y: docY + drop, duration: 0.24, ease: 'power3.in', immediateRender: false }, press2 + 0.08);
+      tl.to('#share-doc', { opacity: 0, duration: 0.01 }, press2 + 0.34); // gone with the sheet
+      tl.to('#share-tap', { opacity: 0, duration: 0.1 }, press2 + 0.12);
+      tl.fromTo('#share-msg', { opacity: 0, scale: 0.6, y: 120, transformOrigin: '100% 100%' }, { opacity: 1, scale: 1, y: 0, duration: 0.32, ease: 'expo.out' }, press2 + 0.24);
+      tl.fromTo('#share-cap2', { opacity: 0 }, { opacity: 1, duration: 0.01 }, press2 + 0.03);
+      JV.wordsIn(tl, root, '#share-cap2 .w', press2 + 0.03, 0.08, 0.16);
+
+      // 3.32 · Out to ink for the end card.
+      JV.blurOut(tl, ['#share-msg', '#share-cap2'], 3.32, 0.18);
+      window.__timelines["share"] = tl;
+    })();
+  </script>
+</template>

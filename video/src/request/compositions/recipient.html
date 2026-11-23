@@ -1,0 +1,136 @@
+<template>
+  <!-- REQUEST 9.5–14.5 s · Recipient. Carmen's phone opens the link (real capture): who asks, for what, which fields
+       and the requester's reason. A tap accepts the extra (the accepted state is the real capture, revealed only
+       inside the row). Then the card: the app hides every field not requested (real redaction patches) and the
+       watermark naming the requester sweeps across (real final render). Opens from the chat's zoom-through; the
+       card holds its place at the end so the receive scene can carry it. Captions sit low in this scene (the
+       panel needs the top of the frame). -->
+  <style>
+    #root { position: absolute; inset: 0; }
+    #recipient-cam { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+    #recipient-phone { --phone-scale: 1.64; }
+    #recipient-ui { transform: scale(1.64); overflow: hidden; background: var(--ink); }
+    #recipient-ui > img { position: absolute; left: 0; top: 0; width: 390px; height: auto; display: block; }
+    /* The accepted row, cut from the "accepted" capture (same scroll, same layout). */
+    #recipient-acc { position: absolute; left: 36px; top: 375px; width: 339px; height: 74px; overflow: hidden; }
+    #recipient-acc > img { position: absolute; left: -36px; top: -375px; width: 390px; height: auto; display: block; }
+    #recipient-cardbox { position: absolute; }
+    #recipient-card { width: 100%; box-shadow: 0 40px 90px rgba(0,0,0,.6); }
+    #recipient-final { position: absolute; inset: 0; }
+    #recipient-final > img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+    #recipient-scan { position: absolute; left: 0; top: -4%; width: 8px; height: 108%; margin-left: -4px; background: var(--lime);
+      box-shadow: 0 0 24px rgba(215,255,58,.8); }
+    #recipient-wm { position: absolute; left: 0; width: 100%; display: flex; justify-content: center; }
+    #recipient-wm .pill { flex-direction: column; gap: 4px; font-size: 30px; line-height: 1.2; padding: 14px 26px; text-align: center; }
+    #recipient-fade { position: absolute; left: 0; width: 100%; top: 1032px; height: 888px;
+      background: linear-gradient(to bottom, rgba(13,13,12,0) 0, var(--ink) 40px, var(--ink) 100%); }
+    #root .cap-band .cap { position: relative; font-size: 88px; }
+    #recipient-tap { opacity: 0; }
+    <!--if:9x16-->
+    #root .cap-band { width: 768px; }
+    #recipient-phone { left: 202px; top: 560px; }
+    #root .cap-band { top: 1078px; width: 660px; }
+    #recipient-cardbox { left: 120px; top: 420px; width: 700px; }
+    #recipient-wm { top: 490px; }
+    <!--endif--><!--if:16x9-->
+    #recipient-phone { left: 200px; top: 60px; }
+    #recipient-fade { display: none; }
+    #recipient-cardbox { left: 110px; top: 220px; width: 740px; }
+    #recipient-wm { top: 520px; }
+    <!--endif-->
+  </style>
+  <div id="root" class="stage" data-composition-id="recipient" data-width="{{W}}" data-height="{{H}}">
+    <div class="stage-grid"></div>
+    <div id="recipient-cam" data-layout-allow-overflow>
+      <div class="phone" id="recipient-phone">
+        <div class="phone-screen">
+          <div class="phone-ui" id="recipient-ui">
+            <img src="assets/cap/req-04-recipient-open.png" alt="">
+            <div id="recipient-acc"><img src="assets/cap/req-04b-recipient-accepted.png" alt=""></div>
+          </div>
+          <div class="phone-notch"></div>
+        </div>
+      </div>
+    </div>
+    <!-- The phone sinks into the ground under the low caption band. -->
+    <div id="recipient-fade" data-layout-ignore></div>
+    <div id="recipient-cardbox">
+      <div class="card" id="recipient-card"><img src="assets/cap/card-front-clean.png" alt="">
+        {{patch:recipient-p:front:issue_date:req-card-front-nowm}}
+        {{patch:recipient-p:front:sex:req-card-front-nowm}}
+        {{patch:recipient-p:front:nationality:req-card-front-nowm}}
+        {{patch:recipient-p:front:support_number:req-card-front-nowm}}
+        {{patch:recipient-p:front:signature:req-card-front-nowm}}
+        {{patch:recipient-p:front:can:req-card-front-nowm}}
+        {{patch:recipient-p:front:cli:req-card-front-nowm}}
+        <div id="recipient-final"><img src="assets/cap/req-card-front-final.png" alt=""></div>
+        <div id="recipient-scan"></div>
+      </div>
+      <div id="recipient-wm"><div class="pill lime" id="recipient-wm-pill"><span id="recipient-wm-a"></span><span id="recipient-wm-b"></span></div></div>
+    </div>
+    <div class="cap-band"><h2 class="cap" id="recipient-cap1">{{words:request.open_cap}}</h2></div>
+    <div class="cap-band"><h2 class="cap" id="recipient-cap2">{{words:request.choose_cap}}</h2></div>
+    <div class="cap-band"><h2 class="cap" id="recipient-cap3">{{words:request.wm_cap}}</h2></div>
+    <div class="tap" id="recipient-tap"></div>
+  </div>
+  <script>
+    (function () {
+      const root = document.querySelector('[data-composition-id="recipient"]');
+      const tl = gsap.timeline({ paused: true });
+      const wide = window.JV_DATA && JV_DATA.aspect === '16x9';
+      const O = wide ? { x: 218, y: 78 } : { x: 220, y: 578 }, K = 1.64;
+      const C = wide ? { x: 470, y: 540 } : { x: 504, y: 664 }; // where the framed UI lands
+      const box = (x, y, w, h) => ({ x: O.x + K * x, y: O.y + K * y, w: K * w, h: K * h });
+      const cam = (b, z) => ({ x: C.x - (b.x + b.w / 2) * z, y: C.y - (b.y + b.h / 2) * z, scale: z });
+      const pt = (c, x, y) => ({ x: c.x + c.scale * (O.x + K * x), y: c.y + c.scale * (O.y + K * y) });
+
+      // The real watermark line (manifest), split after the purpose so it reads in two lines.
+      const wm = ((window.JV_DATA && JV_DATA.manifest.watermarks && JV_DATA.manifest.watermarks.request) || '').split(' · ');
+      root.querySelector('#recipient-wm-a').textContent = wm[0] || '';
+      root.querySelector('#recipient-wm-b').textContent = wm.slice(1).join(' · ');
+
+      // Real positions from the capture manifest (CSS px of the 390×844 screen).
+      const shot = JV_DATA.manifest.files['req-04-recipient-open.png'].boxes;
+      const panel = shot.reqPanel.viewport.css, acc = shot.accept_address.viewport.css;
+      // The accepted row, cut from the "accepted" capture at the same place (+2 px each side for its border).
+      Object.assign(root.querySelector('#recipient-acc').style, { left: (acc.x - 2) + 'px', top: (acc.y - 2) + 'px', width: (acc.w + 4) + 'px', height: (acc.h + 4) + 'px' });
+      Object.assign(root.querySelector('#recipient-acc > img').style, { left: -(acc.x - 2) + 'px', top: -(acc.y - 2) + 'px' });
+      // Key lines: title and purpose (panel top) down to the quoted reason (~75% of the panel).
+      const key = { x: panel.x, y: panel.y + 8, w: panel.w, h: panel.h * 0.76 };
+      const cIn = cam(box(150, panel.y + 13, 110, 40), 3.4);          // the zoom-through lands on the panel title
+      const cA = cam(box(key.x, key.y, key.w, key.h), wide ? 0.98 : 0.98); // the whole request, title to reason
+      const cB = cam(box(key.x, key.y, key.w, key.h), wide ? 1.05 : 1.06); // pushed in, still all inside the safe band
+
+      // 0–0.55: arrival from the chat's zoom-through: big and blurred, settling on the request panel.
+      tl.fromTo('#recipient-cam', { ...cIn, filter: 'blur(10px)', transformOrigin: '0 0' }, { ...cA, filter: 'blur(0px)', transformOrigin: '0 0', duration: 0.6, ease: 'expo.out' }, 0);
+      JV.wordsIn(tl, root, '#recipient-cap1 .w', 0.2, 0.07, 0.16);
+
+      // 1.1–1.55: down to the extra and the reason; tap "accept" (the row turns green: "Aceptado: se mostrará").
+      tl.fromTo('#recipient-cam', { ...cA, transformOrigin: '0 0' }, { ...cB, transformOrigin: '0 0', duration: 0.5, ease: 'power2.inOut', immediateRender: false }, 1.3);
+      JV.blurOut(tl, '#recipient-cap1', 1.86);
+      JV.wordsIn(tl, root, '#recipient-cap2 .w', 1.98, 0.07, 0.16);
+      const ta = pt(cB, acc.x + 28.5, acc.y + 25);
+      const press = JV.tap(tl, root.querySelector('#recipient-tap'), { x: ta.x + 90, y: ta.y + 120 }, ta, 1.5, 0.42);
+      tl.fromTo('#recipient-acc', { opacity: 0 }, { opacity: 1, duration: 0.08, ease: 'none' }, press + 0.02);
+      tl.fromTo('#recipient-tap', { opacity: 1 }, { opacity: 0, duration: 0.15, ease: 'power2.in', immediateRender: false }, press + 0.35);
+
+      // 2.4–2.9: the phone drops away; the card rises into its place.
+      JV.blurOut(tl, '#recipient-cap2', 3.15);
+      tl.fromTo('#recipient-cam', { ...cB, opacity: 1, filter: 'blur(0px)', transformOrigin: '0 0' }, { ...cB, y: cB.y + 900, opacity: 0, filter: 'blur(12px)', transformOrigin: '0 0', duration: 0.32, ease: 'power3.in', immediateRender: false }, 2.95);
+      tl.fromTo('#recipient-card', { y: 700, rotation: 4 }, { y: 0, rotation: 0, duration: 0.6, ease: 'expo.out' }, 3.1);
+      tl.fromTo('#recipient-card', { opacity: 0 }, { opacity: 1, duration: 0.12, ease: 'none' }, 3.1);
+      // Only the requested fields stay: everything else is pixelated (the app's real output), field by field.
+      tl.fromTo('#recipient-card .patch', { opacity: 0, scale: 1.25 }, { opacity: 1, scale: 1, duration: 0.16, ease: 'power3.out', stagger: 0.035 }, 3.35);
+      // The watermark naming the requester sweeps across (final render revealed behind a lime scan line).
+      tl.fromTo('#recipient-final', { clipPath: 'inset(0% 100% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.5, ease: 'power2.inOut' }, 3.6);
+      tl.fromTo('#recipient-scan', { opacity: 0 }, { opacity: 1, duration: 0.01, ease: 'none' }, 3.6);
+      tl.fromTo('#recipient-scan', { x: 0 }, { x: 700, duration: 0.5, ease: 'power2.inOut' }, 3.6);
+      tl.fromTo('#recipient-scan', { opacity: 1 }, { opacity: 0, duration: 0.12, ease: 'power2.out', immediateRender: false }, 4.1);
+      JV.wordsIn(tl, root, '#recipient-cap3 .w', 3.45, 0.08, 0.18);
+      tl.fromTo('#recipient-wm-pill', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.3, ease: 'expo.out' }, 3.5);
+      // Caption and pill leave just before the seam; the card stays (the receive scene carries it).
+      JV.blurOut(tl, ['#recipient-cap3', '#recipient-wm-pill'], 4.8, 0.18);
+      window.__timelines["recipient"] = tl;
+    })();
+  </script>
+</template>

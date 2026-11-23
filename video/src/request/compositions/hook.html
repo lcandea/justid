@@ -1,0 +1,70 @@
+<template>
+  <!-- REQUEST 0–2 s · Hook. Frame 0 already carries the question (thumbnail). The whole specimen sits in a camera
+       viewfinder: someone is about to ask for a full photo of it. The shutter flashes, then an amber strike crosses
+       the photo out ("don't ask for a whole photo"). A lime redaction bar wipes the frame into the builder. -->
+  <style>
+    #root { position: absolute; inset: 0; }
+    #hook-glow { left: -200px; top: 700px; }
+    #hook-title { position: relative; font-size: 124px; }
+    #hook-b { display: inline-block; }
+    #hook-sub { position: relative; margin-top: 34px; font-size: 36px; color: var(--soft); }
+    #hook-shot { position: absolute; }
+    #hook-card { position: absolute; left: 0; top: 0; width: 100%; box-shadow: 0 40px 90px rgba(0,0,0,.6); }
+    #hook-card > img { transition: none; }
+    #hook-flash { position: absolute; inset: 0; background: var(--cream); opacity: 0; border-radius: 3.6% / 5.7%; }
+    /* Viewfinder corners: four L brackets drawn with borders. */
+    .hook-vf { position: absolute; width: 70px; height: 70px; border: 0 solid var(--cream); }
+    #hook-vf-tl { left: -34px; top: -34px; border-left-width: 6px; border-top-width: 6px; }
+    #hook-vf-tr { right: -34px; top: -34px; border-right-width: 6px; border-top-width: 6px; }
+    #hook-vf-bl { left: -34px; bottom: -34px; border-left-width: 6px; border-bottom-width: 6px; }
+    #hook-vf-br { right: -34px; bottom: -34px; border-right-width: 6px; border-bottom-width: 6px; }
+    /* The strike: a thick amber bar laid diagonally over the photo. */
+    #hook-strike { position: absolute; left: -6%; top: 50%; width: 112%; height: 34px; margin-top: -17px; background: var(--warn);
+      box-shadow: 0 10px 30px rgba(0,0,0,.45); }
+    #hook-wipe { top: 0; height: 100%; }
+    <!--if:9x16-->
+    #root .cap-band { width: 768px; }
+    #hook-shot { left: 190px; top: 800px; width: 700px; height: 441px; }
+    <!--endif--><!--if:16x9-->
+    #hook-shot { left: 130px; top: 290px; width: 720px; height: 454px; }
+    #hook-title { font-size: 120px; }
+    <!--endif-->
+  </style>
+  <div id="root" class="stage" data-composition-id="hook" data-width="{{W}}" data-height="{{H}}">
+    <div class="stage-grid"></div>
+    <div class="stage-glow" id="hook-glow"></div>
+    <div id="hook-shot">
+      <div class="card" id="hook-card"><img id="hook-card-img" src="assets/cap/card-front-clean.png" alt=""><div id="hook-flash"></div></div>
+      <div class="hook-vf" id="hook-vf-tl"></div><div class="hook-vf" id="hook-vf-tr"></div>
+      <div class="hook-vf" id="hook-vf-bl"></div><div class="hook-vf" id="hook-vf-br"></div>
+      <div id="hook-strike" data-layout-allow-overlap></div>
+    </div>
+    <div class="cap-band">
+      <h1 class="cap" id="hook-title"><span id="hook-a">{{words:request.hook_a}}</span><br><span id="hook-b">{{words:request.hook_b}}</span></h1>
+      <p class="sub" id="hook-sub">{{words:request.hook_sub}}</p>
+    </div>
+    <div class="bar-wipe lime" id="hook-wipe" data-layout-ignore></div>
+  </div>
+  <script>
+    (function () {
+      const root = document.querySelector('[data-composition-id="hook"]');
+      const tl = gsap.timeline({ paused: true });
+      // Line on screen (sharp) at frame 0; the accent half settles with a small punch.
+      tl.fromTo('#hook-b', { scale: 1.12, transformOrigin: '0% 60%' }, { scale: 1, duration: 0.3, ease: 'expo.out', transformOrigin: '0% 60%' }, 0);
+      // The card drifts into the viewfinder (visible from frame 0), the brackets close in to focus.
+      tl.fromTo('#hook-card', { y: 70, rotation: -4 }, { y: 0, rotation: -2, duration: 0.9, ease: 'expo.out' }, 0);
+      tl.fromTo('.hook-vf', { scale: 1.35, opacity: 0.4 }, { scale: 1, opacity: 1, duration: 0.35, ease: 'power3.out' }, 0.05);
+      // Shutter: a cream flash on the card.
+      tl.fromTo('#hook-flash', { opacity: 0 }, { opacity: 0.85, duration: 0.05, ease: 'none' }, 0.5);
+      tl.fromTo('#hook-flash', { opacity: 0.85 }, { opacity: 0, duration: 0.25, ease: 'power2.out', immediateRender: false }, 0.56);
+      // "Don't ask for a whole photo": the sub reads in, the strike crosses the photo out, the photo greys.
+      JV.wordsIn(tl, root, '#hook-sub .w', 0.4, 0.06, 0.16);
+      tl.fromTo('#hook-strike', { scaleX: 0, rotation: -14, transformOrigin: '0% 50%' }, { scaleX: 1, rotation: -14, duration: 0.28, ease: 'power4.out' }, 0.95);
+      tl.fromTo('#hook-card-img', { filter: 'grayscale(0) brightness(1)' }, { filter: 'grayscale(1) brightness(.55)', duration: 0.3, ease: 'power2.out' }, 0.95);
+      // Exit: the lime redaction bar sweeps the frame (the next scene opens with it leaving).
+      tl.set('#hook-wipe', { xPercent: -110 }, 0);
+      JV.barWipe(tl, '#hook-wipe', 1.68, 0.32);
+      window.__timelines["hook"] = tl;
+    })();
+  </script>
+</template>

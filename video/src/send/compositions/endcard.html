@@ -1,0 +1,42 @@
+<template>
+  <!-- SEND 15–18 s · End card: logo performed in (a redaction bar wipes off the word), tagline, URL, trust line. -->
+  <style>
+    #root { position: absolute; inset: 0; }
+    #end-lockup { position: absolute; left: 0; width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; }
+    #end-logo { font-size: 190px; position: relative; }
+    #end-bar { position: absolute; left: -4%; top: 8%; width: 108%; height: 84%; background: var(--lime); transform-origin: 100% 50%; }
+    #end-tagline { position: relative; margin-top: 70px; font-size: 92px; text-align: center; max-width: 860px; }
+    #end-url { position: relative; margin-top: 60px; font-family: var(--mono); font-size: 46px; color: var(--cream); padding: 16px 30px; border: 3px solid var(--lime); }
+    #end-trust { position: relative; margin-top: 46px; font-family: var(--mono); font-size: 30px; color: var(--soft); letter-spacing: .03em; }
+    <!--if:9x16-->
+    #end-lockup { top: 560px; }
+    <!--endif--><!--if:16x9-->
+    #end-lockup { top: 250px; }
+    #end-logo { font-size: 170px; }
+    #end-tagline { max-width: 1500px; }
+    <!--endif-->
+  </style>
+  <div id="root" class="stage" data-composition-id="endcard" data-width="{{W}}" data-height="{{H}}">
+    <div class="stage-grid"></div>
+    <div id="end-lockup">
+      <div class="logo-v" id="end-logo"><span>Just</span><span class="logo-id">ID</span><div id="end-bar"></div></div>
+      <h2 class="cap" id="end-tagline">{{words:send.end_tagline}}</h2>
+      <div id="end-url">{{t:common.url}}</div>
+      <p id="end-trust">{{t:common.trust}}</p>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const root = document.querySelector('[data-composition-id="endcard"]');
+      const tl = gsap.timeline({ paused: true });
+      // The lime redaction bar covers the logo, then pulls away to the right: the brand is "uncovered".
+      tl.fromTo('#end-bar', { scaleX: 0, transformOrigin: '0% 50%' }, { scaleX: 1, duration: 0.22, ease: 'power3.out' }, 0);
+      tl.fromTo('#end-logo > span', { opacity: 0 }, { opacity: 1, duration: 0.01 }, 0.22);
+      tl.to('#end-bar', { scaleX: 0, transformOrigin: '100% 50%', duration: 0.32, ease: 'expo.inOut' }, 0.3);
+      const t = JV.wordsIn(tl, root, '#end-tagline .w', 0.45, 0.06, 0.16);
+      tl.fromTo('#end-url', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.3, ease: 'expo.out' }, t - 0.05);
+      tl.fromTo('#end-trust', { opacity: 0, filter: 'blur(6px)' }, { opacity: 1, filter: 'blur(0px)', duration: 0.2, ease: 'power2.out' }, t + 0.08);
+      window.__timelines["endcard"] = tl;
+    })();
+  </script>
+</template>

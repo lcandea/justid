@@ -1,0 +1,53 @@
+<template>
+  <!-- SEND 0–2 s · Hook. Frame 0 already carries the line (it is the thumbnail). The whole specimen card sits
+       under it with its sensitive fields ringed in amber: the problem, before the product shows up. -->
+  <style>
+    #root { position: absolute; inset: 0; }
+    #hook-glow { left: -300px; top: 900px; }
+    #hook-cards { position: absolute; }
+    .hook-card { position: absolute; width: 660px; box-shadow: 0 40px 90px rgba(0,0,0,.6); }
+    #hook-back { left: 240px; top: 380px; }
+    #hook-front { left: 0; top: 0; }
+    #hook-cards .zone-ring { border: 6px solid var(--warn); background: rgba(255, 180, 84, .22); }
+    #hook-sub { top: 490px; font-size: 32px; }
+    <!--if:9x16-->
+    #hook-cards { left: 90px; top: 930px; width: 900px; height: 800px; }
+    <!--endif--><!--if:16x9-->
+    #hook-cards { left: 110px; top: 210px; width: 760px; height: 660px; }
+    .hook-card { width: 640px; }
+    #hook-back { left: 110px; top: 250px; }
+    #hook-sub { top: 640px; }
+    <!--endif-->
+  </style>
+  <div id="root" class="stage" data-composition-id="hook" data-width="{{W}}" data-height="{{H}}">
+    <div class="stage-grid"></div>
+    <div class="stage-glow" id="hook-glow"></div>
+    <div id="hook-cards">
+      <div class="card hook-card" id="hook-front"><img src="assets/cap/card-front-clean.png" alt="">{{ring:hook-r:front:signature}}</div>
+      <div class="card hook-card" id="hook-back"><img src="assets/cap/card-back-clean.png" alt="">{{ring:hook-r:back:address}}{{ring:hook-r:back:parents_names}}</div>
+    </div>
+    <div class="cap-band">
+      <h1 class="cap cap-xl" id="hook-title"><span id="hook-a">{{words:send.hook_a}}</span><br><span id="hook-b">{{words:send.hook_b}}</span></h1>
+      <p class="sub" id="hook-sub">{{t:send.hook_sub}}</p>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const root = document.querySelector('[data-composition-id="hook"]');
+      const tl = gsap.timeline({ paused: true });
+      // The whole line is on screen at frame 0 (thumbnail); "entero?" settles with a punch.
+      tl.fromTo('#hook-b .w', { scale: 1.25, filter: 'blur(4px)' }, { scale: 1, filter: 'blur(0px)', duration: 0.3, ease: 'expo.out', transformOrigin: '0% 60%' }, 0);
+      // Cards drift up into place (one move, long-tailed), fanned.
+      tl.fromTo('#hook-front', { y: 120, rotation: -9 }, { y: 0, rotation: -5, duration: 1.1, ease: 'expo.out' }, 0);
+      tl.fromTo('#hook-back', { y: 220, rotation: 2 }, { y: 0, rotation: 6, duration: 1.2, ease: 'expo.out' }, 0);
+      // Amber rings snap on, one per field, then the sub line names them.
+      tl.fromTo('#hook-cards .zone-ring', { opacity: 0, scale: 1.4 }, { opacity: 1, scale: 1, duration: 0.18, ease: 'power3.out', stagger: 0.12 }, 0.45);
+      JV.wordsIn(tl, root, '#hook-sub', 0.45, 0, 0.2);
+      // Exit: a hard push toward the camera into the next scene (cut on the fastest frame).
+      // Anchored at the top edge so the growing cards never reach the sub line above them.
+      tl.to('#hook-cards', { scale: 1.25, y: 40, filter: 'blur(6px)', duration: 0.3, ease: 'power3.in', transformOrigin: '50% 0%' }, 1.7);
+      JV.blurOut(tl, '.cap-band', 1.78, 0.2);
+      window.__timelines["hook"] = tl;
+    })();
+  </script>
+</template>

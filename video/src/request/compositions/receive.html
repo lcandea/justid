@@ -1,0 +1,115 @@
+<template>
+  <!-- REQUEST 14.5–16.5 s · Receive. Back on the requester's side: the recipient's final card (held in place from the
+       previous scene) is carried into an incoming file message in the same neutral chat, then the watermarked
+       copy, front and back, pops out large: only the requested fields, the requester's name in the watermark. -->
+  <style>
+    #root { position: absolute; inset: 0; }
+    #receive-cam { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+    #receive-phone { --phone-scale: 1.64; }
+    #receive-ui { transform: scale(1.64); background: #0b0b0a; font-family: var(--sans); color: var(--cream); }
+    /* Same neutral chat chrome as the chat scene. */
+    #receive-head { position: absolute; left: 0; top: 0; width: 390px; height: 96px; box-sizing: border-box; padding: 52px 16px 0;
+      display: flex; align-items: center; gap: 12px; background: #1a1a18; border-bottom: 1px solid var(--line); }
+    #receive-back { font-size: 30px; line-height: 1; color: var(--soft); margin-top: -4px; }
+    #receive-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--line-2); color: var(--cream);
+      font-weight: 800; font-size: 16px; line-height: 34px; text-align: center; }
+    #receive-name { font-weight: 700; font-size: 17px; }
+    /* Incoming file message: a page thumbnail and the file row. */
+    #receive-bubble { position: absolute; left: 12px; top: 112px; width: 260px; box-sizing: border-box; padding: 6px 6px 8px;
+      background: #1f1f1d; border-radius: 14px 14px 14px 4px; }
+    #receive-thumb { position: relative; width: 248px; height: 166px; border-radius: 9px; background: var(--cream); overflow: hidden; }
+    #receive-thumb > img { position: absolute; left: 6px; top: 5px; width: 236px; height: auto; display: block; border-radius: 6px; }
+    #receive-file { display: flex; gap: 10px; align-items: center; margin: 8px 4px 0; }
+    #receive-ico { flex: none; position: relative; width: 30px; height: 38px; background: var(--cream); clip-path: polygon(0 0, 70% 0, 100% 24%, 100% 100%, 0 100%); }
+    #receive-ico::after { content: ''; position: absolute; left: 6px; right: 6px; bottom: 8px; height: 10px; background: var(--warn); }
+    #receive-fname { font-family: var(--mono); font-size: 14.5px; line-height: 19px; word-break: break-all; color: var(--cream); }
+    #receive-meta { margin: 4px 4px 0; text-align: right; font-family: var(--mono); font-size: 14.5px; color: var(--mute); }
+    #receive-compose { position: absolute; left: 12px; right: 12px; bottom: 26px; height: 42px; border-radius: 21px; background: #1a1a18; border: 1px solid var(--line); }
+    /* The carried card (starts exactly where the recipient scene left it). */
+    #receive-fly { position: absolute; box-shadow: 0 40px 90px rgba(0,0,0,.6); }
+    /* The pop-out: front over back, fanned. */
+    #receive-pop { position: absolute; }
+    .receive-big { position: absolute; left: 0; top: 0; width: 100%; box-shadow: 0 40px 90px rgba(0,0,0,.65); }
+    #receive-dim { position: absolute; inset: 0; background: var(--ink); opacity: 0; }
+    #root .cap-band .cap { position: relative; font-size: 96px; }
+    <!--if:9x16-->
+    #root .cap-band { width: 768px; }
+    #receive-phone { left: 202px; top: 560px; }
+    #receive-fly { left: 120px; top: 420px; width: 700px; }
+    #receive-pop { left: 164px; top: 560px; width: 680px; height: 690px; }
+    <!--endif--><!--if:16x9-->
+    #receive-phone { left: 200px; top: 60px; }
+    #receive-fly { left: 110px; top: 220px; width: 740px; }
+    #receive-pop { left: 1000px; top: 520px; width: 700px; height: 520px; }
+    <!--endif-->
+  </style>
+  <div id="root" class="stage" data-composition-id="receive" data-width="{{W}}" data-height="{{H}}">
+    <div class="stage-grid"></div>
+    <div id="receive-cam" data-layout-allow-overflow>
+      <div class="phone" id="receive-phone">
+        <div class="phone-screen">
+          <div class="phone-ui" id="receive-ui">
+            <div id="receive-head"><span id="receive-back">‹</span><span id="receive-avatar">{{t:request.chat_name}}</span><span id="receive-name">{{t:request.chat_name}}</span></div>
+            <div id="receive-bubble">
+              <div id="receive-thumb"><img id="receive-thumb-img" src="assets/cap/req-card-front-final.png" alt=""></div>
+              <div id="receive-file"><span id="receive-ico"></span><span id="receive-fname">{{t:request.chat_file}}</span></div>
+              <div id="receive-meta">{{t:request.chat_time}}</div>
+            </div>
+            <div id="receive-compose"></div>
+          </div>
+          <div class="phone-notch"></div>
+        </div>
+      </div>
+    </div>
+    <div id="receive-dim"></div>
+    <div class="card" id="receive-fly"><img src="assets/cap/req-card-front-final.png" alt=""></div>
+    <div id="receive-pop">
+      <div class="card receive-big" id="receive-back-card"><img src="assets/cap/req-card-back-final.png" alt=""></div>
+      <div class="card receive-big" id="receive-front-card"><img src="assets/cap/req-card-front-final.png" alt=""></div>
+    </div>
+    <div class="cap-band"><h2 class="cap" id="receive-cap">{{words:request.receive_cap}}</h2></div>
+  </div>
+  <script>
+    (function () {
+      const root = document.querySelector('[data-composition-id="receive"]');
+      const tl = gsap.timeline({ paused: true });
+      const wide = window.JV_DATA && JV_DATA.aspect === '16x9';
+      const O = wide ? { x: 218, y: 78 } : { x: 220, y: 578 }, K = 1.64;
+      const X = wide ? 470 : 504, TOP = wide ? 70 : 612, Z = 1.2;
+      const cam = (z, top) => ({ x: X - z * (O.x + K * 195), y: top - z * O.y, scale: z });
+      const pt = (c, x, y) => ({ x: c.x + c.scale * (O.x + K * x), y: c.y + c.scale * (O.y + K * y) });
+      const cMain = cam(Z, TOP);
+      const av = root.querySelector('#receive-avatar'); av.textContent = av.textContent.trim().charAt(0);
+
+      // Carry target: the thumbnail image inside the bubble (left 12+6+6, top 112+6+5, width 236 CSS px).
+      const fly = wide ? { x: 110, y: 220, w: 740 } : { x: 120, y: 420, w: 700 };
+      const t = pt(cMain, 24, 123), tw = 236 * K * Z;
+      // Pop-out box (for the fan's start: from the thumbnail).
+      const pop = wide ? { x: 1000, y: 520, w: 700 } : { x: 164, y: 560, w: 680 };
+
+      // 0–0.5: the phone rises in from below while the card shrinks into the incoming message.
+      tl.fromTo('#receive-cam', { ...cMain, y: cMain.y + 1300, transformOrigin: '0 0' }, { ...cMain, transformOrigin: '0 0', duration: 0.5, ease: 'expo.out' }, 0);
+      tl.fromTo('#receive-fly', { x: 0, y: 0, scale: 1, transformOrigin: '0 0' },
+        { x: t.x - fly.x, y: t.y - fly.y, scale: tw / fly.w, duration: 0.5, ease: 'power3.inOut' }, 0);
+      tl.fromTo('#receive-bubble', { opacity: 0 }, { opacity: 1, duration: 0.2, ease: 'power2.out' }, 0.3);
+      tl.fromTo('#receive-thumb-img', { opacity: 0 }, { opacity: 1, duration: 0.01, ease: 'none' }, 0.5);
+      tl.fromTo('#receive-fly', { opacity: 1 }, { opacity: 0, duration: 0.01, ease: 'none', immediateRender: false }, 0.5);
+      JV.wordsIn(tl, root, '#receive-cap .w', 0.3, 0.08, 0.18);
+
+      // 0.85–1.25: the copy pops out large, front over back; the chat dims behind.
+      // The chat fades out completely behind the cards (no ghost text under them).
+      tl.fromTo('#receive-dim', { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power2.out' }, 0.85);
+      const s0 = tw / pop.w;
+      tl.fromTo('#receive-front-card', { x: t.x - pop.x, y: t.y - pop.y, scale: s0, rotation: 0, transformOrigin: '0 0' },
+        { x: 0, y: 240, scale: 1, rotation: -3, transformOrigin: '0 0', duration: 0.45, ease: 'expo.out' }, 0.85);
+      tl.fromTo('#receive-back-card', { x: t.x - pop.x, y: t.y - pop.y, scale: s0, rotation: 0, opacity: 0, transformOrigin: '0 0' },
+        { x: 50, y: 0, scale: 0.92, rotation: 4, opacity: 1, transformOrigin: '0 0', duration: 0.5, ease: 'expo.out' }, 0.92);
+      tl.set(['#receive-front-card', '#receive-back-card'], { opacity: 0 }, 0);
+      tl.set('#receive-front-card', { opacity: 1 }, 0.85);
+
+      // Exit: blur swap into the end card.
+      JV.blurOut(tl, ['#receive-cap', '#receive-pop', '#receive-cam'], 1.8, 0.18);
+      window.__timelines["receive"] = tl;
+    })();
+  </script>
+</template>
