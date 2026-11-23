@@ -7,6 +7,7 @@
 //   npm run bench-detect -- --detector /path/to/detect.js   # another module exporting detectCard (served from the repo)
 //   npm run bench-detect -- --opts '{"maxLines":60}'  # options passed to detectCard
 //   npm run bench-detect -- --targets chrome          # quicker: one browser only
+//   npm run bench-detect -- --no-refs                 # without the reference pictures (unknown documents)
 //   npm run bench-detect -- --json out.json           # also write the raw results
 //
 // A case fails when the card isn't found or the worst corner is off by ≥ 1.5% of the photo
@@ -21,6 +22,7 @@ const PORT = 8767, BASE = `http://localhost:${PORT}`;
 const detector = arg('--detector', '/app/js/core/detect.js');
 const only = arg('--only');
 const dopts = JSON.parse(arg('--opts', '{}')); // extra options for detectCard, for experiments
+const useRefs = !args.includes('--no-refs'); // reference pictures of the official templates, as the app passes them
 const targets = (arg('--targets', 'chrome,webkit,chrome-4x')).split(',');
 
 const server = spawn('python3', ['tools/serve.py', String(PORT)], { stdio: 'ignore' });
@@ -37,11 +39,14 @@ for (const target of targets) {
     const cdp = await page.context().newCDPSession(page);
     await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
   }
-  all[target] = await page.evaluate(async ({ detector, only, dopts }) => {
+  all[target] = await page.evaluate(async ({ detector, only, dopts, useRefs }) => {
     const { detectCard } = await import(detector);
     const { runBench } = await import('/tests/e2e/fixtures/bench.js');
-    return runBench(c => detectCard(c, dopts), { only });
-  }, { detector, only, dopts });
+    const { detectionRefs } = await import('/app/js/ui/samples.js');
+    const { officialTemplates } = await import('/app/js/core/templates.js');
+    const refs = useRefs ? await detectionRefs(officialTemplates()) : undefined;
+    return runBench(c => detectCard(c, { ...dopts, refs }), { only });
+  }, { detector, only, dopts, useRefs });
   await browser.close();
 }
 stop();
@@ -49,7 +54,7 @@ stop();
 const fail = r => !r.found || r.errPct >= 1.5;
 const f = (v, d = 2) => v == null ? '  —  ' : v.toFixed(d).padStart(6);
 const first = all[targets[0]];
-console.log(`detector: ${detector} ${JSON.stringify(dopts)}\n`);
+console.log(`detector: ${detector} ${JSON.stringify(dopts)}${useRefs ? ' + reference pictures' : ''}\n`);
 console.log(`${'case'.padEnd(42)} ${'found'.padEnd(5)} ${'err%'.padStart(6)} ${'card%'.padStart(6)}  ${targets.map(t => (t + ' ms').padStart(13)).join(' ')}`);
 first.forEach((r, i) => {
   const times = targets.map(t => f(all[t][i].ms, 0).padStart(13)).join(' ');

@@ -19,6 +19,26 @@ test.describe('detector', () => {
     }
   });
 
+  test('finds the specimen cards in harder scenes, with the reference pictures', async ({ page }) => {
+    test.setTimeout(120_000);
+    await page.goto('/app/');
+    const results = await page.evaluate(async () => {
+      const { detectCard } = await import('/app/js/core/detect.js');
+      const { runBench } = await import('/tests/e2e/fixtures/bench.js');
+      const { detectionRefs } = await import('/app/js/ui/samples.js');
+      const { officialTemplates } = await import('/app/js/core/templates.js');
+      const refs = await detectionRefs(officialTemplates());
+      return (await runBench(c => detectCard(c, { refs }), { reps: 1 })).filter(r => !r.name.startsWith('fake'));
+    });
+    // Known gaps (see `npm run bench-detect`): reported by the benchmark, not required here.
+    const KNOWN_GAPS = ['v4 front · white desk, no shadow', 'v4 back · cluttered, small'];
+    for (const r of results) {
+      if (KNOWN_GAPS.includes(r.name)) continue;
+      expect(r.found, `${r.name}: not found`).toBe(true);
+      expect(r.errPct, `${r.name}: error ${r.errPct?.toFixed(2)}%`).toBeLessThan(1.5);
+    }
+  });
+
   for (const [file, expected] of [
     ['dni_es_v3_front', 'dni_es_v3'], ['dni_es_v3_back', 'dni_es_v3'],
     ['dni_es_v4_front', 'dni_es_v4'], ['dni_es_v4_back', 'dni_es_v4'],

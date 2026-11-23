@@ -8,6 +8,7 @@
 //    and its aspect ratio (ID-1 ≈ 1.586).
 
 import { createCanvas } from './canvas.js';
+import { matchQuad, alignQuad } from './card-match.js';
 
 const CARD_RATIO = 85.6 / 54;
 const NB = 24; // orientation bins of the edge support maps (7.5° each)
@@ -19,6 +20,10 @@ const DEFAULTS = {
   thrMin: 10, thrRel: 0.06, // edge threshold: max(thrMin, thrRel × 98th percentile of edge strength)
   minVotesF: 0.1, // a line needs this × min(W, H) votes
   maxLines: 80,
+  minPol: 0.3, // colour-step consistency a side needs (grids and fabric flip sign: ~0)
+  matchPool: 30, // with reference pictures: how many distinct top candidates are compared with them
+  matchMin: 0.5, // best match below this: no known card in the photo, geometry alone decides
+  alignMin: 0.2, alignTop: 1, // no clear match: align the best partial matches (≥ alignMin) to the reference
 };
 
 const angDiff = (a, b) => { const d = Math.abs(a - b) % Math.PI; return Math.min(d, Math.PI - d); };
@@ -80,7 +85,7 @@ function edgeMap(src, o) {
   vals.sort((a, b) => a - b);
   const thr = Math.max(o.thrMin, vals[Math.floor(vals.length * 0.98)] * o.thrRel); // relative to the strongest edges
   for (let i = 0; i < N; i++) if (edge[i] && mag[i] < thr) edge[i] = 0;
-  return { k, W, H, chans, mag, edge, ang, thr };
+  return { k, W, H, rgba, chans, mag, edge, ang, thr };
 }
 
 /** Gradient-oriented Hough transform: the strongest distinct lines {t (normal angle), r, v (votes)}. */
@@ -241,7 +246,7 @@ export function cardCandidates(src, opts = {}) {
       const p = X[a1 * nL + b], q = X[a2 * nL + b];
       if (!inBounds(p) || !inBounds(q)) continue;
       const sg = segment(prof[b], p, q);
-      if (sg.cov < 0.3 || sg.pol < 0.45) continue;
+      if (sg.cov < 0.3 || sg.pol < o.minPol) continue;
       bs.push({ b, sg });
     }
     for (let u = 0; u < bs.length; u++) for (let w = u + 1; w < bs.length; w++) {
@@ -259,8 +264,8 @@ export function cardCandidates(src, opts = {}) {
       const areaFrac = Math.abs(area) / 2 / (W * H);
       if (areaFrac < 0.015 || areaFrac > 0.98) continue;
       // sides: q0→q1 on a1, q1→q2 on b2, q2→q3 on a2, q3→q0 on b1
-      const s0 = segment(prof[a1], q[0], q[1]); if (s0.cov < 0.3 || s0.pol < 0.45) continue;
-      const s2 = segment(prof[a2], q[2], q[3]); if (s2.cov < 0.3 || s2.pol < 0.45) continue;
+      const s0 = segment(prof[a1], q[0], q[1]); if (s0.cov < 0.3 || s0.pol < o.minPol) continue;
+      const s2 = segment(prof[a2], q[2], q[3]); if (s2.cov < 0.3 || s2.pol < o.minPol) continue;
       const cov = [s0.cov, bs[w].sg.cov, s2.cov, bs[u].sg.cov];
       const minC = Math.min(...cov), meanC = (cov[0] + cov[1] + cov[2] + cov[3]) / 4;
       if (meanC < 0.5) continue;
@@ -300,20 +305,94 @@ export function orderQuad(quad, k, src) {
   return q.map(p => [Math.min(Math.max(p[0], 0), src.width), Math.min(Math.max(p[1], 0), src.height)]);
 }
 
-export function detectCard(src, opts = {}) {
-  const C = cardCandidates(src, opts);
-  if (!C) return null;
-  const { cands, k } = C;
-  let best = cands[0] || null;
-  // Inner structures (photo, header...) form rectangles inside the card that share lines with it.
-  // If a bigger candidate contains the best one and shares ≥ 2 lines, it's the real card border.
-  for (let guard = 0; best && guard < 5; guard++) {
-    const outer = cands.find(c => c !== best && c.score >= 0.5 * best.score && c.areaFrac > best.areaFrac * 1.05 &&
-      c.lines.filter(l => best.lines.includes(l)).length >= 2 && best.quad.every(p => inside(p, c.quad, 3)));
-    if (!outer) break;
-    best = outer;
+/** Same corners, clockwise in image coordinates (y down). */
+function clockwise(q) {
+  let a = 0; for (let m = 0; m < 4; m++) a += q[m][0] * q[(m + 1) % 4][1] - q[(m + 1) % 4][0] * q[m][1];
+  return a < 0 ? [...q].reverse() : q;
+}
+
+/** Largest corner distance between two clockwise quads, over the 4 rotations. */
+function quadDist(p, q) {
+  let best = Infinity;
+  for (let r = 0; r < 4; r++) {
+    let d = 0; for (let i = 0; i < 4; i++) d = Math.max(d, Math.hypot(p[i][0] - q[(i + r) % 4][0], p[i][1] - q[(i + r) % 4][1]));
+    best = Math.min(best, d);
   }
-  if (opts.debug) detectCard.lastDebug = { k, W: C.W, H: C.H, thr: C.E.thr, lines: C.lines.map(l => ({ deg: +(l.t * 180 / Math.PI).toFixed(1), r: Math.round(l.r / k), v: Math.round(l.v) })), pairs: C.pairs, cands: cands.slice(0, 6).map(c => ({ score: +c.score.toFixed(3), cov: c.cov.map(v => +v.toFixed(2)), ratio: +c.ratio.toFixed(2), areaFrac: +c.areaFrac.toFixed(3), q: c.quad.map(p => p.map(v => Math.round(v / k))) })), chosen: best && best.quad.map(p => p.map(v => Math.round(v / k))) };
+  return best;
+}
+
+/** Weight of a reference match in the final score: wrong rectangles (≲ 0.5) all but vanish. */
+const matchWeight = m => Math.max(0.01, (m - 0.2) / 0.8) ** 2;
+
+/**
+ * Find the card in a photo. Returns its corners (top-left, top-right, bottom-right, bottom-left,
+ * in source pixels) or null.
+ * opts.refs: signatures of the reference pictures (card-match.js). When given and one of them
+ * matches a candidate, the best geometric candidate that also looks like a known card wins, and
+ * the corners come in the card's reading orientation (`match` tells which reference).
+ * @returns {null | { quad: number[][], score: number, coverage: number, match?: { score: number, ref: string | null } }}
+ */
+export function detectCard(src, opts = {}) {
+  const o = { ...DEFAULTS, ...opts };
+  const C = cardCandidates(src, o);
+  if (!C) return null;
+  const { cands, k, W, H } = C;
+  let best = cands[0] || null, matched = null;
+
+  if (o.refs?.length && cands.length) {
+    // distinct candidates (best of each cluster of near-identical quads), compared with the references
+    const pool = [], tol = 0.008 * Math.hypot(W, H);
+    for (const c of cands) {
+      const q = clockwise(c.quad);
+      if (pool.some(p => quadDist(p.q, q) < tol)) continue;
+      pool.push({ c, q });
+      if (pool.length >= o.matchPool) break;
+    }
+    const px = { data: C.E.rgba, width: W, height: H };
+    // In shape-score order; matchWeight ≤ 1, so once a shape score is below the best combined
+    // score so far, no later candidate can win: stop matching there.
+    let bestComb = 0;
+    for (let i = 0; i < pool.length; i++) {
+      if (pool[i].c.score <= bestComb) { pool.length = i; break; }
+      const p = pool[i]; p.m = matchQuad(px, p.q, o.refs);
+      bestComb = Math.max(bestComb, p.c.score * matchWeight(p.m.score));
+    }
+    let top = Math.max(...pool.map(p => p.m.score));
+    if (top < o.matchMin && top >= o.alignMin) {
+      // Partial matches: candidates with one side on a wrong line (a paper edge, a grid line).
+      // Align the best few to their reference and keep them if they now match.
+      const sigs = Object.fromEntries(o.refs.map(r => [r.id, r.sig]));
+      const tries = [...pool].sort((a, b) => b.m.score - a.m.score).slice(0, o.alignTop);
+      if (opts.debug) detectCard.lastAlignFrom = tries.map(p => p.m.score);
+      for (const p of tries) {
+        const r = p.m.rot, start = [0, 1, 2, 3].map(i => p.q[(i + r) % 4]);
+        const al = alignQuad(px, start, sigs[p.m.ref]);
+        p.q = al.quad; p.m = { score: al.score, rot: 0, ref: p.m.ref }; p.aligned = true;
+      }
+      top = Math.max(...pool.map(p => p.m.score));
+      if (opts.debug) detectCard.lastAlign = tries.map(p => p.m.score);
+    }
+    if (top >= o.matchMin) {
+      matched = pool.reduce((a, b) => (b.c.score * matchWeight(b.m.score) > a.c.score * matchWeight(a.m.score) ? b : a));
+      best = matched.c;
+    }
+  }
+  if (!matched) {
+    // Inner structures (photo, header...) form rectangles inside the card that share lines with it.
+    // If a bigger candidate contains the best one and shares ≥ 2 lines, it's the real card border.
+    for (let guard = 0; best && guard < 5; guard++) {
+      const outer = cands.find(c => c !== best && c.score >= 0.5 * best.score && c.areaFrac > best.areaFrac * 1.05 &&
+        c.lines.filter(l => best.lines.includes(l)).length >= 2 && best.quad.every(p => inside(p, c.quad, 3)));
+      if (!outer) break;
+      best = outer;
+    }
+  }
+  if (opts.debug) detectCard.lastDebug = { k, W, H, thr: C.E.thr, lines: C.lines.map(l => ({ deg: +(l.t * 180 / Math.PI).toFixed(1), r: Math.round(l.r / k), v: Math.round(l.v) })), pairs: C.pairs, cands: cands.slice(0, 6).map(c => ({ score: +c.score.toFixed(3), cov: c.cov.map(v => +v.toFixed(2)), ratio: +c.ratio.toFixed(2), areaFrac: +c.areaFrac.toFixed(3), q: c.quad.map(p => p.map(v => Math.round(v / k))) })), chosen: best && best.quad.map(p => p.map(v => Math.round(v / k))), match: matched && matched.m };
   if (!best) return null;
+  if (matched) {
+    const q = matched.q, r = matched.m.rot;
+    const quad = [0, 1, 2, 3].map(i => q[(i + r) % 4]).map(p => [Math.min(Math.max(p[0] / k, 0), src.width), Math.min(Math.max(p[1] / k, 0), src.height)]);
+    return { quad, score: best.score, coverage: best.coverage, match: { score: matched.m.score, ref: matched.m.ref } };
+  }
   return { quad: orderQuad(best.quad, k, src), score: best.score, coverage: best.coverage };
 }
