@@ -66,9 +66,14 @@ export class CropEditor {
   rotate() { this.quad.unshift(/** @type {number[]} */ (this.quad.pop())); this.draw(); }
   /** @param {number[][]} q */
   setQuad(q) { this.quad = q.map(p => [...p]); this.draw(); }
-  /** Try to find the card automatically. @returns {boolean} found */
-  autoDetect() {
-    const r = detectCard(this.src);
+  /**
+   * Try to find the card automatically. With the reference pictures of the known documents
+   * (samples.js detectionRefs), other rectangles are told apart and the corners come in reading order.
+   * @param {import('../core/card-match.js').CardRef[]} [refs]
+   * @returns {boolean} found
+   */
+  autoDetect(refs) {
+    const r = detectCard(this.src, { refs });
     if (r) this.setQuad(r.quad);
     return !!r;
   }

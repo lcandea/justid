@@ -9,7 +9,7 @@ import { t, applyI18n, mountLangSwitch } from './i18n.js';
 import { loadImageFile } from './image-file.js';
 import { warpToCard } from '../core/image.js';
 import { CropEditor } from './crop-editor.js';
-import { loadSampleImage } from './samples.js';
+import { loadSampleImage, detectionRefs } from './samples.js';
 import { slug, fieldColor, toVersionModule } from '../core/templates.js';
 import { allTemplates, templateName, fieldLabel, normalizeCustom, saveCustomTemplate, toFlatJson } from './templates.js';
 
@@ -216,7 +216,8 @@ $('#img-file').addEventListener('change', async e => {
   $('#board-wrap').classList.add('hidden');
   $('#crop-wrap').classList.remove('hidden'); $('#crop-bar').classList.remove('hidden');
   M.editor?.destroy(); M.editor = new CropEditor($('#crop'), M.cropSrc, { topLabel: t('crop.top_label') });
-  M.editor.autoDetect();
+  const ed = M.editor, refs = await detectionRefs(allTemplates());
+  if (M.editor === ed) ed.autoDetect(refs);
 });
 function closeCrop() {
   M.editor?.destroy(); M.editor = null;

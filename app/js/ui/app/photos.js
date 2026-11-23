@@ -7,6 +7,8 @@ import { warpToCard } from '../../core/image.js';
 import { assetUrl } from '../../core/templates.js';
 import { requestNeedsBack } from '../../core/flow.js';
 import { CropEditor } from '../crop-editor.js';
+import { detectionRefs } from '../samples.js';
+import { allTemplates } from '../templates.js';
 import { state, sides, sideName, request, reqCtx, handlers } from './state.js';
 import { renderAll } from './render.js';
 import { updateNav } from './nav.js';
@@ -94,7 +96,11 @@ function openCrop(side) {
 function setCropMsg(found) {
   $('#crop-msg').textContent = t(found === null ? 'crop.msg_adjust' : found ? 'crop.msg_found' : 'crop.msg_not_found');
 }
-function cropDetect() { if (crop.editor) setCropMsg(crop.editor.autoDetect()); }
+async function cropDetect() {
+  const ed = crop.editor; if (!ed) return;
+  const refs = await detectionRefs(allTemplates());
+  if (crop.editor === ed) setCropMsg(ed.autoDetect(refs)); // unless the overlay was closed meanwhile
+}
 export const isCropOpen = () => !$('#crop-ov').classList.contains('hidden');
 export function closeCropUI() {
   crop.editor?.destroy(); crop.editor = null;

@@ -8,3 +8,6 @@ playwright-report/
 *_debug.png
 _site/
 .wrangler/
+
+# Real photos for the detector benchmark: never committed (see tools/mark-corners.html)
+tests/private/

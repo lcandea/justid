@@ -14,7 +14,8 @@ import { createCanvas } from './canvas.js';
 /** @typedef {{ full: Float32Array, head: Float32Array }} Signature */
 /** @typedef {(path: string) => Promise<Signature | null>} SignatureLoader */
 
-const SIG_W = 64, SIG_H = 40, SIG_HEAD_ROWS = 9, SIG_BOX = 4; // box radius -> 9×9 window
+export const SIG_W = 64, SIG_H = 40;
+const SIG_HEAD_ROWS = 9, SIG_BOX = 4; // box radius -> 9×9 window
 const SIG_HEAD_WEIGHT = 0.5;
 const ID_MIN_SCORE = 0.35, ID_MIN_MARGIN = 0.05; // below this we don't trust the guess
 
@@ -38,20 +39,32 @@ export function docSignature(src) {
   const d = ctx.getImageData(0, 0, SIG_W, SIG_H).data;
   const g = new Float32Array(SIG_W * SIG_H);
   for (let i = 0; i < g.length; i++) g[i] = 0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2];
-  const hp = new Float32Array(g.length);
-  for (let y = 0; y < SIG_H; y++) for (let x = 0; x < SIG_W; x++) {
-    let s = 0, n = 0;
-    for (let dy = -SIG_BOX; dy <= SIG_BOX; dy++) for (let dx = -SIG_BOX; dx <= SIG_BOX; dx++) {
-      const yy = Math.min(SIG_H - 1, Math.max(0, y + dy)), xx = Math.min(SIG_W - 1, Math.max(0, x + dx));
-      s += g[yy * SIG_W + xx]; n++;
+  return greySignature(g);
+}
+
+/** Signature of a SIG_W × SIG_H grey card (row-major). @param {Float32Array} g @returns {Signature} */
+export function greySignature(g) {
+  // local mean over a (2·SIG_BOX+1)² window, edges replicated: summed-area table of the padded image
+  const B = SIG_BOX, PW = SIG_W + 2 * B + 1, PH = SIG_H + 2 * B + 1, sat = new Float64Array(PW * PH);
+  for (let y = 1; y < PH; y++) {
+    const sy = Math.min(SIG_H - 1, Math.max(0, y - 1 - B));
+    let row = 0;
+    for (let x = 1; x < PW; x++) {
+      row += g[sy * SIG_W + Math.min(SIG_W - 1, Math.max(0, x - 1 - B))];
+      sat[y * PW + x] = sat[(y - 1) * PW + x] + row;
     }
+  }
+  const n = (2 * B + 1) ** 2, hp = new Float32Array(g.length);
+  for (let y = 0; y < SIG_H; y++) for (let x = 0; x < SIG_W; x++) {
+    const x1 = x + 2 * B + 1, y1 = y + 2 * B + 1;
+    const s = sat[y1 * PW + x1] - sat[y * PW + x1] - sat[y1 * PW + x] + sat[y * PW + x];
     hp[y * SIG_W + x] = g[y * SIG_W + x] - s / n;
   }
   return { full: normalizeVec(hp.slice()), head: normalizeVec(hp.slice(0, SIG_HEAD_ROWS * SIG_W)) };
 }
 
-/** @param {Signature} a @param {Signature} b */
-function signatureScore(a, b) {
+/** Similarity of two signatures, about -1..1 (same card ≈ 0.8–1). @param {Signature} a @param {Signature} b */
+export function signatureScore(a, b) {
   let f = 0, h = 0;
   for (let i = 0; i < a.full.length; i++) f += a.full[i] * b.full[i];
   for (let i = 0; i < a.head.length; i++) h += a.head[i] * b.head[i];
