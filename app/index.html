@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111317">
+<!--
+  Content Security Policy: the core privacy guarantee.
+  connect-src 'none' -> the page cannot send anything anywhere (no fetch, XHR, WebSocket, beacons).
+  form-action 'none' -> no form submissions. Scripts, styles and images only from this same site.
+-->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<title data-i18n="meta.title">JustID</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body class="flow-body">
+<noscript><p class="noscript" data-i18n="noscript">Esta herramienta necesita JavaScript. Todo se ejecuta en tu dispositivo: no se envía nada a ningún servidor.</p></noscript>
+<header class="top">
+  <div class="brand">
+    <strong>JustID <small class="tagline" data-i18n="brand.tagline"></small></strong>
+    <div class="brand-actions">
+      <div class="lang-switch" id="lang"></div>
+      <button type="button" class="lock" id="lock-btn" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="currentColor" d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5Zm-3 8V7a3 3 0 1 1 6 0v3H9Z"/></svg><span data-i18n="lock.badge"></span></button>
+    </div>
+  </div>
+  <ol class="steps" id="steps">
+    <li data-s="0"><span>1</span><b data-i18n="steps.photos"></b></li>
+    <li data-s="1"><span>2</span><b data-i18n="steps.hide"></b></li>
+    <li data-s="2"><span>3</span><b data-i18n="steps.purpose"></b></li>
+    <li data-s="3"><span>4</span><b data-i18n="steps.share"></b></li>
+  </ol>
+</header>
+
+<main class="flow">
+  <!-- Shown on steps 1-2 when the photo looks like a different document version -->
+  <div class="tpl-warn hidden" id="tpl-warn" role="alert"></div>
+
+  <!-- Step 1: photos -->
+  <section class="step" data-step="0">
+    <h2 data-i18n="photos.title"></h2>
+    <p class="muted" data-i18n="photos.tip"></p>
+    <div class="slots">
+      <div class="slot" id="slot-front"></div>
+      <div class="slot" id="slot-back"></div>
+    </div>
+    <p class="status warn" id="photo-status" role="status"></p>
+    <details class="tpl-box">
+      <summary><span data-i18n="tpl.summary"></span> <span id="tpl-name"></span><span class="tpl-auto hidden" id="tpl-auto" data-i18n="tpl.detected"></span></summary>
+      <select id="tpl"></select>
+      <div class="tpl-pv" id="tpl-pv"></div>
+      <div class="row" style="margin-top:8px">
+        <label class="btn file-btn"><span data-i18n="tpl.import"></span><input type="file" id="tpl-file" accept="application/json,.json"></label>
+        <a class="btn" href="editor.html" data-i18n="tpl.editor"></a>
+      </div>
+      <p class="muted" id="tpl-note"></p>
+    </details>
+  </section>
+
+  <!-- Step 2: choose what to hide -->
+  <section class="step hidden" data-step="1">
+    <div class="pv-sticky">
+      <div class="seg small hidden" id="pv-side"><button type="button" data-v="front" class="on" data-i18n="side.front"></button><button type="button" data-v="back" data-i18n="side.back"></button></div>
+      <div class="pv" id="pv-hide"></div>
+      <p class="hint" data-i18n="hide.hint"></p>
+    </div>
+    <div id="fields"></div>
+    <h3 data-i18n="hide.method"></h3>
+    <div class="seg" id="mode"><button type="button" data-v="pixel" class="on" data-i18n="hide.pixel"></button><button type="button" data-v="solid" data-i18n="hide.solid"></button></div>
+  </section>
+
+  <!-- Step 3: purpose (watermark) -->
+  <section class="step hidden" data-step="2">
+    <h2 data-i18n="purpose.title"></h2>
+    <p class="muted" data-i18n="purpose.intro"></p>
+    <input type="text" id="purpose" data-i18n-attr="placeholder:purpose.placeholder" maxlength="80" autocomplete="off" enterkeyhint="next">
+    <div class="chips" id="chips"></div>
+    <label class="muted lbl" for="recipient" data-i18n="purpose.recipient_label"></label>
+    <input type="text" id="recipient" data-i18n-attr="placeholder:purpose.recipient_placeholder" maxlength="60" autocomplete="off" enterkeyhint="done">
+    <div class="pv" id="pv-wm" style="margin-top:14px"></div>
+  </section>
+
+  <!-- Step 4: share -->
+  <section class="step hidden" data-step="3">
+    <h2 data-i18n="share.title"></h2>
+    <div class="final" id="pv-final"></div>
+    <h3 data-i18n="share.color"></h3>
+    <div class="seg" id="color"><button type="button" data-v="color" class="on" data-i18n="share.color_original"></button><button type="button" data-v="bw" data-i18n="share.color_bw"></button></div>
+    <p class="summary" id="summary"></p>
+    <div class="share-actions">
+      <button type="button" class="primary big" id="btn-share" data-i18n="share.share_pdf"></button>
+      <button type="button" class="big" id="btn-dl" data-i18n="share.download_pdf"></button>
+    </div>
+    <p class="status" id="out-status" role="status"></p>
+  </section>
+</main>
+
+<nav class="bottom-bar">
+  <button type="button" id="nav-back" data-i18n="nav.back"></button>
+  <button type="button" class="primary" id="nav-next"></button>
+</nav>
+
+<!-- Full-screen framing (crop) -->
+<div class="overlay hidden" id="crop-ov" role="dialog" aria-modal="true" aria-labelledby="crop-title">
+  <div class="ov-head"><strong id="crop-title"></strong><span id="crop-msg"></span></div>
+  <div class="ov-canvas"><canvas id="crop-canvas"></canvas></div>
+  <div class="ov-bar">
+    <button type="button" id="crop-cancel" data-i18n="crop.cancel"></button>
+    <button type="button" id="crop-rot" data-i18n="crop.rotate"></button>
+    <button type="button" id="crop-det" data-i18n="crop.detect"></button>
+    <button type="button" id="crop-full" data-i18n="crop.full"></button>
+    <button type="button" class="primary" id="crop-use" data-i18n="crop.use"></button>
+  </div>
+</div>
+
+<!-- Privacy info, opened from the lock badge -->
+<dialog class="privacy" id="privacy" aria-labelledby="privacy-title">
+  <h2 id="privacy-title" data-i18n="privacy.title"></h2>
+  <p data-i18n="privacy.intro"></p>
+  <ul>
+    <li data-i18n="privacy.point1"></li>
+    <li data-i18n="privacy.point2"></li>
+    <li data-i18n="privacy.point3"></li>
+    <li data-i18n="privacy.point4"></li>
+  </ul>
+  <p data-i18n="privacy.open_source"></p>
+  <p><a id="privacy-repo" target="_blank" rel="noopener noreferrer" data-i18n="privacy.repo_link"></a></p>
+  <button type="button" class="primary" id="privacy-close" data-i18n="privacy.close"></button>
+</dialog>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

@@ -7,7 +7,7 @@ For every img/*.webp (originals are never modified):
   3. level brightness (black/white points) so all references look alike,
   4. cut the ISO/IEC 7810 ID-1 rounded corners out with transparency.
 
-Output: img/ref/<same name>.webp with alpha, ready to show on any background.
+Output: templates/ref/<same name>.webp with alpha, ready to show on any background.
 
 Usage (from tools/):  uv run normalize_refs.py [--debug]
 """
@@ -19,7 +19,7 @@ from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "img"
-OUT = ROOT / "img" / "ref"
+OUT = ROOT / "templates" / "ref"
 CARD_W, CARD_H = 1012, 638             # must match js/common.js
 RADIUS = round(3.18 / 85.6 * CARD_W)   # ID-1 corner radius (3.18 mm)
 SS = 4                                 # mask supersampling (anti-aliased corners)

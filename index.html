@@ -2,127 +2,14 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#111317">
-<!-- Ninguna petición de red: el navegador bloquea cualquier envío de datos -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
-<title>Copia segura del DNI</title>
-<link rel="stylesheet" href="css/styles.css?v=17">
-<link rel="stylesheet" href="css/flow.css?v=17">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="refresh" content="0; url=app/">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<title>JustID</title>
 </head>
-<body class="flow-body">
-<header class="top">
-  <div class="brand">
-    <strong>Copia segura del DNI</strong>
-    <button type="button" class="lock" id="lock-btn" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="currentColor" d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5Zm-3 8V7a3 3 0 1 1 6 0v3H9Z"/></svg>Todo en tu móvil</button>
-  </div>
-  <ol class="steps" id="steps">
-    <li data-s="0"><span>1</span>Fotos</li>
-    <li data-s="1"><span>2</span>Ocultar</li>
-    <li data-s="2"><span>3</span>Motivo</li>
-    <li data-s="3"><span>4</span>Compartir</li>
-  </ol>
-</header>
-
-<main class="flow">
-  <!-- Shown on steps 1-2 when the photo looks like a different document version -->
-  <div class="tpl-warn hidden" id="tpl-warn" role="alert"></div>
-  <!-- Paso 1: fotos -->
-  <section class="step" data-step="0">
-    <h2>Haz una foto de cada cara</h2>
-    <p class="muted">Sobre una mesa lisa que contraste y con buena luz. Reconoceremos automáticamente la versión de tu DNI. El reverso es opcional.</p>
-    <div class="slots">
-      <div class="slot" id="slot-front"></div>
-      <div class="slot" id="slot-back"></div>
-    </div>
-    <details class="tpl-box">
-      <summary>Tipo de documento: <span id="tpl-name"></span><span class="tpl-auto hidden" id="tpl-auto">detectado</span></summary>
-      <select id="tpl"></select>
-      <div class="tpl-pv" id="tpl-pv"></div>
-      <div class="row" style="margin-top:8px">
-        <label class="btn file-btn">Importar plantilla .json<input type="file" id="tpl-file" accept="application/json,.json"></label>
-        <a class="btn" href="marcador.html">Marcador de zonas</a>
-      </div>
-      <p class="muted" id="tpl-note"></p>
-    </details>
-  </section>
-
-  <!-- Paso 2: ocultar -->
-  <section class="step hidden" data-step="1">
-    <div class="pv-sticky">
-      <div class="seg small hidden" id="pv-side"><button data-v="front" class="on">Anverso</button><button data-v="back">Reverso</button></div>
-      <div class="pv" id="pv-hide"></div>
-      <p class="hint">Toca un dato en la imagen para taparlo o destaparlo.</p>
-    </div>
-    <div id="fields"></div>
-    <h3>Cómo ocultar</h3>
-    <div class="seg" id="mode"><button data-v="pixel" class="on">Pixelado</button><button data-v="solid">Tapado sólido</button></div>
-  </section>
-
-  <!-- Paso 3: motivo -->
-  <section class="step hidden" data-step="2">
-    <h2>¿Para qué lo compartes?</h2>
-    <p class="muted">Se escribe como marca de agua sobre todo el documento, para que no sirva para otra cosa.</p>
-    <input type="text" id="motivo" placeholder="Escribe el motivo" maxlength="80" autocomplete="off" enterkeyhint="next">
-    <div class="chips" id="chips"></div>
-    <label class="muted lbl" for="dest">¿A quién se lo envías? (opcional)</label>
-    <input type="text" id="dest" placeholder="p. ej. Inmobiliaria ABC" maxlength="60" autocomplete="off" enterkeyhint="done">
-    <div class="pv" id="pv-wm" style="margin-top:14px"></div>
-  </section>
-
-  <!-- Paso 4: compartir -->
-  <section class="step hidden" data-step="3">
-    <h2>Listo para compartir</h2>
-    <div class="final" id="pv-final"></div>
-    <h3>Color</h3>
-    <div class="seg" id="color"><button data-v="color" class="on">Color original</button><button data-v="bw">Blanco y negro</button></div>
-    <p class="summary" id="summary"></p>
-    <div class="share-actions">
-      <button class="primary big" id="btn-share">Compartir PDF</button>
-      <button class="big" id="btn-dl">Descargar PDF</button>
-    </div>
-    <p class="status" id="out-status"></p>
-  </section>
-</main>
-
-<nav class="bottom-bar">
-  <button id="nav-back">Atrás</button>
-  <button class="primary" id="nav-next">Siguiente</button>
-</nav>
-
-<!-- Encuadre a pantalla completa -->
-<div class="overlay hidden" id="crop-ov" role="dialog" aria-modal="true">
-  <div class="ov-head"><strong id="crop-title"></strong><span id="crop-msg"></span></div>
-  <div class="ov-canvas"><canvas id="crop-canvas"></canvas></div>
-  <div class="ov-bar">
-    <button id="crop-cancel">Cancelar</button>
-    <button id="crop-rot">Girar</button>
-    <button id="crop-det">Detectar</button>
-    <button id="crop-full">Entera</button>
-    <button class="primary" id="crop-use">Usar</button>
-  </div>
-</div>
-
-<!-- Privacy info, opened from the "Todo en tu móvil" badge -->
-<dialog class="privacy" id="privacy" aria-labelledby="privacy-title">
-  <h2 id="privacy-title">Tus datos no salen de tu móvil</h2>
-  <p>Todo el proceso ocurre en tu dispositivo: las fotos, el recorte, el reconocimiento de la versión del DNI, el pixelado y el PDF se generan aquí mismo, en tu navegador.</p>
-  <ul>
-    <li>No subimos tus fotos ni tus datos a ningún servidor.</li>
-    <li>La web tiene bloqueado por diseño cualquier envío de datos por internet.</li>
-    <li>No usamos cookies, analíticas ni rastreadores.</li>
-    <li>Tus fotos no se guardan: al cerrar la página desaparecen.</li>
-  </ul>
-  <p>Valoramos tu privacidad, y por eso no te pedimos que nos creas: el proyecto es de código abierto y puedes revisar el código tú mismo.</p>
-  <p id="privacy-repo"></p>
-  <button type="button" class="primary" id="privacy-close">Entendido</button>
-</dialog>
-
-<script src="js/common.js?v=17"></script>
-<script src="js/detect.js?v=17"></script>
-<script src="js/templates.js?v=17"></script>
-<script src="js/identify.js?v=17"></script>
-<script src="js/pdf.js?v=17"></script>
-<script src="js/app.js?v=17"></script>
+<body>
+<!-- Temporary entry point until the landing page exists: go straight to the app. -->
+<p><a href="app/">JustID</a></p>
 </body>
 </html>

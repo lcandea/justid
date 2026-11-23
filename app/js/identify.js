@@ -1,30 +1,40 @@
-'use strict';
+// @ts-check
 // Document type identification by comparing a straightened card against each template's
 // reference pictures (template.sample.front/back). Runs fully in the browser.
 //
-// Signature: the card downscaled to SIG_W x SIG_H grey, high-passed (minus a local box mean)
+// Signature: the card downscaled to SIG_W × SIG_H grey, high-passed (minus a local box mean)
 // so lighting, white balance and blur matter little, then zero-mean / unit-norm.
 // The header strip gets its own signature: it carries the most distinctive layout (logos,
 // flags, title) and contains no personal data, so it varies least between people.
+import { assetUrl } from './templates.js';
 
-const SIG_W = 64, SIG_H = 40, SIG_HEAD_ROWS = 9, SIG_BOX = 4; // box radius -> 9x9 window
+/** @typedef {import('./templates.js').ResolvedTemplate} ResolvedTemplate */
+/** @typedef {{ full: Float32Array, head: Float32Array }} Signature */
+
+const SIG_W = 64, SIG_H = 40, SIG_HEAD_ROWS = 9, SIG_BOX = 4; // box radius -> 9×9 window
 const SIG_HEAD_WEIGHT = 0.5;
 const ID_MIN_SCORE = 0.35, ID_MIN_MARGIN = 0.05; // below this we don't trust the guess
 
-const sampleImages = new Map(); // url -> Promise<HTMLImageElement | null>
+/** @type {Map<string, Promise<HTMLImageElement | null>>} */
+const sampleImages = new Map();
 
-function loadSampleImage(url) {
-  if (!sampleImages.has(url)) {
-    sampleImages.set(url, new Promise(resolve => {
+/** Load (and cache) a reference picture. Resolves to null if it can't be loaded. @param {string} path */
+export function loadSampleImage(path) {
+  const url = assetUrl(path);
+  let p = sampleImages.get(url);
+  if (!p) {
+    p = new Promise(resolve => {
       const img = new Image();
       img.onload = () => resolve(img);
       img.onerror = () => resolve(null);
       img.src = url;
-    }));
+    });
+    sampleImages.set(url, p);
   }
-  return sampleImages.get(url);
+  return p;
 }
 
+/** @param {Float32Array} a */
 function normalizeVec(a) {
   let m = 0; for (const v of a) m += v; m /= a.length;
   let n = 0; for (let i = 0; i < a.length; i++) { a[i] -= m; n += a[i] * a[i]; }
@@ -33,9 +43,10 @@ function normalizeVec(a) {
   return a;
 }
 
-function docSignature(src) {
+/** @param {CanvasImageSource} src @returns {Signature} */
+export function docSignature(src) {
   const c = document.createElement('canvas'); c.width = SIG_W; c.height = SIG_H;
-  const ctx = c.getContext('2d', { willReadFrequently: true });
+  const ctx = /** @type {CanvasRenderingContext2D} */ (c.getContext('2d', { willReadFrequently: true }));
   // Reference pictures have transparent corners; photos have background there. Same neutral fill for both.
   ctx.fillStyle = '#c8c8c8'; ctx.fillRect(0, 0, SIG_W, SIG_H);
   ctx.imageSmoothingQuality = 'high';
@@ -55,6 +66,7 @@ function docSignature(src) {
   return { full: normalizeVec(hp.slice()), head: normalizeVec(hp.slice(0, SIG_HEAD_ROWS * SIG_W)) };
 }
 
+/** @param {Signature} a @param {Signature} b */
 function signatureScore(a, b) {
   let f = 0, h = 0;
   for (let i = 0; i < a.full.length; i++) f += a.full[i] * b.full[i];
@@ -62,29 +74,37 @@ function signatureScore(a, b) {
   return (1 - SIG_HEAD_WEIGHT) * f + SIG_HEAD_WEIGHT * h;
 }
 
-const refSignatures = new Map(); // url -> Promise<signature | null>
-function sampleSignature(url) {
-  if (!refSignatures.has(url)) refSignatures.set(url, loadSampleImage(url).then(img => img && docSignature(img)));
-  return refSignatures.get(url);
+/** @type {Map<string, Promise<Signature | null>>} */
+const refSignatures = new Map();
+/** @param {string} path */
+function sampleSignature(path) {
+  let p = refSignatures.get(path);
+  if (!p) { p = loadSampleImage(path).then(img => img && docSignature(img)); refSignatures.set(path, p); }
+  return p;
 }
 
-// cards: { front?: canvas, back?: canvas } (already straightened). Scores are averaged over the
-// sides both the photo set and the template have. Returns { template, score, margin, ranking }
-// or null when nothing can be compared; `confident` tells whether the guess is safe to apply.
-async function identifyDocument(cards, templates) {
-  const sides = ['front', 'back'].filter(s => cards[s]);
-  const mine = Object.fromEntries(sides.map(s => [s, docSignature(cards[s])]));
+/**
+ * Rank templates by similarity to the photographed card(s). Scores are averaged over the sides
+ * both the photos and the template have; the front weighs double (both DNI backs share the
+ * chip + MRZ layout). `confident` tells whether the best guess is safe to act on.
+ * @param {{ front?: HTMLCanvasElement | null, back?: HTMLCanvasElement | null }} cards straightened sides
+ * @param {ResolvedTemplate[]} templates
+ * @returns {Promise<null | { template: ResolvedTemplate, score: number, margin: number, confident: boolean,
+ *   ranking: { template: ResolvedTemplate, score: number }[] }>}
+ */
+export async function identifyDocument(cards, templates) {
+  const sides = /** @type {('front' | 'back')[]} */ (['front', 'back']).filter(s => cards[s]);
+  const mine = Object.fromEntries(sides.map(s => [s, docSignature(/** @type {HTMLCanvasElement} */ (cards[s]))]));
   const ranking = [];
-  for (const t of templates) {
+  for (const tpl of templates) {
     let sum = 0, n = 0;
     for (const s of sides) {
-      const url = t.sample?.[s]; if (!url) continue;
-      const ref = await sampleSignature(url); if (!ref) continue;
-      // the front is far more distinctive than the back (both backs share chip + MRZ layout)
+      const path = tpl.sample?.[s]; if (!path) continue;
+      const ref = await sampleSignature(path); if (!ref) continue;
       const w = s === 'front' ? 2 : 1;
       sum += w * signatureScore(mine[s], ref); n += w;
     }
-    if (n) ranking.push({ template: t, score: sum / n });
+    if (n) ranking.push({ template: tpl, score: sum / n });
   }
   if (!ranking.length) return null;
   ranking.sort((a, b) => b.score - a.score);

@@ -5,4 +5,4 @@ tools/.venv/
 node_modules/
 test-results/
 playwright-report/
-img/*_debug.png
+*_debug.png

@@ -1,12 +1,12 @@
-'use strict';
-// Detección automática de la tarjeta en la foto, sin dependencias.
-// 1) reducir a ~480 px, 2) gradiente de color (Sobel por canal) + supresión de no-máximos,
-// 3) Hough orientada por el gradiente, 4) combinar pares de rectas casi paralelas en cuadriláteros,
-// 5) puntuar cada candidato por el borde que lo respalda en sus 4 lados, su área y su proporción (ID-1 ≈ 1,586).
+// @ts-nocheck -- numeric hot loop over typed arrays; kept untyped for readability of the algorithm.
+// Automatic card detection in a photo, no dependencies.
+// 1) downscale to ~480 px, 2) colour gradient (Sobel per channel) + non-maximum suppression,
+// 3) gradient-oriented Hough transform, 4) combine pairs of near-parallel lines into quadrilaterals,
+// 5) score each candidate by edge support on its 4 sides, its area and its aspect ratio (ID-1 ≈ 1.586).
 
-const CARD_RATIO = 85.6 / 54;
+export const CARD_RATIO = 85.6 / 54;
 
-function detectCard(src, opts = {}) {
+export function detectCard(src, opts = {}) {
   const MAXS = opts.maxSide || 480;
   const k = Math.min(1, MAXS / Math.max(src.width, src.height));
   const W = Math.max(8, Math.round(src.width * k)), H = Math.max(8, Math.round(src.height * k));
@@ -17,7 +17,7 @@ function detectCard(src, opts = {}) {
   const rgba = cx.getImageData(0, 0, W, H).data;
   const N = W * H;
 
-  // --- desenfoque gaussiano separable [1 4 6 4 1] por canal ---
+  // --- separable Gaussian blur [1 4 6 4 1] per channel ---
   const chans = [0, 1, 2].map(c => { const a = new Float32Array(N); for (let i = 0; i < N; i++) a[i] = rgba[i * 4 + c]; return a; });
   const tmp = new Float32Array(N);
   const K = [1, 4, 6, 4, 1];
@@ -34,7 +34,7 @@ function detectCard(src, opts = {}) {
     }
   }
 
-  // --- gradiente de color: por píxel, el canal con mayor magnitud ---
+  // --- colour gradient: per pixel, the channel with the largest magnitude ---
   const mag = new Float32Array(N), gxA = new Float32Array(N), gyA = new Float32Array(N);
   for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
     const i = y * W + x;
@@ -48,8 +48,8 @@ function detectCard(src, opts = {}) {
     mag[i] = Math.sqrt(best); gxA[i] = bx; gyA[i] = by;
   }
 
-  // --- supresión de no-máximos ---
-  const edge = new Uint8Array(N), ang = new Float32Array(N); // ang: normal en [0, π)
+  // --- non-maximum suppression ---
+  const edge = new Uint8Array(N), ang = new Float32Array(N); // ang: edge normal in [0, π)
   const vals = [];
   for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
     const i = y * W + x, m = mag[i];
@@ -61,10 +61,10 @@ function detectCard(src, opts = {}) {
   }
   if (vals.length < 50) return null;
   vals.sort((a, b) => a - b);
-  const thr = Math.max(14, vals[Math.floor(vals.length * 0.98)] * 0.1); // relativo a los bordes más fuertes, no a la mediana
+  const thr = Math.max(14, vals[Math.floor(vals.length * 0.98)] * 0.1); // relative to the strongest edges, not the median
   for (let i = 0; i < N; i++) if (edge[i] && mag[i] < thr) edge[i] = 0;
 
-  // --- Hough orientada ---
+  // --- oriented Hough transform ---
   const NT = 180, D = Math.ceil(Math.hypot(W, H)), NR = 2 * D + 1;
   const acc = new Float32Array(NT * NR);
   const COS = new Float32Array(NT), SIN = new Float32Array(NT);
@@ -72,7 +72,7 @@ function detectCard(src, opts = {}) {
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
     const i = y * W + x; if (!edge[i]) continue;
     const t0 = Math.round(ang[i] / Math.PI * NT);
-    const wv = Math.min(mag[i] / thr, 4); // bordes de alto contraste pesan más que la textura
+    const wv = Math.min(mag[i] / thr, 4); // high-contrast edges weigh more than texture
     for (let dt = -3; dt <= 3; dt++) {
       let t = t0 + dt; if (t < 0) t += NT; if (t >= NT) t -= NT;
       const r = Math.round(x * COS[t] + y * SIN[t]) + D;
@@ -98,18 +98,18 @@ function detectCard(src, opts = {}) {
   const lines = peaks.slice(0, 40);
   if (lines.length < 4) return null;
 
-  // --- pares casi paralelos ---
+  // --- near-parallel line pairs ---
   const angDiff = (a, b) => { const d = Math.abs(a - b) % Math.PI; return Math.min(d, Math.PI - d); };
   const minSep = 0.12 * Math.min(W, H);
   const pairs = [];
   for (let i = 0; i < lines.length; i++) for (let j = i + 1; j < lines.length; j++) {
     const A = lines[i], B = lines[j];
-    if (angDiff(A.t, B.t) > 0.8) continue; // ~45° (perspectiva)
-    const rB = Math.abs(A.t - B.t) > Math.PI / 2 ? -B.r : B.r; // misma orientación de normal
+    if (angDiff(A.t, B.t) > 0.8) continue; // ~45° (perspective)
+    const rB = Math.abs(A.t - B.t) > Math.PI / 2 ? -B.r : B.r; // same normal orientation
     if (Math.abs(A.r - rB) < minSep) continue;
     pairs.push([A, B]);
   }
-  // límite de coste en fondos con mucha textura: quedarse con los pares más votados
+  // cap the cost on busy backgrounds: keep the most-voted pairs
   pairs.sort((p1, p2) => (p2[0].v + p2[1].v) - (p1[0].v + p1[1].v));
   pairs.length = Math.min(pairs.length, 120);
 
@@ -118,7 +118,7 @@ function detectCard(src, opts = {}) {
     const det = a * d - b * c; if (Math.abs(det) < 1e-6) return null;
     return [(L1.r * d - b * L2.r) / det, (a * L2.r - L1.r * c) / det];
   };
-  // ¿hay borde con orientación compatible cerca del punto?
+  // is there an edge with a compatible orientation near the point?
   const support = (x, y, nAng) => {
     const xi = Math.round(x), yi = Math.round(y);
     for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) {
@@ -131,21 +131,21 @@ function detectCard(src, opts = {}) {
   };
   const sideCoverage = (p, q) => {
     const len = Math.hypot(q[0] - p[0], q[1] - p[1]);
-    let nAng = Math.atan2(q[0] - p[0], -(q[1] - p[1])); // normal del lado
+    let nAng = Math.atan2(q[0] - p[0], -(q[1] - p[1])); // side normal
     if (nAng < 0) nAng += Math.PI; if (nAng >= Math.PI) nAng -= Math.PI;
     const n = Math.max(12, Math.round(len / 2)); let hit = 0, tot = 0;
     for (let s = 0; s < n; s++) {
       const f = 0.06 + 0.88 * s / (n - 1);
       const x = p[0] + (q[0] - p[0]) * f, y = p[1] + (q[1] - p[1]) * f;
-      if (x < 1 || y < 1 || x > W - 2 || y > H - 2) continue; // fuera de imagen: no cuenta
+      if (x < 1 || y < 1 || x > W - 2 || y > H - 2) continue; // outside the image: doesn't count
       tot++; if (support(x, y, nAng)) hit++;
     }
     return tot < n * 0.5 ? 0 : hit / tot;
   };
 
   let best = null; const cands = [];
-  // Consistencia del salto de color a través de un lado: en el borde de una tarjeta, (dentro − fuera)
-  // apunta siempre en la misma dirección de color; en una cuadrícula o tejido cambia de signo.
+  // Colour-step consistency across a side: on a real card edge, (inside − outside) always points
+  // in the same colour direction; on a grid or fabric pattern it keeps flipping sign.
   const colorAt = (x, y) => { const i = Math.round(y) * W + Math.round(x); return [chans[0][i], chans[1][i], chans[2][i]]; };
   const polarity = (p, q, ctr) => {
     const dx = q[0] - p[0], dy = q[1] - p[1], len = Math.hypot(dx, dy);
@@ -162,13 +162,13 @@ function detectCard(src, opts = {}) {
       const v = [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
       sum[0] += v[0]; sum[1] += v[1]; sum[2] += v[2]; absSum += Math.hypot(...v);
     }
-    return absSum < 1e-3 ? 1 : Math.hypot(...sum) / absSum; // sin muestras (fuera de imagen): no penaliza
+    return absSum < 1e-3 ? 1 : Math.hypot(...sum) / absSum; // no samples (outside the image): no penalty
   };
   const mx = W * 0.04, my = H * 0.04;
   for (let i = 0; i < pairs.length; i++) for (let j = i + 1; j < pairs.length; j++) {
     const [A1, A2] = pairs[i], [B1, B2] = pairs[j];
     if (A1 === B1 || A1 === B2 || A2 === B1 || A2 === B2) continue;
-    if (angDiff(A1.t, B1.t) < 0.87) continue; // < 50° entre familias: no es un rectángulo
+    if (angDiff(A1.t, B1.t) < 0.87) continue; // < 50° between the two line families: not a rectangle
     const q = [inter(A1, B1), inter(A1, B2), inter(A2, B2), inter(A2, B1)];
     if (q.some(p => !p || p[0] < -mx || p[1] < -my || p[0] > W + mx || p[1] > H + my)) continue;
     let sgn = 0, convex = true, area = 0;
@@ -197,8 +197,8 @@ function detectCard(src, opts = {}) {
   }
   cands.sort((a, b) => b.score - a.score);
   best = cands[0] || null;
-  // Las estructuras internas (foto, cabecera...) forman rectángulos dentro de la tarjeta que comparten
-  // rectas con ella. Si un candidato mayor contiene al mejor y comparte ≥ 2 rectas, es el borde real.
+  // Inner structures (photo, header...) form rectangles inside the card that share lines with it.
+  // If a bigger candidate contains the best one and shares ≥ 2 lines, it's the real card border.
   const inside = (p, poly, tol) => {
     for (let m = 0; m < 4; m++) {
       const a = poly[m], b = poly[(m + 1) % 4];
@@ -217,7 +217,7 @@ function detectCard(src, opts = {}) {
   if (opts.debug) detectCard.lastDebug = { k, W, H, thr, lines: lines.map(l => ({ deg: +(l.t * 180 / Math.PI).toFixed(1), r: Math.round(l.r / k), v: Math.round(l.v) })), pairs: pairs.length, cands: cands.slice(0, 6).map(c => ({ score: +c.score.toFixed(3), cov: c.cov.map(v => +v.toFixed(2)), ratio: +c.ratio.toFixed(2), areaFrac: +c.areaFrac.toFixed(3), q: c.quad.map(p => p.map(v => Math.round(v / k))) })), chosen: best && best.quad.map(p => p.map(v => Math.round(v / k))) };
   if (!best) return null;
 
-  // --- ordenar: horario desde arriba-izquierda, lado largo arriba ---
+  // --- order corners: clockwise from top-left, long side on top ---
   let q = best.quad.map(p => [p[0] / k, p[1] / k]);
   let area = 0; for (let m = 0; m < 4; m++) area += q[m][0] * q[(m + 1) % 4][1] - q[(m + 1) % 4][0] * q[m][1];
   if (area < 0) q.reverse();
