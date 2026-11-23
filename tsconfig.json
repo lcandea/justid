@@ -1,6 +1,6 @@
 {
   // Type-checks the plain JavaScript (JSDoc annotations). Nothing is compiled or emitted:
-  // the browser runs exactly the files in app/, locales/ and templates/.
+  // the browser runs exactly the files in app/, landing/, locales/ and templates/.
   "compilerOptions": {
     "allowJs": true,
     "checkJs": true,
@@ -13,5 +13,5 @@
     "noImplicitAny": false,
     "skipLibCheck": true
   },
-  "include": ["app/js/**/*.js", "locales/**/*.js", "templates/**/*.js"]
+  "include": ["app/js/**/*.js", "landing/**/*.js", "locales/**/*.js", "templates/**/*.js"]
 }

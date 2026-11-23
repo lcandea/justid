@@ -1,7 +1,11 @@
 // @ts-check
 // Spanish UI strings (default language). Keys must match locales/en.js exactly (checked by tests).
 // Placeholders use {name} and are filled by t() in app/js/i18n.js.
+import landing from './landing-es.js';
+
+// Landing page strings live in landing-es.js.
 export default {
+  ...landing,
   'meta.title': 'JustID — Comparte tu DNI, solo lo justo',
   'meta.editor_title': 'JustID — Marcador de zonas',
   'brand.tagline': 'Solo lo justo',
