@@ -75,3 +75,14 @@ test('no horizontal scroll at 360px', async ({ page }) => {
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(0);
 });
+
+test('FAQ: the first answer starts open and at most one is open at a time', async ({ page }) => {
+  await page.goto('/');
+  const items = page.locator('details[name="faq"]');
+  await expect(items).toHaveCount(5);
+  await expect(items.nth(0)).toHaveAttribute('open', '');
+  await items.nth(2).locator('summary').click();
+  await expect(items.nth(2)).toHaveAttribute('open', '');
+  await expect(items.nth(0)).not.toHaveAttribute('open', '');
+  await expect(page.locator('details[name="faq"][open]')).toHaveCount(1);
+});
