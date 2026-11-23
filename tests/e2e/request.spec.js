@@ -230,7 +230,7 @@ for (const width of [360, 412]) {
   });
 }
 
-test('country code picker: searchable by name or prefix, keyboard friendly, full number in the link', async ({ page }, testInfo) => {
+test('country code picker: searchable by name or prefix, keyboard friendly, full number in the link', async ({ page, isMobile }) => {
   await page.goto('/app/request.html');
   await page.locator('#b-from').fill('ABC');
   await page.locator('#b-purpose').fill('Alquiler');
@@ -244,7 +244,7 @@ test('country code picker: searchable by name or prefix, keyboard friendly, full
   await expect(btn).toHaveAttribute('aria-expanded', 'true');
   await expect(search).toBeFocused();
   const popBox = await pop.boundingBox(), btnBox = await btn.boundingBox();
-  if (testInfo.project.name === 'mobile') {
+  if (isMobile) {
     // phones: full-screen sheet with the search box on top, so the keyboard never covers it
     await expect(pop).toHaveClass(/\bsheet\b/);
     expect(popBox && popBox.y <= 1).toBe(true);
@@ -299,7 +299,7 @@ test('country code picker: searchable by name or prefix, keyboard friendly, full
 });
 
 test('country code picker: the phone sheet closes with its button and unlocks the page', async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== 'mobile', 'sheet mode is for phones');
+  test.skip(!testInfo.project.use.isMobile, 'sheet mode is for phones');
   await page.goto('/app/request.html');
   await page.locator('#b-dial').click();
   await expect(page.locator('#b-dial-pop')).toBeVisible();

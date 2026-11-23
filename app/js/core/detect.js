@@ -4,13 +4,15 @@
 // 3) gradient-oriented Hough transform, 4) combine pairs of near-parallel lines into quadrilaterals,
 // 5) score each candidate by edge support on its 4 sides, its area and its aspect ratio (ID-1 ≈ 1.586).
 
-export const CARD_RATIO = 85.6 / 54;
+import { createCanvas } from './canvas.js';
+
+const CARD_RATIO = 85.6 / 54;
 
 export function detectCard(src, opts = {}) {
   const MAXS = opts.maxSide || 480;
   const k = Math.min(1, MAXS / Math.max(src.width, src.height));
   const W = Math.max(8, Math.round(src.width * k)), H = Math.max(8, Math.round(src.height * k));
-  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const cv = createCanvas(W, H);
   const cx = cv.getContext('2d', { willReadFrequently: true });
   cx.imageSmoothingQuality = 'high';
   cx.drawImage(src, 0, 0, W, H);

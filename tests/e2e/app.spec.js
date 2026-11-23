@@ -125,7 +125,16 @@ test('privacy dialog opens from the lock badge and links to the repository', asy
   await page.locator('#lock-btn').click();
   await expect(page.locator('#privacy')).toBeVisible();
   await expect(page.locator('#privacy-repo')).toHaveAttribute('href', 'https://github.com/lcandea/justid');
+  await expect(page.locator('#privacy-more')).toHaveAttribute('href', '../#verifica');
+  await expect(page.locator('#privacy-more')).toHaveAttribute('target', '_blank');
+  // focus goes to the dialog itself, not to its first link or button
+  expect(await page.evaluate(() => document.activeElement?.id)).toBe('privacy');
   await page.locator('#privacy-close').click();
+  await expect(page.locator('#privacy')).toBeHidden();
+  // tapping outside the dialog closes it too
+  await page.locator('#lock-btn').click();
+  await expect(page.locator('#privacy')).toBeVisible();
+  await page.mouse.click(5, 5);
   await expect(page.locator('#privacy')).toBeHidden();
 });
 
@@ -138,6 +147,34 @@ test('zone editor loads the default template with its reference picture', async 
   // the board takes the reference picture's aspect ratio (1012x638) once loaded
   await expect.poll(async () => page.locator('#board').evaluate(c => c.clientWidth / c.clientHeight)).toBeCloseTo(1012 / 638, 1);
   expect(errors).toEqual([]);
+});
+
+test('zone editor asks with our own dialogs, not the browser\'s', async ({ page }) => {
+  let native = 0;
+  page.on('dialog', d => { native++; d.dismiss(); });
+  await page.goto('/app/editor.html');
+  const rows = page.locator('.field-row');
+  await expect(rows).not.toHaveCount(0);
+  const before = await rows.count();
+
+  // add a field: a themed dialog with the name field, not window.prompt()
+  await page.locator('#field-add').click();
+  const ask = page.locator('dialog.ask');
+  await expect(ask).toBeVisible();
+  expect(await page.evaluate(() => document.activeElement?.tagName)).toBe('DIALOG'); // nothing auto-focused
+  await ask.locator('input').fill('Mi campo');
+  await ask.locator('input').press('Enter');
+  await expect(ask).toHaveCount(0);
+  await expect(rows).toHaveCount(before + 1);
+
+  // delete it: cancel keeps it, confirming removes it
+  await rows.last().locator('.ed-del').click();
+  await ask.getByRole('button', { name: 'Cancelar' }).click();
+  await expect(rows).toHaveCount(before + 1);
+  await rows.last().locator('.ed-del').click();
+  await ask.getByRole('button', { name: 'Borrar' }).click();
+  await expect(rows).toHaveCount(before);
+  expect(native).toBe(0);
 });
 
 for (const width of [360, 412]) {
@@ -162,6 +199,8 @@ test('reference pictures open full screen and can be zoomed', async ({ page, isM
   await page.locator('.tpl-pv-open').first().click();
   const viewer = page.locator('dialog.zoom-viewer');
   await expect(viewer).toBeVisible();
+  // opening it doesn't focus the close button
+  expect(await page.evaluate(() => document.activeElement?.classList.contains('zoom-viewer'))).toBe(true);
   const scale = () => page.locator('.zoom-img').evaluate(i => new DOMMatrix(getComputedStyle(i).transform).a);
   const box = /** @type {{ x: number, y: number, width: number, height: number }} */ (await page.locator('.zoom-img').boundingBox());
   const cx = box.x + box.width / 2, cy = box.y + box.height / 2;
@@ -172,6 +211,18 @@ test('reference pictures open full screen and can be zoomed', async ({ page, isM
   }
   await expect.poll(scale).toBeGreaterThan(1.5);
   await page.locator('.zoom-close').click();
+  await expect(viewer).toBeHidden();
+});
+
+test('tapping outside the enlarged picture closes the viewer', async ({ page, isMobile }) => {
+  await page.goto('/app/');
+  await page.locator('.tpl-box summary').click();
+  await page.locator('.tpl-pv-open').first().click();
+  const viewer = page.locator('dialog.zoom-viewer');
+  await expect(viewer).toBeVisible();
+  const box = /** @type {{ x: number, y: number, width: number, height: number }} */ (await page.locator('.zoom-img').boundingBox());
+  const x = box.x + box.width / 2, y = Math.max(2, box.y - 10); // just above the picture
+  if (isMobile) await page.touchscreen.tap(x, y); else await page.mouse.click(x, y);
   await expect(viewer).toBeHidden();
 });
 

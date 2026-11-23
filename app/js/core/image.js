@@ -1,33 +1,9 @@
 // @ts-check
-// Image loading and perspective correction. Everything runs locally on <canvas>.
+// Perspective correction (homography + bilinear warp). Everything runs locally on <canvas>.
+import { createCanvas } from './canvas.js';
 
 /** Output size of a straightened card: ISO/IEC 7810 ID-1 (85.6 × 54 mm) at ~300 dpi. */
-export const CARD_W = 1012, CARD_H = 638;
-/** Enough to crop a 1012 px card; 4000 px can exhaust Safari's memory on iPhones. */
-const MAX_SRC_SIDE = 2400;
-
-/**
- * Decode an image file into a canvas, honouring EXIF orientation (the browser applies it).
- * Re-drawing onto a canvas also drops the photo's metadata (GPS, camera, dates).
- * @param {File} file @param {string} errorMessage @returns {Promise<HTMLCanvasElement>}
- */
-export function loadImageFile(file, errorMessage) {
-  return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = () => {
-      const k = Math.min(1, MAX_SRC_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
-      const c = document.createElement('canvas');
-      c.width = Math.round(img.naturalWidth * k);
-      c.height = Math.round(img.naturalHeight * k);
-      /** @type {CanvasRenderingContext2D} */ (c.getContext('2d')).drawImage(img, 0, 0, c.width, c.height);
-      URL.revokeObjectURL(url);
-      resolve(c);
-    };
-    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error(errorMessage)); };
-    img.src = url;
-  });
-}
+const CARD_W = 1012, CARD_H = 638;
 
 /** Gauss-Jordan elimination with partial pivoting. @param {number[][]} A @param {number[]} b */
 function solveLinear(A, b) {
@@ -71,9 +47,7 @@ export function warpToCard(src, quad, W = CARD_W, H = CARD_H) {
   let s = src, q = quad;
   const f = Math.min(1, 1.5 * W / qw);
   if (f < 1) { // downscale first to avoid aliasing
-    s = document.createElement('canvas');
-    s.width = Math.max(1, Math.round(src.width * f));
-    s.height = Math.max(1, Math.round(src.height * f));
+    s = createCanvas(Math.max(1, Math.round(src.width * f)), Math.max(1, Math.round(src.height * f)));
     const sctx = /** @type {CanvasRenderingContext2D} */ (s.getContext('2d'));
     sctx.imageSmoothingQuality = 'high';
     sctx.drawImage(src, 0, 0, s.width, s.height);
@@ -103,8 +77,7 @@ export function warpToCard(src, quad, W = CARD_W, H = CARD_H) {
       o[oi + 3] = 255;
     }
   }
-  const c = document.createElement('canvas');
-  c.width = W; c.height = H;
+  const c = createCanvas(W, H);
   /** @type {CanvasRenderingContext2D} */ (c.getContext('2d')).putImageData(out, 0, 0);
   return c;
 }

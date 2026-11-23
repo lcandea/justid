@@ -4,13 +4,16 @@
 //   - flat JSON (self-contained, importable in the app), or
 //   - a version module for the repository (templates/<id>.js), for official families.
 import { $, $input, $select, $textarea, el, downloadBlob } from './dom.js';
+import { askConfirm, askText } from './ask.js';
 import { t, applyI18n, mountLangSwitch } from './i18n.js';
-import { loadImageFile, warpToCard } from './image.js';
-import { CropEditor, fieldColor } from './crop-editor.js';
-import { loadSampleImage } from './identify.js';
-import { allTemplates, templateName, fieldLabel, normalizeCustom, saveCustomTemplate, toFlatJson, toVersionModule } from './templates.js';
+import { loadImageFile } from './image-file.js';
+import { warpToCard } from '../core/image.js';
+import { CropEditor } from './crop-editor.js';
+import { loadSampleImage } from './samples.js';
+import { slug, fieldColor, toVersionModule } from '../core/templates.js';
+import { allTemplates, templateName, fieldLabel, normalizeCustom, saveCustomTemplate, toFlatJson } from './templates.js';
 
-/** @typedef {import('./templates.js').ResolvedTemplate} ResolvedTemplate */
+/** @typedef {import('../core/templates.js').ResolvedTemplate} ResolvedTemplate */
 /** @typedef {'front' | 'back'} Side */
 
 const M = {
@@ -30,8 +33,6 @@ const board = /** @type {HTMLCanvasElement} */ ($('#board'));
 
 /* ---------- template ---------- */
 const clone = (/** @type {any} */ o) => JSON.parse(JSON.stringify(o));
-/** Turn a free-form name into an id: lowercase ascii, underscores. @param {string} s */
-const slug = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') || 'field';
 const jsonText = () => JSON.stringify(toFlatJson(M.tpl), null, 2);
 
 /** @param {string} [id] */
@@ -68,20 +69,23 @@ function renderFields() {
     // Official templates take labels from locales/*.js; only custom ones have editable labels.
     const label = el('input', { type: 'text', value: fieldLabel(f), disabled: !M.tpl.custom });
     label.addEventListener('input', () => { f.label = label.value; draw(); $textarea('#json').value = jsonText(); });
-    const idIn = el('input', { type: 'text', value: f.id, style: 'width:140px;font-size:12px' });
+    const idIn = el('input', { type: 'text', value: f.id, class: 'ed-id' });
     idIn.addEventListener('change', () => { f.id = slug(idIn.value); idIn.value = f.id; refresh(); });
     const hide = el('input', { type: 'checkbox', checked: f.hide });
     hide.addEventListener('change', () => { f.hide = hide.checked; refresh(); });
-    const del = el('button', { type: 'button', title: t('editor.field_delete') }, '✕');
-    del.addEventListener('click', (/** @type {Event} */ e) => {
+    const del = el('button', { type: 'button', class: 'ed-del', title: t('editor.field_delete'), 'aria-label': t('editor.field_delete') }, '✕');
+    del.addEventListener('click', async (/** @type {Event} */ e) => {
       e.stopPropagation();
-      if (!confirm(t('editor.field_delete_confirm', { field: fieldLabel(f), count: f.zones.length }))) return;
-      M.tpl.fields.splice(i, 1); M.active = Math.min(M.active, M.tpl.fields.length - 1); M.sel = null; refresh();
+      const sure = await askConfirm({ title: t('editor.field_delete_title'),
+        body: t('editor.field_delete_confirm', { field: fieldLabel(f), count: f.zones.length }),
+        ok: t('editor.field_delete_yes'), danger: true });
+      if (!sure) return;
+      M.tpl.fields.splice(M.tpl.fields.indexOf(f), 1); M.active = Math.min(M.active, M.tpl.fields.length - 1); M.sel = null; refresh();
     });
     const nf = f.zones.filter(z => z.side === 'front').length, nb = f.zones.length - nf;
     const row = el('div', { class: 'field-row' + (i === M.active ? ' active' : '') },
       el('span', { class: 'sw', style: `background:${fieldColor(f.id)}` }), label, del,
-      el('div', { class: 'meta' }, idIn, el('label', { class: 'chk', style: 'padding:0' }, hide, t('editor.hide_default')),
+      el('div', { class: 'meta' }, idIn, el('label', { class: 'chk ed-chk' }, hide, t('editor.hide_default')),
         el('span', {}, `${t('side.front')[0]}:${nf} ${t('side.back')[0]}:${nb}`)));
     row.addEventListener('click', (/** @type {MouseEvent} */ e) => {
       const tag = /** @type {HTMLElement} */ (e.target).tagName;
@@ -248,8 +252,10 @@ $('#tpl-file').addEventListener('change', async e => {
   if (!f) return;
   try { setTpl(normalizeCustom(JSON.parse(await f.text()))); } catch (err) { status(t('tpl.import_error', { msg: /** @type {Error} */ (err).message }), true); }
 });
-$('#field-add').addEventListener('click', () => {
-  const name = prompt(t('editor.field_prompt'), t('editor.field_default_name')); if (!name) return;
+$('#field-add').addEventListener('click', async () => {
+  const name = await askText({ title: t('editor.field_add_title'), label: t('editor.field_prompt'),
+    value: t('editor.field_default_name'), ok: t('editor.field_add_ok') });
+  if (!name) return;
   let id = slug(name); while (M.tpl.fields.some(f => f.id === id)) id += '_2';
   M.tpl.fields.push({ id, label: name, hide: true, zones: [] });
   M.active = M.tpl.fields.length - 1; M.sel = null; refresh();

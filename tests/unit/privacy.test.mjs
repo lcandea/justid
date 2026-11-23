@@ -50,7 +50,7 @@ test('no innerHTML with dynamic content (only the static icon helper may use it)
   for (const file of shipped) {
     const src = readFileSync(file, 'utf8');
     const uses = [...src.matchAll(/\.innerHTML\s*=/g)].length;
-    const allowed = relative(ROOT, file) === 'app/js/dom.js' ? 1 : 0;
+    const allowed = relative(ROOT, file) === 'app/js/ui/dom.js' ? 1 : 0;
     assert.ok(uses <= allowed, `${relative(ROOT, file)}: innerHTML assignment`);
   }
 });
@@ -70,5 +70,5 @@ test('the deployed _headers file sends the strict CSP and anti-framing headers o
 test('the build script publishes only the public folders', () => {
   const script = readFileSync(`${ROOT}/tools/build-site.sh`, 'utf8');
   const cp = script.match(/^cp -R (.+) _site\/$/m)?.[1].split(/\s+/) || [];
-  assert.deepEqual(cp.sort(), ['404.html', '_headers', 'app', 'favicon.svg', 'index.html', 'landing', 'locales', 'templates']);
+  assert.deepEqual(cp.sort(), ['404.html', '_headers', 'app', 'favicon.svg', 'index.html', 'landing', 'locales', 'shared', 'templates']);
 });

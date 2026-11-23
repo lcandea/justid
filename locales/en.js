@@ -19,6 +19,7 @@ export default {
   'privacy.point3': 'No cookies, no analytics, no trackers.',
   'privacy.point4': 'Your photos are not stored: they are gone when you close the page.',
   'privacy.open_source': 'We care about your privacy, so we don’t ask you to take our word for it: the project is open source and you can review the code yourself.',
+  'privacy.learn_more': 'Learn more: check it yourself',
   'privacy.repo_link': 'View the source code',
   'privacy.close': 'Got it',
 
@@ -26,6 +27,8 @@ export default {
   'steps.hide': 'Hide',
   'steps.purpose': 'Purpose',
   'steps.share': 'Share',
+  'steps.label': 'Step',
+  'brand.home': 'JustID, home page',
 
   'side.front': 'Front',
   'side.back': 'Back',
@@ -69,8 +72,8 @@ export default {
 
   'crop.title_front': 'Frame the front',
   'crop.title_back': 'Frame the back',
-  'crop.msg_adjust': 'Drag the corners if needed. The yellow line is the top edge.',
-  'crop.msg_found': 'Card detected. Check the corners; the yellow line is the top edge.',
+  'crop.msg_adjust': 'Drag the corners if needed. The thick line is the top edge.',
+  'crop.msg_found': 'Card detected. Check the corners; the thick line is the top edge.',
   'crop.msg_not_found': 'Couldn’t find it: drag the 4 corners. A plain contrasting background helps.',
   'crop.cancel': 'Cancel',
   'crop.rotate': 'Rotate',
@@ -168,6 +171,10 @@ export default {
   'editor.field_prompt': 'Field name',
   'editor.field_default_name': 'New field',
   'editor.field_delete': 'Delete field',
+  'editor.field_delete_title': 'Delete this field?',
+  'editor.field_delete_yes': 'Delete',
+  'editor.field_add_title': 'New field',
+  'editor.field_add_ok': 'Add',
   'editor.field_delete_confirm': 'Delete the field “{field}” and its {count} zones?',
   'editor.hide_default': 'hide by default',
   'editor.new_template_name': 'New template',
@@ -225,6 +232,9 @@ export default {
   'request.error.why_too_long': 'The justification is too long (240 characters at most).',
   'request.error.why_chars': 'The justification contains characters that are not allowed.',
   'request.error.delivery_required': 'Choose how they will send it to you.',
+  'request.error.phone_required': 'Enter your WhatsApp number.',
+  'request.error.email_required': 'Enter your email address.',
+  'request.error.url_required': 'Paste the upload link.',
   'request.error.phone_invalid': 'Check the WhatsApp number (include the country code if it isn’t Spanish).',
   'request.error.email_invalid': 'Check the email address.',
   'request.error.url_invalid': 'The upload link must start with https:// and be a valid web address.',
@@ -235,6 +245,9 @@ export default {
 
   // Request builder (app/request.html): the person who asks for an ID
   'meta.request_title': 'JustID — Request an ID',
+  'builder.eyebrow': 'Request a copy',
+  'builder.who_title': 'Who is asking',
+  'builder.ready': 'Ready to send',
   'builder.title': 'Ask for a copy of an ID, just enough',
   'builder.intro': 'Create a link to ask someone for a copy of their Spanish ID. They open it in JustID, see what you ask for and why, and prepare the copy on their phone. The request is stored inside the link itself (after the #) and never reaches any server.',
   'builder.back_to_app': '← Go to the app',
@@ -281,4 +294,13 @@ export default {
   'builder.preview': 'See what they will see',
   'builder.message_subject': 'Request for a copy of your ID',
   'builder.message_body': 'Hi, for “{purpose}” I need a copy of your ID. You can prepare it with JustID: it only includes the necessary data and everything happens on your phone.',
+
+  'dialog.cancel': 'Cancel',
+
+  'demo.try': 'Want to try it without your ID? Load a',
+  'demo.try_v3': 'v3 ID',
+  'demo.try_or': 'or a',
+  'demo.try_v4': 'v4 ID',
+  'demo.note': 'Test mode: you are using the official sample ID (specimen) photos, not yours.',
+  'demo.exit': 'Use my photos',
 };

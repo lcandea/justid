@@ -8,74 +8,85 @@
 <meta name="referrer" content="no-referrer">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <title data-i18n="meta.editor_title">JustID</title>
-<link rel="stylesheet" href="css/base.css">
+<link rel="preload" href="../shared/fonts/archivo-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../shared/theme.css">
+<link rel="stylesheet" href="css/common.css">
+<link rel="stylesheet" href="css/editor.css">
 </head>
 <body>
-<header>
-  <div class="row" style="justify-content:space-between">
-    <h1 data-i18n="editor.title"></h1>
-    <div class="lang-switch" id="lang"></div>
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <div class="brand-left">
+        <a class="logo" href="../" data-i18n-attr="aria-label:brand.home"><span>Just</span><span class="logo-id">ID</span></a>
+        <span class="tagline mono" data-i18n="brand.tagline"></span>
+      </div>
+      <div class="brand-actions"><div class="lang-switch" id="lang"></div></div>
+    </div>
   </div>
-  <p data-i18n="editor.intro"></p>
-  <nav><a href="index.html" data-i18n="editor.back"></a></nav>
 </header>
-<main class="app">
-  <div style="display:grid;gap:16px">
-    <section>
-      <div class="row" style="justify-content:space-between">
+<div class="ed-head">
+  <p class="builder-nav mono"><a href="index.html" data-i18n="editor.back"></a></p>
+  <h1 class="page-title" data-i18n="editor.title"></h1>
+  <p class="muted lede" data-i18n="editor.intro"></p>
+</div>
+<main class="ed">
+  <div class="ed-main">
+    <section class="ed-panel">
+      <div class="row ed-bar">
         <div class="seg" id="side">
           <button type="button" data-v="front" class="on" data-i18n="side.front"></button><button type="button" data-v="back" data-i18n="side.back"></button>
         </div>
-        <label class="btn file-btn"><span data-i18n="editor.load_image"></span><input type="file" id="img-file" accept="image/*"></label>
+        <label class="btn btn-secondary btn-sm file-btn"><span data-i18n="editor.load_image"></span><input type="file" id="img-file" accept="image/*"></label>
       </div>
-      <p class="muted" id="hint" style="margin:8px 0" data-i18n="editor.hint"></p>
+      <p class="muted ed-hint" id="hint" data-i18n="editor.hint"></p>
       <div class="canvas-wrap hidden" id="crop-wrap"><canvas id="crop"></canvas></div>
-      <div class="row hidden" id="crop-bar" style="margin-top:8px">
-        <button type="button" class="primary" id="crop-use" data-i18n="editor.crop_use"></button>
-        <button type="button" id="crop-rot" data-i18n="editor.crop_rotate"></button>
-        <button type="button" id="crop-full" data-i18n="editor.crop_full"></button>
+      <div class="row hidden ed-bar" id="crop-bar">
+        <button type="button" class="btn btn-primary btn-sm" id="crop-use" data-i18n="editor.crop_use"></button>
+        <button type="button" class="btn btn-secondary btn-sm" id="crop-rot" data-i18n="editor.crop_rotate"></button>
+        <button type="button" class="btn btn-secondary btn-sm" id="crop-full" data-i18n="editor.crop_full"></button>
       </div>
-      <div class="canvas-wrap" id="board-wrap"><canvas id="board" style="touch-action:none;width:100%"></canvas></div>
+      <div class="canvas-wrap" id="board-wrap"><canvas id="board" class="board"></canvas></div>
     </section>
-    <section>
-      <h2 data-i18n="editor.json_title"></h2>
+    <section class="ed-panel">
+      <h2 class="label mono" data-i18n="editor.json_title"></h2>
       <textarea class="json" id="json" spellcheck="false"></textarea>
-      <div class="row" style="margin-top:8px">
-        <button type="button" id="json-apply" data-i18n="editor.json_apply"></button>
+      <div class="row ed-bar">
+        <button type="button" class="btn btn-secondary btn-sm" id="json-apply" data-i18n="editor.json_apply"></button>
       </div>
     </section>
   </div>
-  <aside>
-    <div>
-      <h2 data-i18n="editor.template"></h2>
+  <aside class="ed-side">
+    <section class="ed-panel">
+      <h2 class="label mono" data-i18n="editor.template"></h2>
       <select id="tpl"></select>
-      <div class="row" style="margin-top:8px">
-        <button type="button" id="tpl-new" data-i18n="editor.new"></button>
-        <label class="btn file-btn"><span data-i18n="editor.import"></span><input type="file" id="tpl-file" accept="application/json,.json"></label>
+      <div class="row ed-bar">
+        <button type="button" class="btn btn-secondary btn-sm" id="tpl-new" data-i18n="editor.new"></button>
+        <label class="btn btn-secondary btn-sm file-btn"><span data-i18n="editor.import"></span><input type="file" id="tpl-file" accept="application/json,.json"></label>
       </div>
-      <label class="muted" style="display:block;margin-top:8px" for="tpl-name" data-i18n="editor.name"></label>
+      <label class="lbl muted" for="tpl-name" data-i18n="editor.name"></label>
       <input type="text" id="tpl-name">
-      <label class="muted" style="display:block;margin-top:8px" for="tpl-id" data-i18n="editor.id"></label>
+      <label class="lbl muted" for="tpl-id" data-i18n="editor.id"></label>
       <input type="text" id="tpl-id">
-    </div>
-    <div>
-      <h2 data-i18n="editor.fields"></h2>
-      <p class="muted" data-i18n="editor.fields_hint"></p>
+    </section>
+    <section class="ed-panel">
+      <h2 class="label mono" data-i18n="editor.fields"></h2>
+      <p class="muted ed-hint" data-i18n="editor.fields_hint"></p>
       <div id="fields"></div>
-      <div class="row" style="margin-top:8px"><button type="button" id="field-add" data-i18n="editor.field_add"></button></div>
-    </div>
-    <div>
-      <h2 data-i18n="editor.export"></h2>
-      <div class="row">
-        <button type="button" class="primary" id="exp-save" data-i18n="editor.save"></button>
-        <button type="button" id="exp-dl" data-i18n="editor.download_json"></button>
-        <button type="button" id="exp-module" data-i18n="editor.download_module"></button>
-        <button type="button" id="exp-copy" data-i18n="editor.copy"></button>
+      <div class="row ed-bar"><button type="button" class="btn btn-secondary btn-sm" id="field-add" data-i18n="editor.field_add"></button></div>
+    </section>
+    <section class="ed-panel">
+      <h2 class="label mono" data-i18n="editor.export"></h2>
+      <div class="row ed-bar">
+        <button type="button" class="btn btn-primary btn-sm" id="exp-save" data-i18n="editor.save"></button>
+        <button type="button" class="btn btn-secondary btn-sm" id="exp-dl" data-i18n="editor.download_json"></button>
+        <button type="button" class="btn btn-secondary btn-sm" id="exp-module" data-i18n="editor.download_module"></button>
+        <button type="button" class="btn btn-secondary btn-sm" id="exp-copy" data-i18n="editor.copy"></button>
       </div>
       <p class="status" id="exp-status" role="status"></p>
-    </div>
+    </section>
   </aside>
 </main>
-<script type="module" src="js/editor.js"></script>
+<script type="module" src="js/ui/editor.js"></script>
 </body>
 </html>

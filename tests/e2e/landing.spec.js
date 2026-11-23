@@ -86,3 +86,41 @@ test('FAQ: the first answer starts open and at most one is open at a time', asyn
   await expect(items.nth(0)).not.toHaveAttribute('open', '');
   await expect(page.locator('details[name="faq"][open]')).toHaveCount(1);
 });
+
+test('"try it with the sample ID" opens a real example request with the specimen photos loaded', async ({ page, baseURL }) => {
+  const errors = [];
+  page.on('pageerror', e => errors.push(String(e)));
+  await page.goto('/');
+  const tryLink = page.locator('#req-try');
+  await expect(tryLink).toHaveAttribute('href', /^app\/\?demo=specimenv4#req=1&.*from=JustID/);
+  await expect(page.locator('#req-url-frag')).toContainText('justid%40justid.com');
+  await tryLink.click();
+  await expect(page).toHaveURL(/\/app\/\?demo=specimenv4#req=1/);
+  await expect(page.locator('#demo-note')).toBeVisible();
+  await expect(page.locator('#req-panel')).toContainText('JustID');
+  await expect(page.locator('#slot-front .slot-bar')).toBeVisible();
+  await expect(page.locator('#slot-back .slot-bar')).toBeVisible();
+  await expect(page.locator('#tpl-name')).toHaveText('DNI España v4 (desde 2021)');
+  // "use my photos" keeps the request but drops the test mode
+  await expect(page.locator('#demo-exit')).toHaveAttribute('href', /^\/app\/#req=1&/);
+  await page.locator('#nav-next').click();
+  await expect(page.locator('.step[data-step="1"]')).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test('?demo=specimenv3 loads the v3 specimen and identifies it as v3', async ({ page }) => {
+  await page.goto('/app/?demo=specimenv3');
+  await expect(page.locator('#demo-note')).toBeVisible();
+  await expect(page.locator('#slot-front .slot-bar')).toBeVisible();
+  await expect(page.locator('#slot-back .slot-bar')).toBeVisible();
+  await expect(page.locator('#tpl-name')).toHaveText('DNI España v3 (2015–2021)');
+});
+
+test('step 1 offers to try with a v3 or v4 sample ID, keeping the request link', async ({ page }) => {
+  await page.goto('/app/#keep-me');
+  await expect(page.locator('#demo-v3')).toHaveAttribute('href', '/app/?demo=specimenv3#keep-me');
+  await page.locator('#demo-v4').click();
+  await expect(page).toHaveURL(/\/app\/\?demo=specimenv4#keep-me$/);
+  await expect(page.locator('#demo-note')).toBeVisible();
+  await expect(page.locator('#tpl-name')).toHaveText('DNI España v4 (desde 2021)');
+});

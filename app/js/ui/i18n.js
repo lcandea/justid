@@ -4,14 +4,14 @@
 //   data-i18n-attr="placeholder:key;aria-label:key" sets attributes.
 // - Dynamic text: call t(key, { param }) and re-render on the 'langchange' window event.
 // Text is always set as textContent, never innerHTML, so translations can't inject markup.
-import es from '../../locales/es.js';
-import en from '../../locales/en.js';
+import es from '../../../locales/es.js';
+import en from '../../../locales/en.js';
 
 /** @typedef {'es' | 'en'} Lang */
 
 /** @type {Record<Lang, Record<string, string>>} */
 const DICTS = { es, en };
-export const LANGS = /** @type {Lang[]} */ (['es', 'en']);
+const LANGS = /** @type {Lang[]} */ (['es', 'en']);
 const STORAGE_KEY = 'justid.lang';
 
 /** @returns {Lang} */
@@ -55,7 +55,7 @@ export function applyI18n(root = document) {
 }
 
 /** @param {Lang} lang */
-export function setLang(lang) {
+function setLang(lang) {
   if (!DICTS[lang] || lang === current) return;
   current = lang;
   try { localStorage.setItem(STORAGE_KEY, lang); } catch { /* not persisted: fine */ }

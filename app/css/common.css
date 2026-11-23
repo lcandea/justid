@@ -1,0 +1,26 @@
+/* Pieces shared by the three app pages (index, request, editor), on top of shared/theme.css:
+   small UI bits and the page header (logo, language switch, optional extras on the right). */
+
+button { font: inherit; color: inherit; }
+.row { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.status { font-family: var(--mono); font-size: .8125rem; line-height: 1.5; }
+.status.ok { color: var(--ok); }
+.status.warn { color: var(--warn); }
+.status:empty { display: none; }
+.btn-sm { min-height: 44px; padding: .5rem .875rem; font-size: .875rem; justify-content: center; }
+.file-btn { position: relative; overflow: hidden; }
+.file-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+body.no-scroll { overflow: hidden; }
+.noscript { margin: 1rem; padding: .75rem 1rem; border-left: 4px solid var(--warn); background: var(--panel); }
+
+/* ---------- Page header ---------- */
+.top { position: sticky; top: 0; z-index: 10; background: var(--ink); border-bottom: 1px solid var(--line);
+  padding: env(safe-area-inset-top) var(--gutter) 0; }
+.top-in { max-width: 60rem; margin-inline: auto; }
+.brand { display: flex; align-items: center; justify-content: space-between; gap: .5rem; min-height: 3.25rem; }
+.brand-left, .brand-actions { display: flex; align-items: center; gap: .75rem; min-width: 0; }
+.brand-actions { gap: .25rem; }
+.brand .logo { font-size: 1.25rem; min-height: 44px; }
+.tagline { font-size: .75rem; letter-spacing: .04em; color: var(--mute); white-space: nowrap; }
+@media (max-width: 30rem) { .tagline { display: none; } }
+@media (max-width: 24rem) { .lang-switch button { min-width: 40px; padding: 0 .25rem; } }

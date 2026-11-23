@@ -1,6 +1,6 @@
 // @ts-check
 // Spanish UI strings (default language). Keys must match locales/en.js exactly (checked by tests).
-// Placeholders use {name} and are filled by t() in app/js/i18n.js.
+// Placeholders use {name} and are filled by t() in app/js/ui/i18n.js.
 import landing from './landing-es.js';
 
 // Landing page strings live in landing-es.js.
@@ -20,6 +20,7 @@ export default {
   'privacy.point3': 'No usamos cookies, analíticas ni rastreadores.',
   'privacy.point4': 'Tus fotos no se guardan: al cerrar la página desaparecen.',
   'privacy.open_source': 'Valoramos tu privacidad, y por eso no te pedimos que nos creas: el proyecto es de código abierto y puedes revisar el código tú mismo.',
+  'privacy.learn_more': 'Saber más: compruébalo tú mismo',
   'privacy.repo_link': 'Ver el código fuente',
   'privacy.close': 'Entendido',
 
@@ -27,6 +28,8 @@ export default {
   'steps.hide': 'Ocultar',
   'steps.purpose': 'Motivo',
   'steps.share': 'Compartir',
+  'steps.label': 'Paso',
+  'brand.home': 'JustID, página de inicio',
 
   'side.front': 'Anverso',
   'side.back': 'Reverso',
@@ -70,8 +73,8 @@ export default {
 
   'crop.title_front': 'Encuadra el anverso',
   'crop.title_back': 'Encuadra el reverso',
-  'crop.msg_adjust': 'Arrastra las esquinas si hace falta. La línea amarilla es el borde superior.',
-  'crop.msg_found': 'Tarjeta detectada. Revisa las esquinas; la línea amarilla es el borde superior.',
+  'crop.msg_adjust': 'Arrastra las esquinas si hace falta. La línea gruesa es el borde superior.',
+  'crop.msg_found': 'Tarjeta detectada. Revisa las esquinas; la línea gruesa es el borde superior.',
   'crop.msg_not_found': 'No la he encontrado: arrastra las 4 esquinas. Ayuda un fondo liso que contraste.',
   'crop.cancel': 'Cancelar',
   'crop.rotate': 'Girar',
@@ -169,6 +172,10 @@ export default {
   'editor.field_prompt': 'Nombre del campo',
   'editor.field_default_name': 'Nuevo campo',
   'editor.field_delete': 'Borrar campo',
+  'editor.field_delete_title': '¿Borrar el campo?',
+  'editor.field_delete_yes': 'Borrar',
+  'editor.field_add_title': 'Nuevo campo',
+  'editor.field_add_ok': 'Añadir',
   'editor.field_delete_confirm': '¿Borrar el campo «{field}» y sus {count} zonas?',
   'editor.hide_default': 'ocultar por defecto',
   'editor.new_template_name': 'Nueva plantilla',
@@ -226,6 +233,9 @@ export default {
   'request.error.why_too_long': 'La justificación es demasiado larga (máximo 240 caracteres).',
   'request.error.why_chars': 'La justificación contiene caracteres no permitidos.',
   'request.error.delivery_required': 'Elige cómo te lo enviarán.',
+  'request.error.phone_required': 'Escribe tu número de WhatsApp.',
+  'request.error.email_required': 'Escribe tu correo electrónico.',
+  'request.error.url_required': 'Pega el enlace de subida.',
   'request.error.phone_invalid': 'Revisa el número de WhatsApp (con el prefijo del país si no es español).',
   'request.error.email_invalid': 'Revisa el correo electrónico.',
   'request.error.url_invalid': 'El enlace de subida debe empezar por https:// y ser una dirección web válida.',
@@ -236,6 +246,9 @@ export default {
 
   // Request builder (app/request.html): the person who asks for a DNI
   'meta.request_title': 'JustID — Pedir un DNI',
+  'builder.eyebrow': 'Solicitar una copia',
+  'builder.who_title': 'Quién la pide',
+  'builder.ready': 'Listo para enviar',
   'builder.title': 'Pide una copia de DNI, solo con lo justo',
   'builder.intro': 'Crea un enlace para pedirle a alguien una copia de su DNI. Lo abrirá en JustID, verá qué le pides y por qué, y preparará la copia en su móvil. Los datos de la solicitud van dentro del propio enlace (detrás del #) y nunca llegan a ningún servidor.',
   'builder.back_to_app': '← Ir a la app',
@@ -282,4 +295,13 @@ export default {
   'builder.preview': 'Ver lo que verá',
   'builder.message_subject': 'Solicitud de copia de DNI',
   'builder.message_body': 'Hola, para «{purpose}» necesito una copia de tu DNI. Puedes prepararla con JustID: solo incluye los datos necesarios y todo se hace en tu móvil.',
+
+  'dialog.cancel': 'Cancelar',
+
+  'demo.try': '¿Quieres probar sin tu DNI? Carga un',
+  'demo.try_v3': 'DNI v3',
+  'demo.try_or': 'o un',
+  'demo.try_v4': 'DNI v4',
+  'demo.note': 'Modo de prueba: estás usando las fotos del DNI de muestra oficial (espécimen), no las tuyas.',
+  'demo.exit': 'Usar mis fotos',
 };

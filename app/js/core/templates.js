@@ -1,5 +1,6 @@
 // @ts-check
-// Template model shared by the app and the zone editor.
+// Template model shared by the app and the zone editor (pure: no i18n, no storage; see ui/templates.js
+// for display names and the browser-side store of custom templates).
 //
 // Official templates come in two layers (see templates/):
 //   family  (templates/dni_es.js)    -> which fields exist + whether each is shown by default
@@ -9,8 +10,7 @@
 //
 // Custom templates (imported .json or saved from the editor) are already flat and self-contained:
 // they carry their own field labels and template name.
-import { FAMILIES, VERSIONS } from '../../templates/index.js';
-import { t } from './i18n.js';
+import { FAMILIES, VERSIONS } from '../../../templates/index.js';
 
 /**
  * @typedef {'front' | 'back'} Side
@@ -23,12 +23,12 @@ import { t } from './i18n.js';
  * }} ResolvedTemplate
  */
 
-const SITE_ROOT = new URL('../../', import.meta.url);
+const SITE_ROOT = new URL('../../../', import.meta.url);
 /** Resolve a site-root-relative asset path (e.g. template sample pictures). @param {string} path */
 export const assetUrl = path => new URL(path, SITE_ROOT).href;
 
 /** @param {any} version @returns {ResolvedTemplate} */
-export function resolveVersion(version) {
+function resolveVersion(version) {
   const family = FAMILIES.find(f => f.id === version.family);
   if (!family) throw new Error(`Unknown template family: ${version.family}`);
   const overrides = version.overrides || {};
@@ -48,22 +48,17 @@ export function officialTemplates() {
   return [...list.filter(x => x.isDefault), ...list.filter(x => !x.isDefault)];
 }
 
-/** Display name: locale string for official templates, own name for custom ones. @param {ResolvedTemplate} tpl */
-export const templateName = tpl => tpl.name || t('template.' + tpl.id);
-
-/** Display label of a field. @param {Field} field */
-export const fieldLabel = field => field.label || t('field.' + field.id);
-
-/* ---------- custom templates (stored in this browser only) ---------- */
-
-const CUSTOM_KEY = 'justid.customTemplates';
+/** Raised for a malformed flat template; the UI shows its own translated message. */
+export class InvalidTemplateError extends Error {
+  constructor() { super('invalid template'); this.name = 'InvalidTemplateError'; }
+}
 
 /**
- * Validate and normalise a flat template (imported .json / editor). Throws on bad input.
+ * Validate and normalise a flat template (imported .json / editor). Throws InvalidTemplateError on bad input.
  * @param {any} raw @returns {ResolvedTemplate}
  */
 export function normalizeCustom(raw) {
-  if (!raw || typeof raw.id !== 'string' || !Array.isArray(raw.fields)) throw new Error(t('tpl.invalid'));
+  if (!raw || typeof raw.id !== 'string' || !Array.isArray(raw.fields)) throw new InvalidTemplateError();
   return {
     id: raw.id, name: String(raw.name || raw.id), custom: true,
     sample: raw.sample && typeof raw.sample === 'object' ? raw.sample : undefined,
@@ -75,39 +70,37 @@ export function normalizeCustom(raw) {
   };
 }
 
-/** @returns {ResolvedTemplate[]} */
-export function loadCustomTemplates() {
-  try {
-    return JSON.parse(localStorage.getItem(CUSTOM_KEY) || '[]').map(normalizeCustom);
-  } catch { return []; }
-}
-
-/** @param {ResolvedTemplate} tpl @returns {boolean} saved */
-export function saveCustomTemplate(tpl) {
-  try {
-    const all = loadCustomTemplates().filter(x => x.id !== tpl.id);
-    all.push(tpl);
-    localStorage.setItem(CUSTOM_KEY, JSON.stringify(all.map(toFlatJson)));
-    return true;
-  } catch { return false; }
-}
-
-/** Official templates first (they win on id clashes), then custom ones. @returns {ResolvedTemplate[]} */
-export function allTemplates() {
-  const official = officialTemplates();
+/**
+ * Official templates first (they win on id clashes), then custom ones.
+ * @param {ResolvedTemplate[]} official @param {ResolvedTemplate[]} custom @returns {ResolvedTemplate[]}
+ */
+export function mergeTemplates(official, custom) {
   const ids = new Set(official.map(x => x.id));
-  return [...official, ...loadCustomTemplates().filter(x => !ids.has(x.id))];
+  return [...official, ...custom.filter(x => !ids.has(x.id))];
 }
 
 /* ---------- export formats (used by the editor) ---------- */
 
-/** Flat, self-contained JSON (labels included): what the app imports. @param {ResolvedTemplate} tpl */
-export function toFlatJson(tpl) {
+/**
+ * Flat, self-contained JSON (labels included): what the app imports.
+ * @param {ResolvedTemplate} tpl
+ * @param {{ templateName: (tpl: ResolvedTemplate) => string, fieldLabel: (field: Field) => string }} names display names (translated by the caller)
+ */
+export function toFlatJson(tpl, names) {
   return {
-    id: tpl.id, name: templateName(tpl),
+    id: tpl.id, name: names.templateName(tpl),
     ...(tpl.sample ? { sample: tpl.sample } : {}),
-    fields: tpl.fields.map(f => ({ id: f.id, label: fieldLabel(f), hide: f.hide, zones: f.zones })),
+    fields: tpl.fields.map(f => ({ id: f.id, label: names.fieldLabel(f), hide: f.hide, zones: f.zones })),
   };
+}
+
+/** Turn a free-form name into an id: lowercase ascii, underscores. @param {string} s */
+export const slug = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') || 'field';
+
+/** Stable colour per field id (editor overlays). @param {string} id */
+export function fieldColor(id) {
+  let h = 0; for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) % 360;
+  return `hsl(${h} 85% 50%)`;
 }
 
 /**

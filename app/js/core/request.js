@@ -18,10 +18,10 @@
 // This module is pure (no DOM, no i18n) so the unit tests can run it in Node.
 
 /** Format version written as `req=`; links with another value are rejected. */
-export const REQUEST_VERSION = '1';
+const REQUEST_VERSION = '1';
 
 /** Document families a request can be made for. */
-export const SUPPORTED_DOCS = ['dni_es'];
+const SUPPORTED_DOCS = ['dni_es'];
 
 /**
  * Length limits, in UTF-16 code units (what <input maxlength> counts).
@@ -37,7 +37,7 @@ const DELIVERY_KEYS = /** @type {const} */ ([['whatsapp', K.whatsapp], ['email',
 
 /** Error codes the request builder can show to the requester (each has a `request.error.<code>` string). */
 export const BUILDER_ERRORS = ['from_required', 'from_too_long', 'from_chars', 'purpose_required', 'purpose_too_long',
-  'purpose_chars', 'why_required', 'why_too_long', 'why_chars', 'delivery_required', 'phone_invalid', 'email_invalid',
+  'purpose_chars', 'why_required', 'why_too_long', 'why_chars', 'delivery_required', 'phone_required', 'email_required', 'url_required', 'phone_invalid', 'email_invalid',
   'url_invalid', 'too_long', 'fields_required'];
 
 /**
@@ -83,7 +83,7 @@ const stripSeparators = s => s.replace(/[\s().-]/g, '');
  * Throws `phone_invalid`.
  * @param {unknown} value @returns {string}
  */
-export function normalizePhone(value) {
+function normalizePhone(value) {
   if (typeof value !== 'string' || value.length > 40) throw new RequestError('phone_invalid');
   let s = stripSeparators(value);
   if (s.startsWith('+')) s = s.slice(1);
@@ -119,7 +119,7 @@ const EMAIL = /^[A-Za-z0-9_+-]+(?:\.[A-Za-z0-9_+-]+)*@[A-Za-z0-9](?:[A-Za-z0-9-]
 const TLD = /\.(?:[A-Za-z]{2,63}|xn--[A-Za-z0-9-]+)$/;
 
 /** @param {unknown} value @returns {string} */
-export function normalizeEmail(value) {
+function normalizeEmail(value) {
   if (typeof value !== 'string') throw new RequestError('email_invalid');
   const s = value.trim();
   if (s.length > LIMITS.email || !EMAIL.test(s) || !TLD.test(s)) throw new RequestError('email_invalid');
@@ -132,7 +132,7 @@ export function normalizeEmail(value) {
  * look-alike domain shows as what it really is).
  * @param {unknown} value @returns {string}
  */
-export function normalizeUploadUrl(value) {
+function normalizeUploadUrl(value) {
   if (typeof value !== 'string') throw new RequestError('url_invalid');
   const s = value.trim();
   if (!s || s.length > LIMITS.url || BAD_CHARS.test(s)) throw new RequestError('url_invalid');
@@ -146,7 +146,11 @@ export function normalizeUploadUrl(value) {
 /** @param {unknown} d @returns {Delivery} */
 function cleanDelivery(d) {
   const dd = /** @type {any} */ (d);
-  if (!dd || typeof dd !== 'object' || typeof dd.value !== 'string' || !dd.value.trim()) throw new RequestError('delivery_required');
+  if (!dd || typeof dd !== 'object' || typeof dd.value !== 'string') throw new RequestError('delivery_required');
+  if (!dd.value.trim()) { // a method is chosen but its contact is empty: say which one is missing
+    const missing = { whatsapp: 'phone_required', email: 'email_required', upload: 'url_required' }[/** @type {string} */ (dd.kind)];
+    throw new RequestError(missing || 'delivery_required');
+  }
   if (dd.kind === 'whatsapp') return { kind: 'whatsapp', value: normalizePhone(dd.value) };
   if (dd.kind === 'email') return { kind: 'email', value: normalizeEmail(dd.value) };
   if (dd.kind === 'upload') return { kind: 'upload', value: normalizeUploadUrl(dd.value) };
@@ -220,7 +224,7 @@ export function encodeRequest(raw, families) {
 
 /**
  * Read a request from a URL fragment.
- * @param {string | null | undefined} hash location.hash (with or without the #)
+ * @param {string | null | undefined} hash the URL fragment (with or without the #)
  * @param {Family[]} families
  * @returns {null | { ok: true, request: DniRequest } | { ok: false, error: string }}
  *   null when the fragment is not a request at all

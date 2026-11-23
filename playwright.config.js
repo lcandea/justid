@@ -10,14 +10,15 @@ export default defineConfig({
   reporter: process.env.CI ? 'github' : 'list',
   use: {
     baseURL: `http://localhost:${PORT}`,
-    // Locally, use the installed Chrome (no browser download); CI installs Playwright's Chromium.
-    channel: process.env.CI ? undefined : 'chrome',
     locale: 'es-ES',
     acceptDownloads: true,
   },
+  // Chromium projects: locally the installed Chrome (no browser download); CI installs Playwright's Chromium.
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'], channel: process.env.CI ? undefined : 'chrome' } },
     { name: 'mobile', use: { ...devices['Pixel 7'], channel: process.env.CI ? undefined : 'chrome' } },
+    // Safari's engine (every iPhone browser uses it): Playwright's WebKit, installed with `npx playwright install webkit`.
+    { name: 'iphone', use: { ...devices['iPhone 13'] } },
   ],
   webServer: {
     command: `python3 tools/serve.py ${PORT}`,

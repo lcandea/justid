@@ -1,0 +1,90 @@
+/* Request builder (app/request.html), on top of shared/theme.css and common.css.
+   Same style as the app: hairline-divided sections, cream = selected, lime = primary action and focus. */
+.builder-body { padding-bottom: env(safe-area-inset-bottom); }
+.builder { max-width: calc(44rem + 2 * var(--gutter)); margin: 0 auto; padding: 1rem var(--gutter) 4rem; }
+.builder-nav { font-size: .8125rem; letter-spacing: .02em; margin-bottom: 1rem; }
+.builder-nav a { display: inline-flex; align-items: center; min-height: 44px; }
+.builder .eyebrow { margin-bottom: .5rem; }
+.page-title { font-size: clamp(2.25rem, 9vw, 3.75rem); line-height: .9; font-weight: 900; font-stretch: 70%; text-transform: uppercase;
+  letter-spacing: -.01em; text-wrap: balance; overflow-wrap: break-word; margin-bottom: .75rem; }
+.lede { font-size: 1.0625rem; line-height: 1.55; max-width: 38rem; margin-bottom: 2rem; }
+.muted { color: var(--mute); }
+
+/* Sections between hairlines */
+.b-sec { border-top: 1px solid var(--line); padding: 1.25rem 0 1.75rem; }
+.b-sec > .label { margin-bottom: .75rem; font-size: .8125rem; font-weight: 500; letter-spacing: .08em; }
+.b-sec > p.muted { font-size: .9375rem; line-height: 1.5; margin-bottom: .75rem; }
+.lbl { display: block; margin: 1.25rem 0 .5rem; font-weight: 600; }
+.b-sec > h3 + .lbl { margin-top: 0; }
+.chips { margin-top: .75rem; }
+textarea { resize: vertical; font-size: 1rem; }
+.b-count { margin-top: .375rem; text-align: right; font-size: .75rem; }
+.b-sec .seg { max-width: 100%; }
+[aria-invalid="true"] { border-color: var(--warn) !important; box-shadow: 0 0 0 1px var(--warn); }
+#b-fields[aria-invalid="true"] { box-shadow: -4px 0 0 var(--warn); }
+
+/* Field checklist: a hairline between rows, native checkbox in lime */
+.chk { display: flex; gap: .75rem; align-items: flex-start; cursor: pointer; }
+.chk input { flex: none; width: 1.375rem; height: 1.375rem; margin: .125rem 0 0; accent-color: var(--lime); }
+.b-field { min-height: 3.5rem; padding: .75rem 0; border-bottom: 1px solid var(--line); align-items: center; font-weight: 700; }
+.b-field small { display: block; margin-top: .125rem; font-family: var(--mono); font-size: .6875rem; font-weight: 400; letter-spacing: .02em; }
+.b-field .b-extra-note { color: var(--warn); }
+.b-field.extra:has(input:checked) { box-shadow: inset 3px 0 0 var(--warn); padding-left: .75rem; }
+.b-back { min-height: 3.5rem; padding: .75rem 0; align-items: center; font-weight: 700; border-bottom: 1px solid var(--line); }
+.b-back small { display: block; font-family: var(--mono); font-size: .6875rem; font-weight: 400; }
+
+/* WhatsApp number: country-code button + number; the searchable country list floats ABOVE the row
+   (search box at the bottom, next to the button), so the phone keyboard never covers it */
+.b-contact-lbl { margin-top: 1.25rem; }
+.phone-wrap { position: relative; }
+.phone-row { display: flex; gap: .5rem; }
+.phone-row input { flex: 1; min-width: 0; }
+.dial-btn { flex: none; display: inline-flex; align-items: center; gap: .4rem; min-height: 48px; padding: 0 .875rem; font: inherit; font-family: var(--mono); font-size: 1rem; white-space: nowrap;
+  background: var(--panel); color: var(--cream); border: 1.5px solid var(--line-2); border-radius: 0; cursor: pointer; }
+.dial-btn:hover, .dial-btn[aria-expanded="true"] { border-color: var(--lime); }
+.dial-flag { font-size: 1.25rem; line-height: 1; }
+.dial-pop { position: absolute; left: 0; right: 0; bottom: calc(100% + .375rem); z-index: 20; display: flex; flex-direction: column;
+  border: 1.5px solid var(--cream); background: var(--ink); padding: .5rem; box-shadow: 0 -8px 28px rgba(0, 0, 0, .55); }
+.dial-head { order: 3; display: flex; gap: .5rem; }
+.dial-head input { flex: 1; min-width: 0; }
+.dial-close { display: none; }
+/* Phones: a full-screen sheet pinned to the visible area above the keyboard (iOS keeps the layout
+   viewport behind the keyboard, so JS feeds the visual viewport in --vv-top / --vv-h). Search on top. */
+.dial-pop.sheet { position: fixed; left: 0; right: 0; bottom: auto; top: var(--vv-top, 0px); height: var(--vv-h, 100vh);
+  z-index: 1000; border: 0; box-shadow: none; padding: calc(env(safe-area-inset-top, 0px) + .625rem) .75rem .5rem; }
+.dial-pop.sheet .dial-head { order: 0; }
+.dial-pop.sheet .dial-close { display: inline-flex; flex: none; }
+.dial-pop.sheet .dial-list { order: 1; flex: 1; min-height: 0; max-height: none; margin: .5rem 0 0; }
+.dial-pop.sheet .dial-empty { order: 2; }
+html.dial-lock, html.dial-lock body { overflow: hidden; }
+.dial-pop .dial-empty { order: 2; margin: .5rem .25rem; }
+.dial-list { order: 1; margin: 0 0 .375rem; max-height: min(16rem, 38vh); max-height: min(16rem, 38dvh); overflow-y: auto; overscroll-behavior: contain; }
+.dial-list li { display: flex; align-items: center; gap: .625rem; min-height: 44px; padding: .5rem; border-bottom: 1px solid var(--line); cursor: pointer; }
+.dial-list li:hover { background: var(--panel); }
+.dial-list li.active { background: rgba(215, 255, 58, .14); outline: 2px solid var(--lime); outline-offset: -2px; }
+.dial-list li[aria-selected="true"] .dial-name { font-weight: 800; }
+.dial-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.dial-code { font-family: var(--mono); color: var(--mute); font-variant-numeric: tabular-nums; }
+.b-phone-preview { margin-top: .5rem; font-size: .8125rem; color: var(--soft); }
+.b-phone-preview::before { content: '■ '; color: var(--cream); }
+
+/* Create: the single primary action, with the validation message just above it */
+.b-create-row { border-top: 1px solid var(--line); padding-top: 1.25rem; }
+.b-error { margin: 0 0 1rem; padding: .75rem 1rem; border-left: 4px solid var(--warn); background: var(--panel); font-size: .875rem; }
+.b-create-row .btn { min-height: 3.5rem; }
+
+/* The generated link is the payoff: a lime-topped block with the link ready to send */
+.b-result { margin-top: 2.5rem; padding-top: 1.5rem; border-top: 4px solid var(--lime); }
+.b-result .eyebrow { margin-bottom: .5rem; }
+.b-result .page-title { font-size: clamp(2rem, 8vw, 3rem); }
+#b-link { margin: 1rem 0; font-family: var(--mono); font-size: .875rem; background: var(--cream); color: var(--ink); border-color: var(--cream); }
+#b-link:focus-visible { box-shadow: 0 0 0 2px var(--lime); }
+.b-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+.b-actions .btn-block { grid-column: 1 / -1; }
+.b-actions .btn { min-height: 3rem; text-align: center; }
+#b-status { margin-top: 1rem; }
+#b-status.ok::before { content: '✓ '; }
+
+@media (min-width: 56rem) {
+  .builder { padding-top: 1.5rem; }
+}

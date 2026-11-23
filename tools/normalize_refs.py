@@ -20,7 +20,7 @@ from PIL import Image, ImageDraw
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "img"
 OUT = ROOT / "templates" / "ref"
-CARD_W, CARD_H = 1012, 638             # must match js/common.js
+CARD_W, CARD_H = 1012, 638             # must match app/js/core/image.js
 RADIUS = round(3.18 / 85.6 * CARD_W)   # ID-1 corner radius (3.18 mm)
 SS = 4                                 # mask supersampling (anti-aliased corners)
 

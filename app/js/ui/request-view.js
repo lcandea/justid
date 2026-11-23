@@ -4,9 +4,9 @@
 // Everything in the request comes from the link and is untrusted: it is only ever set as text.
 import { el } from './dom.js';
 import { t } from './i18n.js';
-import { deliveryHref, uploadHost } from './request.js';
+import { deliveryHref, uploadHost } from '../core/request.js';
 
-/** @typedef {import('./request.js').DniRequest} DniRequest */
+/** @typedef {import('../core/request.js').DniRequest} DniRequest */
 
 /**
  * The justification, quoted and clearly attributed to the requester (never to JustID).
@@ -79,7 +79,7 @@ export function renderSendBlock(box, req, purpose) {
   const host = d.kind === 'upload' ? uploadHost(d.value) : '';
   const label = t('request.open_' + d.kind, { value: d.value, host });
   // Not target=_blank for mailto: (it would leave an empty tab behind on some browsers).
-  const link = el('a', { class: 'btn big req-send-btn', href, id: 'req-send-link',
+  const link = el('a', { class: 'btn btn-primary btn-md btn-block req-send-btn', href, id: 'req-send-link',
     ...(d.kind === 'email' ? {} : { target: '_blank', rel: 'noopener noreferrer' }) }, label);
   box.replaceChildren(
     el('h3', {}, t('request.send_title', { name })),
