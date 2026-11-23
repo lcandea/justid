@@ -38,10 +38,15 @@ test('requester -> recipient: build a link, open it, accept an extra field, send
   await page.locator('#b-chips button', { hasText: 'Alquiler de vivienda' }).click();
   await page.locator('.b-field input[data-f="address"]').check();
   await page.locator('.b-field input[data-f="birth_place"]').check();
+  // the usual fields come ticked, but the requester may ask for less
+  await expect(page.locator('.b-field input[data-f="birth_date"]')).toBeChecked();
+  await page.locator('.b-field input[data-f="birth_date"]').uncheck();
   // address is only on the back of the card: the back side becomes required
   await expect(page.locator('#b-back')).toBeChecked();
   await expect(page.locator('#b-back')).toBeDisabled();
+  await expect(page.locator('#b-dial')).toHaveAttribute('aria-label', 'Prefijo: España (+34). Cambiar'); // Spain by default
   await page.locator('#b-contact').fill('600 11 22 33');
+  await expect(page.locator('#b-phone-preview')).toHaveText('Se usará: +34600112233');
   await page.locator('#b-create').click();
   // extra fields need a justification
   await expect(page.locator('#b-error')).toHaveText('Has pedido datos extra: explica por qué los necesitas.');
@@ -50,9 +55,8 @@ test('requester -> recipient: build a link, open it, accept an extra field, send
   await expect(page.locator('#b-why-count')).toHaveText('62/240');
   await page.locator('#b-create').click();
   await expect(page.locator('#b-result')).toBeVisible();
-  await expect(page.locator('#b-contact')).toHaveValue('+34600112233'); // shown as it will be used
   const link = await page.locator('#b-link').inputValue();
-  expect(link).toMatch(/\/app\/#req=1&doc=dni_es&from=Inmobiliaria\+ABC&for=Alquiler\+de\+vivienda&fields=address%2Cbirth_place&back=1&wa=34600112233&why=/);
+  expect(link).toMatch(/\/app\/#req=1&doc=dni_es&from=Inmobiliaria\+ABC&for=Alquiler\+de\+vivienda&fields=given_name%2Csurnames%2Cdocument_number%2Cphoto%2Cexpiry_date%2Caddress%2Cbirth_place&back=1&wa=34600112233&why=/);
   await expect(page.locator('#b-wa')).toHaveAttribute('href', /^https:\/\/wa\.me\/\?text=.*%23req%3D1/);
   await expect(page.locator('#b-mail')).toHaveAttribute('href', /^mailto:\?subject=/);
   await expect(page.locator('#b-preview')).toHaveAttribute('href', link);
@@ -66,7 +70,9 @@ test('requester -> recipient: build a link, open it, accept an extra field, send
   await expect(panel).toBeVisible();
   await expect(panel.locator('h2')).toHaveText('Solicitud de Inmobiliaria ABC');
   await expect(panel).toContainText('Para: Alquiler de vivienda');
+  await expect(panel).toContainText('Datos que pide: Nombre, Apellidos, Número de DNI, Fotografía, Fecha de validez, Domicilio, Lugar de nacimiento.');
   await expect(panel).toContainText('Inmobiliaria ABC te pide estos datos extra');
+  await expect(panel).not.toContainText('normalmente se comparten (según');
   await expect(panel).toContainText('Su justificación es (la ha escrito Inmobiliaria ABC, no JustID):');
   await expect(panel.locator('blockquote.req-why')).toHaveText('El contrato de arrendamiento debe incluir tu domicilio actual.');
   await expect(panel).toContainText('También te pide el reverso.');
@@ -78,6 +84,10 @@ test('requester -> recipient: build a link, open it, accept an extra field, send
   await expect(birthPlace).not.toBeChecked();
   await expect(panel.locator('.req-extra-row')).toHaveCount(2);
   await expect(page.locator('#tpl option')).toHaveCount(2); // only DNI versions
+  // the back is asked for: the tip doesn't call it optional, and the slot says who asks
+  await expect(page.locator('#photos-tip')).not.toContainText('opcional');
+  await expect(page.locator('#photos-tip')).toContainText('Te piden las dos caras.');
+  await expect(page.locator('#slot-back .empty')).toContainText('Te lo pide Inmobiliaria ABC');
 
   await addPhoto(page, 'front', 'img/dni_es_v4_front.webp');
   await addPhoto(page, 'back', 'img/dni_es_v4_back.webp');
@@ -89,7 +99,8 @@ test('requester -> recipient: build a link, open it, accept an extra field, send
   const hidden = id => page.locator(`.fld[data-f="${id}"] input`);
   await expect(hidden('address')).not.toBeChecked();    // accepted extra: shown
   await expect(hidden('birth_place')).toBeChecked();    // not accepted: still hidden
-  await expect(hidden('given_name')).not.toBeChecked(); // shown by default
+  await expect(hidden('given_name')).not.toBeChecked(); // requested (usual field): shown
+  await expect(hidden('birth_date')).toBeChecked();      // usual field the requester left out: hidden
   await expect(hidden('mrz')).toBeChecked();            // not requested: hidden
   await expect(page.locator('.fld.req-extra')).toHaveCount(2);
   await expect(page.locator('.fld[data-f="birth_place"]')).toContainText('te lo pide Inmobiliaria ABC');
@@ -125,16 +136,22 @@ test('requester -> recipient: build a link, open it, accept an extra field, send
   expect(seen.outside).toEqual([]); // nothing was sent anywhere, the request included
 });
 
-test('normal request: says so, credits INCIBE and the AEPD, and leaves out the back side', async ({ page }) => {
-  await page.goto(requestUrl({ req: '1', doc: 'dni_es', from: 'Gimnasio Sol', for: 'Alta en gimnasio', mail: 'altas@gimnasio.example' }));
+test('normal request: says so, credits INCIBE and the AEPD, back side stays optional', async ({ page }) => {
+  await page.goto(requestUrl({ req: '1', doc: 'dni_es', from: 'Gimnasio Sol', for: 'Alta en gimnasio', fields: 'given_name,surnames,document_number', mail: 'altas@gimnasio.example' }));
   const panel = page.locator('#req-panel');
   await expect(panel).toContainText('Gimnasio Sol solo te pide los datos que normalmente se comparten (según las recomendaciones de INCIBE y la AEPD).');
   await expect(panel).not.toContainText(/gobierno/i);
   await expect(panel).toContainText('No necesita el reverso.');
   await expect(panel.locator('.req-extra-row')).toHaveCount(0);
-  await expect(page.locator('#slot-back')).toBeHidden();
+  await expect(page.locator('#slot-back')).toBeVisible();
+  await expect(page.locator('#slot-back .empty')).toContainText('Opcional');
+  await expect(page.locator('#photos-tip')).toContainText('El reverso es opcional.');
   await addPhoto(page, 'front', 'img/dni_es_v4_front.webp');
   await page.locator('#nav-next').click();
+  // fewer than the usual fields: only the requested ones are shown
+  await expect(page.locator('.fld[data-f="document_number"] input')).not.toBeChecked();
+  await expect(page.locator('.fld[data-f="photo"] input')).toBeChecked();
+  await expect(page.locator('.fld[data-f="birth_date"] input')).toBeChecked();
   await page.locator('#nav-next').click();
   await page.locator('#nav-next').click();
   const sendLink = page.locator('#req-send-link');
@@ -143,7 +160,7 @@ test('normal request: says so, credits INCIBE and the AEPD, and leaves out the b
 });
 
 test('upload delivery shows the real host and warns that it is an external website', async ({ page }) => {
-  await page.goto(requestUrl({ req: '1', doc: 'dni_es', from: 'Banco X', for: 'Apertura de cuenta', up: 'https://subidas.example.com/dni?id=7' }));
+  await page.goto(requestUrl({ req: '1', doc: 'dni_es', from: 'Banco X', for: 'Apertura de cuenta', fields: 'given_name', up: 'https://subidas.example.com/dni?id=7' }));
   await expect(page.locator('#req-panel')).toContainText('Lo subirás a una web externa: subidas.example.com');
   await addPhoto(page, 'front', 'img/dni_es_v3_front.webp');
   for (let i = 0; i < 3; i++) await page.locator('#nav-next').click();
@@ -170,10 +187,11 @@ test('hostile request text is shown as plain text, never as markup', async ({ pa
 
 test('an invalid or tampered link is ignored with a notice, and the app works as usual', async ({ page }) => {
   for (const url of [
-    '/app/#req=1&doc=dni_es&from=Ana&for=x', // no delivery
+    '/app/#req=1&doc=dni_es&from=Ana&for=x&fields=photo', // no delivery
+    '/app/#req=1&doc=dni_es&from=Ana&for=x&wa=34600112233', // no fields
     requestUrl({ req: '1', doc: 'dni_es', from: 'Ana', for: 'x', wa: '34600112233', fields: 'address' }), // extra without justification
-    requestUrl({ req: '1', doc: 'dni_es', from: 'a'.repeat(61), for: 'x', wa: '34600112233' }), // too long
-    '/app/#req=1&doc=dni_es&from=Ana&from=Banco&for=x&wa=34600112233', // duplicate key
+    requestUrl({ req: '1', doc: 'dni_es', from: 'a'.repeat(61), for: 'x', fields: 'photo', wa: '34600112233' }), // too long
+    '/app/#req=1&doc=dni_es&from=Ana&from=Banco&for=x&fields=photo&wa=34600112233', // duplicate key
   ]) {
     await page.goto('about:blank');
     await page.goto(url);
@@ -203,10 +221,65 @@ test('the request page ships the strict CSP and works in English', async ({ page
 for (const width of [360, 412]) {
   test(`request pages have no horizontal overflow at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 800 });
-    for (const url of ['/app/request.html', requestUrl({ req: '1', doc: 'dni_es', from: 'Inmobiliaria con un nombre bastante largo S.L.', for: 'Alquiler de vivienda', fields: 'address,signature', why: 'x'.repeat(240), up: 'https://example.com/' + 'y'.repeat(200) })]) {
+    for (const url of ['/app/request.html#picker', requestUrl({ req: '1', doc: 'dni_es', from: 'Inmobiliaria con un nombre bastante largo S.L.', for: 'Alquiler de vivienda', fields: 'address,signature', why: 'x'.repeat(240), up: 'https://example.com/' + 'y'.repeat(200) })]) {
       await page.goto(url);
+      if (url.endsWith('#picker')) { await page.locator('#b-dial').click(); await expect(page.locator('#b-dial-list li').first()).toBeVisible(); }
       const { scroll, client } = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, client: document.documentElement.clientWidth }));
       expect(scroll, url).toBeLessThanOrEqual(client);
     }
   });
 }
+
+test('country code picker: searchable by name or prefix, keyboard friendly, full number in the link', async ({ page }) => {
+  await page.goto('/app/request.html');
+  await page.locator('#b-from').fill('ABC');
+  await page.locator('#b-purpose').fill('Alquiler');
+  const btn = page.locator('#b-dial'), search = page.locator('#b-dial-search'), pop = page.locator('#b-dial-pop');
+  await expect(btn).toContainText('+34');
+  await expect(btn).toHaveAttribute('aria-expanded', 'false');
+
+  // by name (accents ignored), picked with the keyboard
+  await btn.click();
+  await expect(pop).toBeVisible();
+  await expect(btn).toHaveAttribute('aria-expanded', 'true');
+  await expect(search).toBeFocused();
+  await search.fill('portu');
+  await expect(page.locator('#b-dial-list li')).toHaveCount(1);
+  await expect(page.locator('#b-dial-list li')).toContainText('Portugal');
+  await expect(search).toHaveAttribute('aria-activedescendant', 'b-dial-list-PT');
+  await search.press('Enter');
+  await expect(pop).toBeHidden();
+  await expect(btn).toBeFocused();
+  await expect(btn).toContainText('+351');
+  await expect(btn).toHaveAttribute('aria-label', 'Prefijo: Portugal (+351). Cambiar');
+
+  // by prefix, with the arrow keys; Escape closes without changing anything
+  await btn.press('ArrowDown');
+  await search.fill('+44');
+  await expect(page.locator('#b-dial-list li').first()).toContainText('+44');
+  await expect(page.locator('#b-dial-list')).toContainText('Reino Unido');
+  await search.press('Escape');
+  await expect(pop).toBeHidden();
+  await expect(btn).toContainText('+351');
+  await btn.click();
+  await search.fill('zzzz');
+  await expect(page.locator('#b-dial-empty')).toBeVisible();
+  await search.press('Escape');
+
+  await page.locator('#b-contact').fill('912 345 678');
+  await expect(page.locator('#b-phone-preview')).toHaveText('Se usará: +351912345678');
+  await page.locator('#b-create').click();
+  await expect(page.locator('#b-link')).toHaveValue(/&wa=351912345678(&|$)/);
+
+  // mouse/touch pick, and names follow the UI language
+  await btn.click();
+  await search.fill('alem');
+  await page.locator('#b-dial-list li', { hasText: 'Alemania' }).click();
+  await expect(btn).toContainText('+49');
+  await page.locator('#lang button', { hasText: 'EN' }).click();
+  await expect(btn).toHaveAttribute('aria-label', 'Country code: Germany (+49). Change');
+
+  // email delivery: no country picker
+  await page.locator('#b-delivery button', { hasText: 'Email' }).click();
+  await expect(btn).toBeHidden();
+});

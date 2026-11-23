@@ -192,5 +192,21 @@ a.btn.big { width: 100%; justify-content: center; padding: 14px; font-size: 17px
 .builder #b-delivery { flex-wrap: wrap; }
 .builder #b-error { margin: 12px 0; }
 .builder #b-error:empty { margin: 4px 0; }
+/* WhatsApp number: country-code button + number, then the searchable country list below */
+.phone-row { display: flex; gap: 8px; }
+.phone-row input { flex: 1; min-width: 0; }
+.dial-btn { flex: none; font-size: 16px; padding: 0 12px; border-radius: 8px; white-space: nowrap; }
+.dial-flag { font-size: 20px; line-height: 1; }
+.dial-pop { margin-top: 8px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); padding: 8px; }
+.dial-pop input { font-size: 16px; padding: 10px; }
+.dial-list { list-style: none; margin: 6px 0 0; padding: 0; max-height: 260px; overflow-y: auto; }
+.dial-list li { display: flex; align-items: center; gap: 10px; padding: 9px 8px; border-radius: 8px; cursor: pointer; }
+.dial-list li.active { background: color-mix(in srgb, var(--accent) 18%, transparent); outline: 2px solid var(--accent); outline-offset: -2px; }
+.dial-list li[aria-selected="true"] .dial-name { font-weight: 600; }
+.dial-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.dial-code { color: var(--muted); font-variant-numeric: tabular-nums; }
+.dial-empty { margin: 8px 4px; }
+.b-phone-preview { margin: 4px 0 0; }
+.slot .empty .req-asked { color: var(--accent); font-weight: 600; }
 .b-result { margin-top: 20px; }
 .b-result #b-link { margin: 6px 0 12px; font-size: 14px; }

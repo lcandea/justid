@@ -51,7 +51,17 @@
     <button type="button" data-v="whatsapp" class="on" data-i18n="builder.delivery_whatsapp"></button><button type="button" data-v="email" data-i18n="builder.delivery_email"></button><button type="button" data-v="upload" data-i18n="builder.delivery_upload"></button>
   </div>
   <label class="lbl b-contact-lbl" for="b-contact" id="b-contact-label"></label>
-  <input type="text" id="b-contact" maxlength="300" autocomplete="off">
+  <div class="phone-row">
+    <!-- Country calling code (WhatsApp only): opens a searchable list, see js/dial-picker.js -->
+    <button type="button" class="dial-btn" id="b-dial" aria-haspopup="listbox" aria-expanded="false" aria-controls="b-dial-pop"></button>
+    <input type="text" id="b-contact" maxlength="300" autocomplete="off">
+  </div>
+  <div class="dial-pop hidden" id="b-dial-pop">
+    <input type="text" id="b-dial-search" role="combobox" aria-expanded="true" aria-controls="b-dial-list" aria-autocomplete="list" autocomplete="off" data-i18n-attr="placeholder:builder.dial_search;aria-label:builder.dial_search">
+    <ul class="dial-list" id="b-dial-list" role="listbox" data-i18n-attr="aria-label:builder.dial_list"></ul>
+    <p class="muted dial-empty hidden" id="b-dial-empty" data-i18n="builder.dial_none"></p>
+  </div>
+  <p class="muted b-phone-preview hidden" id="b-phone-preview" aria-live="polite"></p>
 
   <p class="status warn" id="b-error" role="alert"></p>
   <button type="button" class="primary big" id="b-create" data-i18n="builder.create"></button>

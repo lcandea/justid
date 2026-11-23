@@ -2,10 +2,11 @@
 // Request builder (app/request.html): someone who needs a copy of a DNI makes a link for it.
 // The whole request goes into the link's #fragment (see request.js); nothing is sent anywhere.
 import { $, $input, $textarea, $button, el } from './dom.js';
-import { t, applyI18n, mountLangSwitch } from './i18n.js';
+import { t, getLang, applyI18n, mountLangSwitch } from './i18n.js';
 import { officialTemplates } from './templates.js';
 import { FAMILIES } from '../../templates/index.js';
-import { encodeRequest, shareLinkHrefs, normalizePhone, RequestError, BUILDER_ERRORS, LIMITS } from './request.js';
+import { encodeRequest, shareLinkHrefs, composePhone, RequestError, BUILDER_ERRORS, LIMITS } from './request.js';
+import { DialPicker } from './dial-picker.js';
 
 /** @typedef {import('./request.js').DeliveryKind} DeliveryKind */
 
@@ -21,19 +22,23 @@ const BACK_ONLY = new Set(family.fields.map(f => f.id).filter(id => {
 const CAN_SHARE = typeof navigator.share === 'function';
 
 const state = {
-  /** @type {Set<string>} extra (normally hidden) fields ticked */ extras: new Set(),
+  /** fields asked for: the usual ones start ticked, any can be unticked @type {Set<string>} */
+  fields: new Set(family.fields.filter(f => f.show).map(f => f.id)),
   /** @type {DeliveryKind} */ delivery: 'whatsapp',
   /** last link built @type {string | null} */ link: null,
 };
 
 const fieldLabel = (/** @type {string} */ id) => t('field.' + id);
 
+/** Ticked fields that are normally hidden: they need a justification. */
+const extras = () => family.fields.filter(f => !f.show && state.fields.has(f.id)).map(f => f.id);
+
 function renderFields() {
   const box = $('#b-fields');
   box.replaceChildren(...family.fields.map(f => {
     const extra = !f.show;
-    const cb = el('input', { type: 'checkbox', 'data-f': f.id, checked: !extra || state.extras.has(f.id), disabled: !extra });
-    if (extra) cb.addEventListener('change', () => { cb.checked ? state.extras.add(f.id) : state.extras.delete(f.id); onChange(); });
+    const cb = el('input', { type: 'checkbox', 'data-f': f.id, checked: state.fields.has(f.id) });
+    cb.addEventListener('change', () => { cb.checked ? state.fields.add(f.id) : state.fields.delete(f.id); onChange(); });
     return el('label', { class: 'chk b-field' + (extra ? ' extra' : '') }, cb,
       el('span', {}, fieldLabel(f.id), ' ', el('small', { class: extra ? 'b-extra-note' : 'muted' }, t(extra ? 'builder.field_extra' : 'builder.field_default'))));
   }));
@@ -49,8 +54,8 @@ function renderChips() {
   }));
 }
 
-/** Back side checkbox: forced on when an extra field lives only on the back. */
-function needsBackForced() { return [...state.extras].some(id => BACK_ONLY.has(id)); }
+/** Back side checkbox: forced on when a ticked field lives only on the back. */
+function needsBackForced() { return [...state.fields].some(id => BACK_ONLY.has(id)); }
 function renderBack() {
   const forced = needsBackForced(), cb = $input('#b-back');
   if (forced) cb.checked = true;
@@ -60,7 +65,7 @@ function renderBack() {
 
 function renderWhy() {
   const why = $textarea('#b-why');
-  $('#b-why-label').textContent = t(state.extras.size ? 'builder.why_label_required' : 'builder.why_label');
+  $('#b-why-label').textContent = t(extras().length ? 'builder.why_label_required' : 'builder.why_label');
   $('#b-why-count').textContent = t('builder.why_count', { n: why.value.length, max: LIMITS.why });
 }
 
@@ -69,13 +74,29 @@ function renderContact() {
   $('#b-contact-label').textContent = t('builder.contact_' + kind);
   input.placeholder = t('builder.contact_placeholder_' + kind);
   input.inputMode = kind === 'whatsapp' ? 'tel' : kind === 'email' ? 'email' : 'url';
-  input.setAttribute('autocomplete', kind === 'whatsapp' ? 'tel' : kind === 'email' ? 'email' : 'url');
+  input.setAttribute('autocomplete', kind === 'whatsapp' ? 'tel-national' : kind === 'email' ? 'email' : 'url');
+  $('#b-dial').classList.toggle('hidden', kind !== 'whatsapp');
+  if (kind !== 'whatsapp') dial.close(false);
+  renderPhonePreview();
   $('#b-delivery').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === kind));
+}
+
+/** WhatsApp number as it will go in the link (dial code + number), so mistakes are visible. */
+function wholePhone() {
+  const typed = $input('#b-contact').value;
+  return typed.trim() ? composePhone(dial.dial, typed) : '';
+}
+function renderPhonePreview() {
+  const box = $('#b-phone-preview');
+  let phone = '';
+  if (state.delivery === 'whatsapp') { try { phone = wholePhone(); } catch { /* not a number yet */ } }
+  box.textContent = phone ? t('builder.phone_preview', { phone: '+' + phone }) : '';
+  box.classList.toggle('hidden', !phone);
 }
 
 /** Any edit makes a previously built link stale: hide it so it can't be sent by mistake. */
 function onChange() {
-  renderBack(); renderWhy();
+  renderBack(); renderWhy(); renderPhonePreview();
   state.link = null;
   $('#b-result').classList.add('hidden');
   $('#b-error').textContent = '';
@@ -84,24 +105,24 @@ function onChange() {
 function buildLink() {
   const err = $('#b-error');
   err.textContent = '';
-  const raw = {
-    doc: DOC,
-    from: $input('#b-from').value,
-    purpose: $input('#b-purpose').value,
-    fields: [...state.extras],
-    back: $input('#b-back').checked || needsBackForced(),
-    delivery: { kind: state.delivery, value: $input('#b-contact').value },
-    why: $textarea('#b-why').value,
-  };
   let fragment;
-  try { fragment = encodeRequest(raw, FAMILIES); }
+  try {
+    const contact = $input('#b-contact').value;
+    fragment = encodeRequest({
+      doc: DOC,
+      from: $input('#b-from').value,
+      purpose: $input('#b-purpose').value,
+      fields: [...state.fields],
+      back: $input('#b-back').checked || needsBackForced(),
+      delivery: { kind: state.delivery, value: state.delivery === 'whatsapp' ? wholePhone() : contact },
+      why: $textarea('#b-why').value,
+    }, FAMILIES);
+  }
   catch (e) {
     if (!(e instanceof RequestError)) throw e;
     err.textContent = BUILDER_ERRORS.includes(e.code) ? t('request.error.' + e.code) : t('request.error.generic', { code: e.code });
     return;
   }
-  // Show the phone as it will be used, so a missing country code is obvious.
-  if (state.delivery === 'whatsapp') $input('#b-contact').value = '+' + normalizePhone(raw.delivery.value);
   const link = new URL('./', location.href).href + '#' + fragment;
   state.link = link;
   showResult(link, $input('#b-purpose').value.trim());
@@ -149,6 +170,14 @@ async function shareLink() {
 }
 
 /* ---------- init ---------- */
+const dial = new DialPicker({
+  button: $button('#b-dial'), pop: $('#b-dial-pop'), search: $input('#b-dial-search'), list: $('#b-dial-list'), empty: $('#b-dial-empty'),
+}, {
+  initial: 'ES', // Spain by default
+  lang: getLang,
+  buttonLabel: c => t('builder.dial_button', { country: c.name, dial: c.dial }),
+  onChange: onChange,
+});
 $('#b-delivery').addEventListener('click', e => {
   const b = /** @type {HTMLElement | null} */ (/** @type {HTMLElement} */ (e.target).closest('button'));
   if (!b) return;
@@ -169,6 +198,7 @@ $('#b-share').addEventListener('click', shareLink);
 $('#b-link').addEventListener('focus', () => $input('#b-link').select());
 
 window.addEventListener('langchange', () => {
+  dial.refresh(); // country names in the new language
   renderFields(); renderChips(); renderWhy(); renderContact();
   if (state.link) showResult(state.link, $input('#b-purpose').value.trim(), false); // message text follows the language
 });
