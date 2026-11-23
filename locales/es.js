@@ -124,9 +124,14 @@ export default {
   'nav.need_purpose': 'Escribe el motivo',
 
   'wm.only_for': 'SOLO PARA: {purpose}',
-  'pdf.caption_purpose': 'Copia de documento de identidad con datos ocultados. Finalidad: {purpose}',
-  'pdf.caption_recipient': 'Destinatario: {recipient}. ',
-  'pdf.caption_date': '{recipient}Fecha: {date}. No válida para otro fin.',
+  'pdf.eyebrow': 'Copia con datos ocultados',
+  'pdf.purpose_label': 'Finalidad',
+  'pdf.recipient_label': 'Destinatario',
+  'pdf.date_label': 'Fecha',
+  'pdf.hidden_label': 'Datos ocultados',
+  'pdf.notice': 'Válida solo para la finalidad indicada. No sirve para ningún otro uso.',
+  'pdf.footer': 'Generado con JustID en el dispositivo del titular. Las fotos no se han subido a ningún servidor.',
+  'pdf.site': 'justid.candea.es',
   'pdf.filename': 'copia_documento_{date}.pdf',
 
   'template.dni_es_v3': 'DNI España v3 (2015–2021)',

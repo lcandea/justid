@@ -31,11 +31,14 @@ test('watermark: upper-case "only for purpose · recipient · date"; empty witho
   assert.equal(W.watermarkText({ purpose: '   ', recipient: 'Ana', date: 'x', onlyFor }), '');
 });
 
-test('PDF caption and file name are composed from the translate function', () => {
-  const tr = (key, p = {}) => `${key}:${Object.values(p).join('|')}`;
-  assert.deepEqual(W.pdfCaption({ purpose: ' gym ', recipient: ' Ana ', date: 'D' }, tr),
-    ['pdf.caption_purpose:gym', 'pdf.caption_date:pdf.caption_recipient:Ana|D']);
-  assert.deepEqual(W.pdfCaption({ purpose: 'gym', recipient: ' ', date: 'D' }, tr)[1], 'pdf.caption_date:|D');
+test('PDF texts and file name are composed from the translate function', () => {
+  const tr = (k, p) => p ? `${k}:${Object.values(p).join('|')}` : k;
+  const x = W.pdfTexts({ purpose: ' gym ', recipient: ' Ana ', date: 'D', hiddenCount: 4 }, tr);
+  assert.equal(x.purpose, 'gym');
+  assert.deepEqual(x.meta, [
+    { label: 'pdf.recipient_label', value: 'Ana', wide: true }, { label: 'pdf.date_label', value: 'D' }, { label: 'pdf.hidden_label', value: '4' },
+  ]);
+  assert.deepEqual(W.pdfTexts({ purpose: 'gym', recipient: ' ', date: 'D', hiddenCount: 0 }, tr).meta.map(m => m.label), ['pdf.date_label', 'pdf.hidden_label']);
   assert.equal(W.pdfFileName(tr, new Date('2026-03-04T10:00:00Z')), 'pdf.filename:2026-03-04');
 });
 

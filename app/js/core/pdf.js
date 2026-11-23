@@ -1,5 +1,8 @@
 // @ts-check
-// Minimal PDF writer (no dependencies): JPEG images + Helvetica text, one A4 page.
+// Minimal PDF writer (no dependencies): JPEG images + text in the standard PDF fonts, one A4 page.
+import { textWidth, wrapText } from './pdf-fonts.js';
+
+/** @typedef {import('./pdf-fonts.js').PdfFont} PdfFont */
 // Being this small is deliberate: it's easy to audit that the PDF contains only what you see.
 
 /** PDF strings use Latin-1; anything outside it becomes "?". @param {string} str */
@@ -12,40 +15,117 @@ function latin1(str) {
 function pdfText(s) { return s.replace(/[\\()]/g, m => '\\' + m).replace(/[\r\n]+/g, ' '); }
 
 /**
- * Cards at real size (85.6 × 54 mm), centred on an A4 page, one under the other, then the caption.
+ * Texts printed on the page, already translated. Labels are upper-cased here (they are set as mono eyebrows).
+ * @typedef {{ eyebrow: string, purposeLabel: string, purpose: string,
+ *   meta: { label: string, value: string, wide?: boolean }[], notice: string, footer: string, site: string }} PdfTexts
+ */
+
+// Colours of the site's theme (shared/theme.css), on paper instead of ink.
+const INK = '0.051 0.051 0.047', MUTE = '0.42 0.404 0.373', LINE = '0.851 0.839 0.812', LIME = '0.843 1 0.227', PAPER = '1 1 1';
+/** Font resource names. @type {Record<PdfFont, string>} */
+const FONT_RES = { 'Helvetica': 'F1', 'Helvetica-Bold': 'F2', 'Courier': 'F3', 'Courier-Bold': 'F4' };
+const n = (/** @type {number} */ v) => +v.toFixed(2);
+
+/** Path of a rectangle with rounded corners (Bézier arcs). @param {number} x @param {number} y @param {number} w @param {number} h @param {number} r */
+function roundRect(x, y, w, h, r) {
+  const k = r * 0.5523;
+  return `${n(x + r)} ${n(y)} m ${n(x + w - r)} ${n(y)} l ${n(x + w - r + k)} ${n(y)} ${n(x + w)} ${n(y + r - k)} ${n(x + w)} ${n(y + r)} c ` +
+    `${n(x + w)} ${n(y + h - r)} l ${n(x + w)} ${n(y + h - r + k)} ${n(x + w - r + k)} ${n(y + h)} ${n(x + w - r)} ${n(y + h)} c ` +
+    `${n(x + r)} ${n(y + h)} l ${n(x + r - k)} ${n(y + h)} ${n(x)} ${n(y + h - r + k)} ${n(x)} ${n(y + h - r)} c ` +
+    `${n(x)} ${n(y + r)} l ${n(x)} ${n(y + r - k)} ${n(x + r - k)} ${n(y)} ${n(x + r)} ${n(y)} c h`;
+}
+
+/**
+ * One A4 page in the site's style, on white: header with the logo, the cards at real size
+ * (85.6 × 54 mm, ID-1 corner radius) one under the other, the purpose and its details, and a footer.
  * @param {{ jpeg: Uint8Array, w: number, h: number }[]} images sizes in pixels
- * @param {string[]} captionLines
+ * @param {PdfTexts} texts
  * @returns {Blob}
  */
-export function makePdf(images, captionLines) {
+export function makePdf(images, texts) {
   const PW = 595.28, PH = 841.89, MM = 72 / 25.4;
-  const cw = 85.6 * MM, ch = 54 * MM, gap = 10 * MM;
-  const x = (PW - cw) / 2;
-  let y = PH - 25 * MM - ch;
-
+  const M = 20 * MM, CW = PW - 2 * M;
   let content = '';
-  images.forEach((img, i) => {
-    content += `q ${cw.toFixed(2)} 0 0 ${ch.toFixed(2)} ${x.toFixed(2)} ${y.toFixed(2)} cm /Im${i} Do Q\n`;
-    content += `q 0.6 G 0.5 w ${x.toFixed(2)} ${y.toFixed(2)} ${cw.toFixed(2)} ${ch.toFixed(2)} re S Q\n`;
+  /** @param {string} str @param {PdfFont} font @param {number} size @param {number} x @param {number} y @param {string} color @param {number} [sp] */
+  const text = (str, font, size, x, y, color, sp = 0) => {
+    content += `BT /${FONT_RES[font]} ${size} Tf ${n(sp)} Tc ${color} rg ${n(x)} ${n(y)} Td (${pdfText(str)}) Tj ET\n`;
+  };
+  /** @param {number} x @param {number} y @param {number} w @param {number} h @param {string} color */
+  const rect = (x, y, w, h, color) => { content += `${color} rg ${n(x)} ${n(y)} ${n(w)} ${n(h)} re f\n`; };
+  /** Mono eyebrow label (upper-case, tracked). @param {string} str @param {number} x @param {number} y @param {string} [color] */
+  const eyebrow = (str, x, y, color = MUTE) => text(str.toUpperCase(), 'Courier-Bold', 7.5, x, y, color, 0.6);
+  const eyebrowWidth = (/** @type {string} */ str) => textWidth(str.toUpperCase(), 'Courier-Bold', 7.5, 0.6);
+
+  // Header: logo ("Just" + an inverted "ID" block, as on the site), eyebrow on the right, a thick rule.
+  const hy = PH - 18 * MM, ls = 15;
+  text('Just', 'Helvetica-Bold', ls, M, hy, INK);
+  const idX = M + textWidth('Just', 'Helvetica-Bold', ls) + 1.5, idW = textWidth('ID', 'Helvetica-Bold', ls) + 6;
+  rect(idX, hy - 3.6, idW, ls * 0.98, INK);
+  text('ID', 'Helvetica-Bold', ls, idX + 3, hy, PAPER);
+  eyebrow(texts.eyebrow, M + CW - eyebrowWidth(texts.eyebrow), hy + 1);
+  rect(M, hy - 9 * MM / 2 - 3, CW, 1.4, INK);
+
+  // Cards
+  const cw = 85.6 * MM, ch = 54 * MM, gap = 7 * MM, r = 3.18 * MM, cx = (PW - cw) / 2;
+  let y = PH - 36 * MM - ch, bottom = y;
+  images.forEach((_, i) => {
+    bottom = y;
+    content += `q ${roundRect(cx, y, cw, ch, r)} W n ${n(cw)} 0 0 ${n(ch)} ${n(cx)} ${n(y)} cm /Im${i} Do Q\n`;
+    content += `q ${LINE} RG 0.6 w ${roundRect(cx, y, cw, ch, r)} S Q\n`;
     y -= ch + gap;
   });
-  let ty = y + ch - 4 * MM;
-  captionLines.forEach((line, i) => {
-    content += `BT /F1 ${i === 0 ? 10 : 8.5} Tf ${(25 * MM).toFixed(2)} ${ty.toFixed(2)} Td (${pdfText(line)}) Tj ET\n`;
-    ty -= 14;
-  });
+  y = bottom;
 
+  // Purpose: label, then the purpose itself highlighted in lime (like the site's <mark>).
+  y -= 13 * MM;
+  eyebrow(texts.purposeLabel, M, y);
+  const ps = 17, lead = 23;
+  y -= 8 * MM;
+  for (const line of wrapText(texts.purpose, 'Helvetica-Bold', ps, CW - 8)) {
+    rect(M, y - 4.5, textWidth(line, 'Helvetica-Bold', ps) + 8, ps + 3.5, LIME);
+    text(line, 'Helvetica-Bold', ps, M + 4, y, INK);
+    y -= lead;
+  }
+
+  // Details in columns (a "wide" one gets twice the room), values wrapped to two lines at most.
+  y -= 5 * MM;
+  const units = texts.meta.reduce((s, m) => s + (m.wide ? 2 : 1), 0), colGap = 6 * MM;
+  let x = M, lowest = y;
+  for (const m of texts.meta) {
+    const w = (CW - colGap * (texts.meta.length - 1)) * (m.wide ? 2 : 1) / units;
+    eyebrow(m.label, x, y);
+    let vy = y - 14;
+    for (const line of wrapText(m.value, 'Helvetica', 10.5, w).slice(0, 2)) { text(line, 'Helvetica', 10.5, x, vy, INK); vy -= 13.5; }
+    lowest = Math.min(lowest, vy);
+    x += w + colGap;
+  }
+
+  // Notice, introduced by a short redaction bar (the site's motif).
+  y = lowest - 6 * MM;
+  rect(M, y - 0.5, 16, 7, INK);
+  for (const line of wrapText(texts.notice, 'Helvetica-Bold', 9.5, CW - 24)) { text(line, 'Helvetica-Bold', 9.5, M + 24, y, INK); y -= 12.5; }
+
+  // Footer: hairline, then what made this file and where (site right-aligned).
+  const fy = 14 * MM, siteW = textWidth(texts.site, 'Courier-Bold', 7.5);
+  const footLines = wrapText(texts.footer, 'Courier', 7.5, CW - siteW - 8 * MM);
+  rect(M, fy + (footLines.length - 1) * 9.5 + 12, CW, 0.6, LINE);
+  footLines.forEach((line, i) => text(line, 'Courier', 7.5, M, fy + (footLines.length - 1 - i) * 9.5, MUTE));
+  text(texts.site, 'Courier-Bold', 7.5, M + CW - siteW, fy, INK);
+
+  // Objects: 1 catalog, 2 page tree, 3 page, 4 content, 5.. fonts, then the images.
+  const fonts = /** @type {[PdfFont, string][]} */ (Object.entries(FONT_RES)), firstImg = 5 + fonts.length;
   /** @type {(string | Uint8Array)[][]} each object: list of parts */
   const objs = [];
   objs[1] = ['<< /Type /Catalog /Pages 2 0 R >>'];
   objs[2] = ['<< /Type /Pages /Kids [3 0 R] /Count 1 >>'];
-  const xo = images.map((_, i) => `/Im${i} ${6 + i} 0 R`).join(' ');
-  objs[3] = [`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW} ${PH}] /Resources << /Font << /F1 4 0 R >> /XObject << ${xo} >> >> /Contents 5 0 R >>`];
-  objs[4] = ['<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>'];
+  const fontRefs = fonts.map(([, res], i) => `/${res} ${5 + i} 0 R`).join(' ');
+  const xo = images.map((_, i) => `/Im${i} ${firstImg + i} 0 R`).join(' ');
+  objs[3] = [`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW} ${PH}] /Resources << /Font << ${fontRefs} >> /XObject << ${xo} >> >> /Contents 4 0 R >>`];
   const cb = latin1(content);
-  objs[5] = [`<< /Length ${cb.length} >>\nstream\n`, cb, '\nendstream'];
+  objs[4] = [`<< /Length ${cb.length} >>\nstream\n`, cb, '\nendstream'];
+  fonts.forEach(([font], i) => { objs[5 + i] = [`<< /Type /Font /Subtype /Type1 /BaseFont /${font} /Encoding /WinAnsiEncoding >>`]; });
   images.forEach((img, i) => {
-    objs[6 + i] = [`<< /Type /XObject /Subtype /Image /Width ${img.w} /Height ${img.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${img.jpeg.length} >>\nstream\n`, img.jpeg, '\nendstream'];
+    objs[firstImg + i] = [`<< /Type /XObject /Subtype /Image /Width ${img.w} /Height ${img.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${img.jpeg.length} >>\nstream\n`, img.jpeg, '\nendstream'];
   });
 
   /** @type {Uint8Array[]} */

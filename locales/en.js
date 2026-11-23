@@ -123,9 +123,14 @@ export default {
   'nav.need_purpose': 'Type the purpose',
 
   'wm.only_for': 'ONLY FOR: {purpose}',
-  'pdf.caption_purpose': 'Copy of an identity document with redacted data. Purpose: {purpose}',
-  'pdf.caption_recipient': 'Recipient: {recipient}. ',
-  'pdf.caption_date': '{recipient}Date: {date}. Not valid for any other purpose.',
+  'pdf.eyebrow': 'Copy with redacted data',
+  'pdf.purpose_label': 'Purpose',
+  'pdf.recipient_label': 'Recipient',
+  'pdf.date_label': 'Date',
+  'pdf.hidden_label': 'Hidden fields',
+  'pdf.notice': 'Valid only for the purpose stated. Not valid for any other use.',
+  'pdf.footer': "Generated with JustID on the holder's device. The photos were never uploaded to any server.",
+  'pdf.site': 'justid.candea.es',
   'pdf.filename': 'id_copy_{date}.pdf',
 
   'template.dni_es_v3': 'Spanish ID card (DNI) v3 (2015–2021)',

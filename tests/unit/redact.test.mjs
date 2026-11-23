@@ -19,3 +19,13 @@ test('hashSeed: depends on both the text and the secret seed', () => {
   assert.notEqual(R.hashSeed('dni:front:0', 7), R.hashSeed('dni:front:1', 7));
   assert.notEqual(R.hashSeed('dni:front:0', 7), R.hashSeed('dni:front:0', 8));
 });
+
+const F = await import(join(ROOT, 'app/js/core/pdf-fonts.js'));
+
+test('PDF font metrics: AFM widths, accents as their base letter, wrapping within the width', () => {
+  assert.equal(F.textWidth('Hello', 'Helvetica', 1000), 2278);
+  assert.equal(F.textWidth('Ñandú', 'Helvetica-Bold', 10), F.textWidth('Nandu', 'Helvetica-Bold', 10));
+  assert.equal(F.textWidth('abc', 'Courier', 10, 1), 21);
+  const lines = F.wrapText('Evaluación de solvencia para el alquiler de una vivienda en Madrid', 'Helvetica-Bold', 17, 200);
+  assert.ok(lines.length > 1 && lines.every(l => F.textWidth(l, 'Helvetica-Bold', 17) <= 200));
+});
