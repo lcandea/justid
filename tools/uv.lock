@@ -8,7 +8,7 @@ resolution-markers = [
 ]
 
 [[package]]
-name = "dni-seguro-tools"
+name = "justid-tools"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

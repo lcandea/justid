@@ -1,5 +1,5 @@
 [project]
-name = "dni-seguro-tools"
+name = "justid-tools"
 version = "0.1.0"
 description = "Internal dev tools (not published): reference picture normalisation, etc."
 requires-python = ">=3.10"
