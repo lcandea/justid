@@ -34,6 +34,8 @@
     #chat-phone { left: 202px; top: 560px; }
     <!--endif--><!--if:16x9-->
     #chat-phone { left: 200px; top: 60px; }
+    #root .cap-band { left: 1000px; width: 720px; top: 360px; }
+    #root .cap-band .cap { font-size: 92px; }
     <!--endif-->
   </style>
   <div id="root" class="stage" data-composition-id="chat" data-width="{{W}}" data-height="{{H}}">
@@ -46,7 +48,7 @@
             <div id="chat-bubble">
               <div id="chat-preview"><div class="logo-v"><span>Just</span><span class="logo-id">ID</span></div><div id="chat-domain">{{t:common.url}}</div></div>
               <p id="chat-text">{{t:request.builder_message_app}}</p>
-              <p id="chat-url">{{t:common.url}}/app/#req=1&amp;doc=dni_es&amp;from=Inmobiliaria…</p>
+              <p id="chat-url"></p>
               <div id="chat-meta">{{t:request.chat_time}}<span id="chat-ticks">✓✓</span></div>
             </div>
             <div id="chat-compose"></div>
@@ -71,10 +73,20 @@
       const tl = gsap.timeline({ paused: true });
       const wide = window.JV_DATA && JV_DATA.aspect === '16x9';
       const O = wide ? { x: 218, y: 78 } : { x: 220, y: 578 }, K = 1.64;
-      const X = wide ? 470 : 504, TOP = wide ? 70 : 612, Z = 1.2;
+      // 9:16: the phone sits a little left so the outgoing bubble clears TikTok's right rail (x ≤ 780 below y 840).
+      const X = wide ? 560 : 440, TOP = wide ? 90 : 612, Z = wide ? 1.15 : 1.2;
       const cam = (z, top) => ({ x: X - z * (O.x + K * 195), y: top - z * O.y, scale: z });
       const pt = (c, x, y) => ({ x: c.x + c.scale * (O.x + K * x), y: c.y + c.scale * (O.y + K * y) });
       const cMain = cam(Z, TOP);
+      // The link as the app builds it (manifest.requestLink, the part after the domain), ellipsized by CSS.
+      const buildLink = (el, bold) => {
+        const rl = JV_DATA.manifest.requestLink || '', i = rl.indexOf('#');
+        el.textContent = '{{t:common.url}}/' + rl.slice(0, i < 0 ? rl.length : i);
+        const tail = bold ? document.createElement('b') : document.createTextNode('');
+        tail.textContent = i < 0 ? '' : rl.slice(i);
+        el.append(tail);
+      };
+      buildLink(root.querySelector('#chat-url'), false);
       // The avatar shows the initial only.
       const av = root.querySelector('#chat-avatar'); av.textContent = av.textContent.trim().charAt(0);
 

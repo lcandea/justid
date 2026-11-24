@@ -35,8 +35,11 @@
     <!--endif--><!--if:16x9-->
     #recipient-phone { left: 200px; top: 60px; }
     #recipient-fade { display: none; }
-    #recipient-cardbox { left: 110px; top: 220px; width: 740px; }
-    #recipient-wm { top: 520px; }
+    #recipient-cardbox { left: 160px; top: 190px; width: 760px; }
+    #recipient-wm { top: 530px; }
+    #root .cap-band { left: 1000px; width: 720px; top: 360px; }
+    #root .cap-band .cap { font-size: 92px; }
+
     <!--endif-->
   </style>
   <div id="root" class="stage" data-composition-id="recipient" data-width="{{W}}" data-height="{{H}}">
@@ -79,7 +82,7 @@
       const tl = gsap.timeline({ paused: true });
       const wide = window.JV_DATA && JV_DATA.aspect === '16x9';
       const O = wide ? { x: 218, y: 78 } : { x: 220, y: 578 }, K = 1.64;
-      const C = wide ? { x: 470, y: 540 } : { x: 504, y: 664 }; // where the framed UI lands
+      const C = wide ? { x: 560, y: 540 } : { x: 504, y: 664 }; // where the framed UI lands
       const box = (x, y, w, h) => ({ x: O.x + K * x, y: O.y + K * y, w: K * w, h: K * h });
       const cam = (b, z) => ({ x: C.x - (b.x + b.w / 2) * z, y: C.y - (b.y + b.h / 2) * z, scale: z });
       const pt = (c, x, y) => ({ x: c.x + c.scale * (O.x + K * x), y: c.y + c.scale * (O.y + K * y) });
@@ -125,7 +128,7 @@
       // The watermark naming the requester sweeps across (final render revealed behind a lime scan line), then holds.
       tl.fromTo('#recipient-final', { clipPath: 'inset(0% 100% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.6, ease: 'power2.inOut' }, 5.6);
       tl.fromTo('#recipient-scan', { opacity: 0 }, { opacity: 1, duration: 0.01, ease: 'none' }, 5.6);
-      tl.fromTo('#recipient-scan', { x: 0 }, { x: 700, duration: 0.6, ease: 'power2.inOut' }, 5.6);
+      tl.fromTo('#recipient-scan', { x: 0 }, { x: root.querySelector('#recipient-card').offsetWidth, duration: 0.6, ease: 'power2.inOut' }, 5.6);
       tl.fromTo('#recipient-scan', { opacity: 1 }, { opacity: 0, duration: 0.15, ease: 'power2.out', immediateRender: false }, 6.2);
       JV.wordsIn(tl, root, '#recipient-cap3 .w', 5.3, 0.08, 0.18);
       tl.fromTo('#recipient-wm-pill', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35, ease: 'expo.out' }, 5.55);

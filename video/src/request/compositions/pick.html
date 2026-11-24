@@ -42,6 +42,8 @@
     #pick-phone { left: 202px; top: 560px; }
     <!--endif--><!--if:16x9-->
     #pick-phone { left: 200px; top: 60px; }
+    #root .cap-band { left: 1000px; width: 720px; top: 360px; }
+    #root .cap-band .cap { font-size: 92px; }
     <!--endif-->
   </style>
   <div id="root" class="stage" data-composition-id="pick" data-width="{{W}}" data-height="{{H}}">
@@ -57,7 +59,7 @@
               <div id="pick-count">0/240</div>
             </div>
             <div id="pick-result"><img src="assets/cap/req-03-result.png" alt="">
-              <div id="pick-link">justid.candea.es/app/<b>#req=1&amp;doc=dni_es&amp;from=Inmobiliaria</b>…</div>
+              <div id="pick-link"></div>
             </div>
             <div id="pick-head"><img src="assets/cap/req-02-builder-filled.png" alt=""></div>
           </div>
@@ -86,14 +88,24 @@
       // Phone screen origin in the camera wrapper, and the screen's CSS→px scale.
       const O = wide ? { x: 218, y: 78 } : { x: 220, y: 578 }, K = 1.64;
       // Framing: the screen's centre line lands at X, its top edge at TOP (below the caption band in 9:16).
-      const X = wide ? 470 : 504, TOP = wide ? 70 : 612, Z = 1.2;
+      // 16:9: phone on the left half, its top just inside the frame, UI at 1.89 px/CSS px (text ≥ 26 px).
+      const X = wide ? 560 : 504, TOP = wide ? 90 : 612, Z = wide ? 1.15 : 1.2;
       /** Camera state: zoom z, screen top at scene y `top`. */
       const cam = (z, top) => ({ x: X - z * (O.x + K * 195), y: top - z * O.y, scale: z });
       /** A screen point (CSS px of the 390×844 viewport) seen through a camera state → scene px. */
       const pt = (c, x, y) => ({ x: c.x + c.scale * (O.x + K * x), y: c.y + c.scale * (O.y + K * y) });
       const scroll = (sel, from, to, at, dur) =>
         tl.fromTo(sel, { y: -from }, { y: -to, duration: dur, ease: 'power2.inOut', immediateRender: false }, at);
-      const cIn = cam(1.0, TOP + 140), cMain = cam(Z, TOP);
+      const cIn = cam(wide ? 0.88 : 1.0, TOP + 140), cMain = cam(Z, TOP);
+      // The link as the app builds it (manifest.requestLink, the part after the domain), ellipsized by CSS.
+      const buildLink = (el, bold) => {
+        const rl = JV_DATA.manifest.requestLink || '', i = rl.indexOf('#');
+        el.textContent = '{{t:common.url}}/' + rl.slice(0, i < 0 ? rl.length : i);
+        const tail = bold ? document.createElement('b') : document.createTextNode('');
+        tail.textContent = i < 0 ? '' : rl.slice(i);
+        el.append(tail);
+      };
+      buildLink(root.querySelector('#pick-link'), true);
 
       // Positions come from the capture manifest (CSS px), so overlays stay aligned when captures are redone.
       const files = JV_DATA.manifest.files;

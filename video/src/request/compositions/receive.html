@@ -47,10 +47,15 @@
     #root #receive-carry { top: 1078px; width: 660px; }
     <!--endif--><!--if:16x9-->
     #receive-phone { left: 200px; top: 60px; }
-    #receive-fly { left: 110px; top: 220px; width: 740px; }
-    #receive-pop { left: 1000px; top: 520px; width: 700px; height: 520px; }
-    #receive-wmbox { left: 110px; top: 220px; width: 740px; }
-    #receive-wm { top: 520px; }
+    /* Requester's chat on the left, the received copy pops out on the right under the caption. */
+    #receive-fly { left: 160px; top: 190px; width: 760px; }
+    #receive-pop { left: 1020px; top: 330px; width: 620px; height: 620px; }
+    #receive-wmbox { left: 160px; top: 190px; width: 760px; }
+    #receive-wm { top: 530px; }
+    #root .cap-band { left: 1000px; width: 720px; top: 360px; }
+    #root .cap-band .cap { font-size: 92px; }
+    #root .cap-band:not(#receive-carry) { top: 130px; }
+    #root #receive-carry .cap { font-size: 92px; }
     <!--endif-->
   </style>
   <div id="root" class="stage" data-composition-id="receive" data-width="{{W}}" data-height="{{H}}">
@@ -87,17 +92,17 @@
       const tl = gsap.timeline({ paused: true });
       const wide = window.JV_DATA && JV_DATA.aspect === '16x9';
       const O = wide ? { x: 218, y: 78 } : { x: 220, y: 578 }, K = 1.64;
-      const X = wide ? 470 : 504, TOP = wide ? 70 : 612, Z = 1.2;
+      const X = wide ? 560 : 504, TOP = wide ? 90 : 612, Z = wide ? 1.15 : 1.2;
       const cam = (z, top) => ({ x: X - z * (O.x + K * 195), y: top - z * O.y, scale: z });
       const pt = (c, x, y) => ({ x: c.x + c.scale * (O.x + K * x), y: c.y + c.scale * (O.y + K * y) });
       const cMain = cam(Z, TOP);
       const av = root.querySelector('#receive-avatar'); av.textContent = av.textContent.trim().charAt(0);
 
       // Carry target: the thumbnail image inside the bubble (left 12+6+6, top 112+6+5, width 236 CSS px).
-      const fly = wide ? { x: 110, y: 220, w: 740 } : { x: 120, y: 420, w: 700 };
+      const fly = wide ? { x: 160, y: 190, w: 760 } : { x: 120, y: 420, w: 700 };
       const t = pt(cMain, 24, 123), tw = 236 * K * Z;
       // Pop-out box (for the fan's start: from the thumbnail).
-      const pop = wide ? { x: 1000, y: 520, w: 700 } : { x: 164, y: 560, w: 680 };
+      const pop = wide ? { x: 1020, y: 330, w: 620 } : { x: 164, y: 560, w: 680 };
 
       // The watermark line for the carried pill (same text as the recipient scene's).
       const wm = ((JV_DATA.manifest.watermarks && JV_DATA.manifest.watermarks.request) || '').split(' · ');
@@ -116,10 +121,11 @@
       // Hold: the copy has arrived (file message). Then it pops out large, front over back; the chat fades out.
 
       // 1.6–2.25: pop-out, then hold on front and back (only the requested fields, the requester in the watermark).
-      tl.fromTo('#receive-dim', { opacity: 0 }, { opacity: 1, duration: 0.35, ease: 'power2.out' }, 1.6);
+      // 9:16: the cards land over the phone, so the chat fades out under them; 16:9: side by side, the chat stays.
+      tl.fromTo('#receive-dim', { opacity: 0 }, { opacity: wide ? 0 : 1, duration: 0.35, ease: 'power2.out' }, 1.6);
       const s0 = tw / pop.w;
       tl.fromTo('#receive-front-card', { x: t.x - pop.x, y: t.y - pop.y, scale: s0, rotation: 0, transformOrigin: '0 0' },
-        { x: 0, y: 240, scale: 1, rotation: -3, transformOrigin: '0 0', duration: 0.6, ease: 'expo.out' }, 1.6);
+        { x: 0, y: wide ? 200 : 240, scale: 1, rotation: -3, transformOrigin: '0 0', duration: 0.6, ease: 'expo.out' }, 1.6);
       tl.fromTo('#receive-back-card', { x: t.x - pop.x, y: t.y - pop.y, scale: s0, rotation: 0, opacity: 0, transformOrigin: '0 0' },
         { x: 50, y: 0, scale: 0.92, rotation: 4, opacity: 1, transformOrigin: '0 0', duration: 0.65, ease: 'expo.out' }, 1.68);
       tl.set(['#receive-front-card', '#receive-back-card'], { opacity: 0 }, 0);
