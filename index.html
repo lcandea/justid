@@ -11,9 +11,97 @@
 -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
 <meta name="referrer" content="no-referrer">
-<meta name="description" content="Tapa los datos de tu DNI que no hacen falta, marca para qué es la copia y envíala en PDF. Todo ocurre en tu móvil: tu DNI no sale de tu dispositivo." data-i18n-attr="content:landing.meta.description">
+<meta name="description" content="Comparte tu DNI de forma segura: tapa los datos que sobran, añade una marca de agua y envíalo por WhatsApp en PDF. Gratis y sin salir de tu móvil." data-i18n-attr="content:landing.meta.description">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<title data-i18n="landing.meta.title">JustID — Comparte tu DNI, solo lo justo</title>
+<title data-i18n="landing.meta.title">Compartir DNI de forma segura, solo lo justo — JustID</title>
+<link rel="canonical" href="https://justid.candea.es/">
+<!-- Social previews (Open Graph, X/Twitter). The image is rendered by tools/render-og-image.mjs. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="JustID">
+<meta property="og:title" content="JustID — Comparte tu DNI. Solo lo justo.">
+<meta property="og:description" content="Tapa los datos de tu DNI que sobran, añade una marca de agua con su finalidad y envíalo en PDF. Gratis y sin salir de tu móvil.">
+<meta property="og:url" content="https://justid.candea.es/">
+<meta property="og:image" content="https://justid.candea.es/shared/og/og-es.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="JustID: «Comparte tu DNI. Solo lo justo.» junto a un DNI de muestra con datos tapados y marca de agua">
+<meta property="og:locale" content="es_ES">
+<meta property="og:locale:alternate" content="en_GB">
+<meta name="twitter:card" content="summary_large_image">
+<!-- Structured data for search engines: inert JSON (type="application/ld+json" is never executed, so the CSP's
+     script-src 'self' is unaffected). The FAQ entries must match the visible FAQ word for word
+     (tests/unit/seo.test.mjs checks it). -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "JustID",
+  "url": "https://justid.candea.es/",
+  "description": "Comparte tu DNI de forma segura: tapa los datos que sobran, añade una marca de agua y envíalo por WhatsApp en PDF. Gratis y sin salir de tu móvil.",
+  "applicationCategory": "UtilityApplication",
+  "operatingSystem": "Any (web browser)",
+  "inLanguage": [
+    "es",
+    "en"
+  ],
+  "isAccessibleForFree": true,
+  "image": "https://justid.candea.es/shared/og/og-es.png",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "EUR"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "es",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "¿Es gratis?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sí. Sin registro, sin anuncios y sin letra pequeña."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Funciona sin internet?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Una vez cargada la página, todo el proceso ocurre en tu dispositivo."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Guardáis mis fotos?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Al cerrar la página desaparecen. No usamos cookies, analíticas ni rastreadores."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Una copia tapada sigue siendo válida?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Para la mayoría de trámites, sí: basta con tu nombre, tu número de DNI y tu foto. Solo algunas entidades, como los bancos, están obligadas por ley a guardar una copia completa."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Qué DNI admite?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "El DNI español 3.0 (2015–2021) y 4.0 (desde 2021). Con el marcador de zonas puedes adaptarlo a otros documentos."
+      }
+    }
+  ]
+}
+</script>
 <link rel="preload" href="shared/fonts/archivo-var-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="shared/theme.css">
 <link rel="stylesheet" href="landing/landing.css">
@@ -369,6 +457,7 @@
       <nav class="foot-nav mono" aria-label="Pie de página" data-i18n-attr="aria-label:landing.footer.nav">
         <a href="https://github.com/lcandea/justid" rel="noopener noreferrer"><span data-i18n="landing.footer.source">Código fuente</span> <span aria-hidden="true">↗</span></a>
         <a href="why/" data-i18n="landing.footer.why">Por qué así</a>
+        <a href="guia/" data-i18n="landing.footer.guide">Guía para compartir el DNI</a>
         <span class="muted" data-i18n="landing.footer.license">Licencia MIT</span>
         <div class="lang-switch" data-lang-switch></div>
       </nav>

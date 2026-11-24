@@ -1,0 +1,66 @@
+/* The /guia/ page (guia/index.html): a long-form guide. Reuses landing.css (header, buttons, FAQ list, footer)
+   and only adds what a readable article needs: a narrow text column, smaller headings and a few callouts. */
+
+.guide { counter-reset: g-sec; }
+
+/* Hero: headline, intro and the table of contents */
+.g-hero { display: flex; flex-direction: column; align-items: flex-start; gap: clamp(1.25rem, 3vw, 1.75rem); padding-block: clamp(2rem, 6vw, 4.5rem) clamp(2rem, 5vw, 3rem); }
+.g-hero h1 { font-size: clamp(2.75rem, 7.4vw, 6rem); max-width: 14ch; }
+.g-hero h1 > span:first-child { max-width: none; }
+.g-lede { max-width: 46rem; }
+.g-toc { width: 100%; max-width: 46rem; margin-top: .5rem; padding-top: 1.25rem; border-top: 1px solid var(--line); }
+.g-toc ol { list-style: decimal-leading-zero inside; margin-top: .5rem; font-size: .9375rem; color: var(--mute); }
+.g-toc li { padding-block: .125rem; }
+.g-toc a { display: inline-flex; align-items: center; min-height: 40px; text-decoration: none; color: var(--soft); }
+.g-toc a:hover { color: var(--lime); }
+
+/* Sections: a numbered heading beside (wide) or above (narrow) a column of text */
+.g-sec { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.5rem 4rem; padding-block: clamp(2.5rem, 6vw, 4.5rem); border-top: 1px solid var(--line); }
+@media (min-width: 62rem) { .g-sec { grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); } }
+.g-sec h2 { font-size: clamp(2rem, 4.2vw, 3.25rem); line-height: .95; align-self: start; }
+@media (min-width: 62rem) { .g-sec h2 { position: sticky; top: 1.5rem; } }
+.g-sec h2::before { counter-increment: g-sec; content: counter(g-sec, decimal-leading-zero); display: block; margin-bottom: .75rem; font-family: var(--mono); font-size: .875rem; font-weight: 400; font-stretch: 100%; letter-spacing: .04em; color: var(--lime); }
+
+.g-body { display: flex; flex-direction: column; gap: 1.25rem; max-width: 44rem; font-size: 1.125rem; line-height: 1.65; color: var(--soft); }
+.g-body strong, .g-body dt { color: var(--cream); font-weight: 800; }
+
+/* Cases (rent, hotel, work…): a term per row */
+.g-cases { border-top: 1px solid var(--line); }
+.g-cases > div { padding-block: 1.125rem; border-bottom: 1px solid var(--line); }
+.g-cases dt { font-size: 1.1875rem; line-height: 1.3; margin-bottom: .375rem; }
+
+/* Bullet lists with a bold lead-in, and plain check lists */
+.g-items, .g-checks { display: flex; flex-direction: column; gap: .875rem; }
+.g-items li, .g-checks li { position: relative; padding-left: 1.5rem; }
+.g-items li::before, .g-checks li::before { content: ''; position: absolute; left: 0; top: .62em; width: .75rem; height: .4em; background: var(--lime); }
+.g-items strong { display: block; }
+
+/* The example watermark: a redaction-bar style strip */
+.g-example { align-self: flex-start; max-width: 100%; padding: .75rem 1rem; background: var(--cream); color: var(--ink); font-size: .875rem; letter-spacing: .04em; line-height: 1.5; overflow-wrap: anywhere; transform: rotate(-1.5deg); }
+
+/* Callouts */
+.g-note { display: flex; flex-direction: column; align-items: flex-start; gap: .75rem; padding: 1.5rem 1.75rem; background: var(--panel); border-left: 4px solid var(--lime); }
+.g-note h3 { font-size: 1.375rem; font-weight: 800; line-height: 1.2; color: var(--cream); }
+.g-note p { font-size: 1.0625rem; line-height: 1.6; }
+
+.g-ctas { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 2rem; margin-top: .5rem; }
+
+/* "How JustID does it": lime band, like the landing's request band */
+.g-tool { background: var(--lime); color: var(--ink); }
+.g-tool .g-sec { border-top: 0; }
+.g-tool h2::before { color: var(--ink); }
+.g-tool .g-body { color: var(--ink); }
+.g-tool .src-link { color: var(--ink); border-bottom-color: var(--ink); }
+.g-tool .src-link:hover { color: var(--ink); border-bottom-width: 2px; }
+.g-tool :focus-visible { outline-color: var(--ink); }
+.g-steps { counter-reset: g-step; display: flex; flex-direction: column; border-top: 2px solid var(--ink); }
+.g-steps li { counter-increment: g-step; display: flex; gap: 1.25rem; padding-block: 1rem; border-bottom: 1px solid rgba(13,13,12,.25); font-weight: 700; line-height: 1.45; }
+.g-steps li::before { content: counter(g-step, decimal-leading-zero); flex: none; padding-top: .2em; font-family: var(--mono); font-size: .875rem; font-weight: 400; }
+
+/* FAQ: reuses .faq-list from landing.css */
+.g-sec.faq .g-body { display: block; }
+
+/* Sources and disclaimer */
+.g-end { display: flex; flex-direction: column; gap: 1rem; padding-block: 2rem clamp(3rem, 6vw, 4.5rem); border-top: 1px solid var(--line); }
+.g-sources { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem 1.5rem; font-size: .875rem; color: var(--mute); }
+.g-disclaimer { max-width: 46rem; font-size: .9375rem; line-height: 1.55; color: var(--mute); }

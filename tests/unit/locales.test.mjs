@@ -22,7 +22,7 @@ test('placeholders match between languages', () => {
 });
 
 test('every data-i18n key used in HTML exists', () => {
-  for (const file of [...walk('app', '.html'), `${ROOT}/index.html`, `${ROOT}/why/index.html`]) {
+  for (const file of [...walk('app', '.html'), `${ROOT}/index.html`, `${ROOT}/why/index.html`, `${ROOT}/guia/index.html`]) {
     const html = readFileSync(file, 'utf8');
     for (const m of html.matchAll(/data-i18n="([^"]+)"/g)) assert.ok(m[1] in es, `${file}: unknown key ${m[1]}`);
     for (const m of html.matchAll(/data-i18n-attr="([^"]+)"/g)) {

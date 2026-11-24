@@ -3,12 +3,15 @@
 // Placeholders use {name} and are filled by t() in app/js/ui/i18n.js.
 import landing from './landing-es.js';
 import why from './why-es.js';
+import guide from './guide-es.js';
 
-// Landing page strings live in landing-es.js, the /why page strings in why-es.js.
+// Landing page strings live in landing-es.js, the /why page strings in why-es.js, the /guia/ page strings in guide-es.js.
 export default {
   ...landing,
   ...why,
+  ...guide,
   'meta.title': 'JustID — Comparte tu DNI, solo lo justo',
+  'meta.app_description': 'Tapa los datos de tu DNI que sobran, añade una marca de agua y descárgalo en PDF. Gratis, sin registro y sin que tu DNI salga de tu móvil.',
   'meta.editor_title': 'JustID — Marcador de zonas',
   'brand.tagline': 'Solo lo justo',
   'lang.label': 'Idioma',

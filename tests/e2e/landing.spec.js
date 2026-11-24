@@ -156,6 +156,25 @@ test('/why loads cleanly, has both audiences, switches language and links to the
   expect(seen.outside).toEqual([]);
 });
 
+test('/guia/ loads cleanly, has its sections, switches language and links to the app', async ({ page, baseURL }) => {
+  const seen = watch(page, String(baseURL));
+  await page.goto('/guia/#tapar');
+  await expect(page.locator('h1')).toHaveCount(1);
+  await expect(page.locator('h1')).toContainText(/compartir tu DNI/i);
+  await expect(page.locator('section#tapar h2')).toBeInViewport();
+  await expect(page.locator('main section[id] h2')).toHaveCount(8);
+  await expect(page.locator('#preguntas details')).toHaveCount(6);
+  await expect(page.locator('a[href="/app/"]')).toHaveCount(1);
+  await expect(page.locator('a[href="/app/request.html"]')).toHaveCount(1);
+  await page.locator('.site-header [data-lang-switch] button', { hasText: 'EN' }).click();
+  await expect(page.locator('h1')).toContainText(/share your ID/i);
+  await expect(page).toHaveTitle(/How to share your ID/);
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  await page.evaluate(() => document.fonts.ready);
+  expect(seen.errors).toEqual([]);
+  expect(seen.outside).toEqual([]);
+});
+
 test('the hero specimen can be dragged (also with reduced motion) and moved with the keyboard', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');

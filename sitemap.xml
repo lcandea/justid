@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Public pages for search engines. Spanish is the default; English is swapped in client-side at the same URLs. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://justid.candea.es/</loc></url>
+  <url><loc>https://justid.candea.es/guia/</loc></url>
+  <url><loc>https://justid.candea.es/why/</loc></url>
+  <url><loc>https://justid.candea.es/app/</loc></url>
+</urlset>

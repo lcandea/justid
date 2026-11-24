@@ -1,0 +1,37 @@
+<!doctype html>
+<!-- Dev-only source of the social preview image (shared/og/og-es.png), rendered at 1200×630 by
+     tools/render-og-image.mjs. Never shipped. Uses the site's own fonts, colours and the landing's real
+     covered specimen (a specimen card, not anyone's real ID). -->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../shared/theme.css">
+<style>
+  html, body { width: 1200px; height: 630px; overflow: hidden; }
+  body { position: relative; background: var(--ink); color: var(--cream); }
+  .glow { position: absolute; inset: 0; background:
+    radial-gradient(520px 380px at 88% 12%, rgba(215,255,58,.13), transparent 70%),
+    radial-gradient(480px 360px at 10% 100%, rgba(243,241,236,.06), transparent 70%); }
+  .copy { position: absolute; left: 72px; top: 64px; bottom: 64px; width: 600px; display: flex; flex-direction: column; }
+  .logo { font-size: 44px; }
+  .logo > span:first-child { margin-right: -.4rem; }
+  h1 { margin-top: auto; font-size: 100px; line-height: .88; font-weight: 900; font-stretch: 72%; letter-spacing: -.02em; text-transform: uppercase; }
+  h1 span { display: block; white-space: nowrap; }
+  .tag { margin-top: 30px; font-family: var(--mono); font-size: 22px; letter-spacing: .04em; color: var(--mute); }
+  .tag b { color: var(--lime); font-weight: 400; }
+  .card { position: absolute; right: 60px; top: 160px; width: 500px; border-radius: 16px; transform: rotate(-4deg);
+    box-shadow: 0 40px 80px rgba(0,0,0,.6); }
+  .bar { position: absolute; right: 0; bottom: 0; left: 0; height: 10px; background: var(--lime); }
+</style>
+</head>
+<body>
+<div class="glow"></div>
+<div class="copy">
+  <div class="logo"><span>Just</span><span class="logo-id">ID</span></div>
+  <h1><span>Comparte</span> <span>tu DNI.</span> <span class="accent">Solo lo</span> <span class="accent">justo.</span></h1>
+  <p class="tag"><b>justid.candea.es</b> · Gratis · Sin registro</p>
+</div>
+<img class="card" src="../landing/img/dni_es_v4_front_covered_es.webp" alt="">
+<div class="bar"></div>
+</body>
+</html>

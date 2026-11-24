@@ -7,7 +7,7 @@ import { ROOT, walk } from './helpers.mjs';
 import { relative } from 'node:path';
 
 const shipped = [...walk('app', '.js'), ...walk('landing', '.js'), ...walk('locales', '.js'), ...walk('templates', '.js')];
-const pages = [...walk('app', '.html'), `${ROOT}/index.html`, `${ROOT}/404.html`, `${ROOT}/why/index.html`];
+const pages = [...walk('app', '.html'), `${ROOT}/index.html`, `${ROOT}/404.html`, `${ROOT}/why/index.html`, `${ROOT}/guia/index.html`];
 
 test('no network APIs anywhere in the shipped JavaScript', () => {
   const apiNames = [/\bfetch\s*\(/, /XMLHttpRequest/, /WebSocket/, /EventSource/, /sendBeacon/, /RTCPeerConnection/,
@@ -41,6 +41,12 @@ test('no external resources referenced from pages (scripts, styles, images, font
   for (const file of pages) {
     const html = readFileSync(file, 'utf8');
     for (const m of html.matchAll(/<(script|link|img|iframe|video|source)\b[^>]*\b(src|href|poster)="([^"]+)"/g)) {
+      // <link rel="canonical"> must be an absolute URL by definition, and it loads nothing: it only tells search
+      // engines the page's own address. Allowed only when it points at the site itself.
+      if (/^<link\b[^>]*\brel="canonical"/.test(m[0])) {
+        assert.match(m[3], /^https:\/\/justid\.candea\.es\//, `${relative(ROOT, file)}: canonical ${m[3]}`);
+        continue;
+      }
       assert.doesNotMatch(m[3], /^(https?:)?\/\//, `${relative(ROOT, file)}: external ${m[1]} ${m[3]}`);
     }
   }
@@ -70,5 +76,6 @@ test('the deployed _headers file sends the strict CSP and anti-framing headers o
 test('the build script publishes only the public folders', () => {
   const script = readFileSync(`${ROOT}/tools/build-site.sh`, 'utf8');
   const cp = script.match(/^cp -R (.+) _site\/$/m)?.[1].split(/\s+/) || [];
-  assert.deepEqual(cp.sort(), ['404.html', '_headers', 'app', 'favicon.svg', 'index.html', 'landing', 'locales', 'shared', 'templates', 'why']);
+  assert.deepEqual(cp.sort(), ['404.html', '_headers', 'app', 'favicon.svg', 'guia', 'index.html', 'landing', 'locales', 'robots.txt',
+    'shared', 'sitemap.xml', 'templates', 'why']);
 });
