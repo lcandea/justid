@@ -1,5 +1,5 @@
 <template>
-  <!-- SEND 0–2 s · Hook. Frame 0 already carries the line (it is the thumbnail). The whole specimen card sits
+  <!-- SEND 0–3 s · Hook. Frame 0 already carries the line (it is the thumbnail). The whole specimen card sits
        under it with its sensitive fields ringed in amber: the problem, before the product shows up. -->
   <style>
     #root { position: absolute; inset: 0; }
@@ -9,14 +9,20 @@
     #hook-back { left: 240px; top: 380px; }
     #hook-front { left: 0; top: 0; }
     #hook-cards .zone-ring { border: 6px solid var(--warn); background: rgba(255, 180, 84, .22); }
-    #hook-sub { top: 490px; font-size: 32px; }
+    /* The sub line follows the title in normal flow, so a longer title (English) pushes it down instead of overlapping. */
+    #hook-title { position: relative; }
+    #hook-sub { position: relative; top: auto; margin-top: 26px; font-size: 32px; }
+    <!--if:en-->
+    #hook-title { font-size: 140px; }
+    <!--endif-->
     <!--if:9x16-->
     #hook-cards { left: 90px; top: 930px; width: 900px; height: 800px; }
     <!--endif--><!--if:16x9-->
-    #hook-cards { left: 110px; top: 210px; width: 760px; height: 660px; }
-    .hook-card { width: 640px; }
-    #hook-back { left: 110px; top: 250px; }
-    #hook-sub { top: 640px; }
+    /* 16:9: cards fanned on the left half, the line on the right (title-safe x 192–1728). */
+    .cap-band { left: 1000px; width: 728px; top: 230px; }
+    #hook-cards { left: 150px; top: 200px; width: 780px; height: 680px; }
+    .hook-card { width: 600px; }
+    #hook-back { left: 170px; top: 300px; }
     <!--endif-->
   </style>
   <div id="root" class="stage" data-composition-id="hook" data-width="{{W}}" data-height="{{H}}">

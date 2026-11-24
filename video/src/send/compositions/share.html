@@ -43,6 +43,9 @@
     #share-msg .m-body { min-width: 0; }
     #share-msg .m-file { margin: 0; font: 500 28px/1.3 var(--mono); color: var(--cream); overflow-wrap: anywhere; }
     #share-msg .m-tick { margin: 8px 0 0; font: 700 30px/1 var(--mono); color: var(--lime); text-align: right; }
+    <!--if:16x9-->
+    #share-cap1, #share-cap2 { font-size: 108px; }
+    <!--endif-->
   </style>
   <div id="root" class="stage" data-composition-id="share" data-width="{{W}}" data-height="{{H}}">
     <div class="stage-grid"></div>
@@ -98,9 +101,10 @@
         '9x16': { band: { x: 120, y: 300, w: 768 }, cardW: 520, front: { x: 244, y: 420 }, back: { x: 244, y: 766 },
           btn: { x: 244, y: 1130, w: 520, h: 96 }, page: { x: 214, y: 410, w: 580 },
           sheet: { x: 0, y: 720, w: 1080, inX: 150 }, msg: { x: 188, y: 640, w: 700 } },
-        '16x9': { band: { x: 980, y: 300, w: 800 }, cardW: 380, front: { x: 160, y: 150 }, back: { x: 160, y: 410 },
-          btn: { x: 160, y: 690, w: 380, h: 90 }, page: { x: 230, y: 110, w: 420 },
-          sheet: { x: 100, y: 470, w: 880, inX: 50 }, msg: { x: 160, y: 420, w: 700 } },
+        // 16:9: everything product-side on the left (x 192–920), captions on the right; the page hero is 580 px wide.
+        '16x9': { band: { x: 1000, y: 300, w: 728 }, cardW: 400, front: { x: 356, y: 170 }, back: { x: 356, y: 440 },
+          btn: { x: 356, y: 730, w: 400, h: 90 }, page: { x: 266, y: 130, w: 580 },
+          sheet: { x: 150, y: 440, w: 820, inX: 20 }, msg: { x: 192, y: 440, w: 700 } },
       }[D.aspect];
       const px = v => `${v}px`;
       const place = (sel, b) => { const el = root.querySelector(sel); el.style.left = px(b.x); el.style.top = px(b.y); if (b.w) el.style.width = px(b.w); if (b.h) el.style.height = px(b.h); return el; };

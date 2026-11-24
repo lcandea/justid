@@ -28,10 +28,12 @@
     #hide-pills { position: absolute; left: 120px; top: 1060px; }
     #hide-lock { left: 120px; top: 1170px; }
     <!--endif--><!--if:16x9-->
-    .hide-band { left: 980px; top: 300px; width: 800px; }
-    #hide-flip { left: 160px; top: 300px; width: 700px; height: 441.3px; }
-    #hide-pills { position: absolute; left: 160px; top: 790px; }
-    #hide-lock { left: 980px; top: 640px; }
+    /* 16:9: card on the left (x 192–920), its pills under it; captions and the docked lock badge on the right. */
+    .hide-band { left: 1000px; top: 300px; width: 728px; }
+    #hide-cap1, #hide-cap2 { font-size: 108px; }
+    #hide-flip { left: 192px; top: 310px; width: 728px; height: 459.2px; }
+    #hide-pills { position: absolute; left: 192px; top: 800px; }
+    #hide-lock { left: 1000px; top: 870px; }
     <!--endif-->
   </style>
   <div id="root" class="stage" data-composition-id="hide" data-width="{{W}}" data-height="{{H}}">
@@ -84,7 +86,7 @@
       const tl = gsap.timeline({ paused: true });
       const D = window.JV_DATA;
       // Card box per aspect (same as photo.html's target).
-      const card = { '9x16': { x: 120, y: 500, w: 840 }, '16x9': { x: 160, y: 300, w: 700 } }[D.aspect];
+      const card = { '9x16': { x: 120, y: 500, w: 840 }, '16x9': { x: 192, y: 310, w: 728 } }[D.aspect];
       card.h = card.w * 638 / 1012;
       const toggle = D.zones.sides.front.birth_date.rects[0];
 

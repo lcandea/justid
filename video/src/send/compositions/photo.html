@@ -41,10 +41,13 @@
     #photo-chip { left: 120px; top: 1060px; }
     #photo-lock { left: 120px; top: 1170px; }
     <!--endif--><!--if:16x9-->
-    .photo-band { left: 980px; top: 300px; width: 800px; }
-    #photo-phone { --phone-scale: 1.1; left: 300px; top: 58px; }
-    #photo-chip { left: 160px; top: 790px; }
-    #photo-lock { left: 980px; top: 640px; }
+    /* 16:9: the phone on the left at the same 1.3 scale, raised so the framing screen fills the height (its bottom
+       bar just clips); the straightened card lands at x 192–920; captions, chip and lock badge in the right column. */
+    .photo-band { left: 1000px; top: 300px; width: 728px; }
+    #photo-cap1, #photo-cap2 { font-size: 108px; }
+    #photo-phone { --phone-scale: 1.3; left: 289px; top: -30px; }
+    #photo-chip { left: 1000px; top: 760px; }
+    #photo-lock { left: 1000px; top: 870px; }
     <!--endif-->
   </style>
   <div id="root" class="stage" data-composition-id="photo" data-width="{{W}}" data-height="{{H}}">
@@ -81,7 +84,7 @@
       // Per-aspect geometry (keep in sync with the CSS above and with hide.html's card box).
       const L = {
         '9x16': { phone: { x: 268, y: 450, s: 1.3 }, card: { x: 120, y: 500, w: 840 } },
-        '16x9': { phone: { x: 300, y: 58, s: 1.1 }, card: { x: 160, y: 300, w: 700 } },
+        '16x9': { phone: { x: 289, y: -30, s: 1.3 }, card: { x: 192, y: 310, w: 728 } },
       }[D.aspect];
       const CW = 1012, CH = 638;
       L.card.h = L.card.w * CH / CW;
@@ -101,8 +104,15 @@
       for (let i = 0; i < 4; i++) { const a = q[i], b = q[(i + 1) % 4]; per += Math.hypot(b[0] - a[0], b[1] - a[1]); }
       gsap.set('#photo-poly', { attr: { 'stroke-dasharray': per } });
 
-      // Screen px → scene px (phone at rest: padding 18 px, then the screen scale).
-      const toScene = p => [L.phone.x + 18 + p[0] * L.phone.s, L.phone.y + 18 + p[1] * L.phone.s];
+      // 16:9 pushes the camera into the detected card during the detection hold so the UI reads at 1080p.
+      const cam = D.aspect === '16x9' ? { zoom: 1.45, cx: 556, cy: 540 } : null;
+      const local = p => [18 + p[0] * L.phone.s, 18 + p[1] * L.phone.s]; // screen px → phone-local px
+      const mid = local([(q[0][0] + q[2][0]) / 2, (q[0][1] + q[2][1]) / 2]);
+      // Screen px → scene px, with the phone at rest (9:16) or pushed in (16:9) when the straightening starts.
+      const toScene = p => {
+        const l = local(p);
+        return cam ? [cam.cx + (l[0] - mid[0]) * cam.zoom, cam.cy + (l[1] - mid[1]) * cam.zoom] : [L.phone.x + l[0], L.phone.y + l[1]];
+      };
       const from = q.map(toScene);
       const to = [[L.card.x, L.card.y], [L.card.x + L.card.w, L.card.y], [L.card.x + L.card.w, L.card.y + L.card.h], [L.card.x, L.card.y + L.card.h]];
 
@@ -138,6 +148,11 @@
       tl.fromTo('#photo-poly', { attr: { 'stroke-dashoffset': per }, opacity: 0 }, { attr: { 'stroke-dashoffset': 0 }, opacity: 1, duration: 0.4, ease: 'power2.out' }, 1.2);
       tl.fromTo('#photo-top', { opacity: 0 }, { opacity: 1, duration: 0.16, ease: 'power2.out' }, 1.45);
       tl.fromTo('#photo-msgmask', { clipPath: 'inset(0% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 100%)', duration: 0.4, ease: 'power2.inOut' }, 1.35);
+
+      if (cam) {
+        tl.to('#photo-phone', { x: cam.cx - L.phone.x - mid[0] * cam.zoom, y: cam.cy - L.phone.y - mid[1] * cam.zoom, scale: cam.zoom,
+          transformOrigin: '0 0', duration: 0.6, ease: 'power2.inOut' }, 1.55);
+      }
 
       // 2.10 · Detection holds; then the caption swaps.
       JV.blurOut(tl, '#photo-cap1', 2.1, 0.18);

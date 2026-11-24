@@ -29,11 +29,13 @@
     #pur-card { left: 120px; top: 600px; width: 840px; }
     #pur-lock { left: 120px; top: 1170px; }
     <!--endif--><!--if:16x9-->
-    .pur-band { left: 980px; top: 300px; width: 800px; }
-    #pur-label { left: 160px; top: 150px; }
-    #pur-input { left: 160px; top: 200px; width: 700px; height: 110px; }
-    #pur-card { left: 160px; top: 370px; width: 700px; }
-    #pur-lock { left: 980px; top: 640px; }
+    /* 16:9: field above the card on the left (x 192–920); captions and the docked lock badge on the right. */
+    .pur-band { left: 1000px; top: 300px; width: 728px; }
+    #pur-cap1, #pur-cap2 { font-size: 108px; }
+    #pur-label { left: 192px; top: 150px; }
+    #pur-input { left: 192px; top: 200px; width: 728px; height: 112px; }
+    #pur-card { left: 192px; top: 360px; width: 728px; }
+    #pur-lock { left: 1000px; top: 870px; }
     <!--endif-->
   </style>
   <div id="root" class="stage" data-composition-id="purpose" data-width="{{W}}" data-height="{{H}}">
@@ -61,7 +63,7 @@
       // Where hide.html leaves the card, relative to this scene's card box.
       const L = {
         '9x16': { from: { x: 120, y: 500 }, to: { x: 120, y: 600, w: 840 } },
-        '16x9': { from: { x: 160, y: 300 }, to: { x: 160, y: 370, w: 700 } },
+        '16x9': { from: { x: 192, y: 310 }, to: { x: 192, y: 360, w: 728 } },
       }[D.aspect];
       const purpose = root.querySelector('#pur-input').dataset.purpose;
 
