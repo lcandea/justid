@@ -94,19 +94,22 @@ h1 > span:first-child { max-width: 4.6em; }
 @media (max-width: 40rem) { .specimen { padding-bottom: 5rem; } .specimen-stats { left: 0; right: auto; text-align: left; } }
 
 /* ---------- 2. Video ---------- */
-.video-box { position: relative; margin: 0; border: 1px solid var(--line); background: var(--panel); overflow: hidden; aspect-ratio: 4 / 3; }
-@media (min-width: 40rem) { .video-box { aspect-ratio: 16 / 9; } }
-@media (min-width: 62rem) { .video-box { aspect-ratio: 21 / 9; } }
+/* The box has the video's own shape: vertical on phones, 16:9 from 40rem (landing.js loads the matching file). */
+.video-figure { margin: 0; }
+.video-box { position: relative; border: 1px solid var(--line); background: var(--ink); overflow: hidden; aspect-ratio: 9 / 16; width: min(100%, calc(85svh * 9 / 16)); margin-inline: auto; }
+@media (min-width: 40rem) { .video-box { aspect-ratio: 16 / 9; width: 100%; } }
 .video-grid { position: absolute; inset: 0; background: repeating-linear-gradient(90deg, rgba(243,241,236,.035) 0 1px, transparent 1px 7.5rem), repeating-linear-gradient(0deg, rgba(243,241,236,.035) 0 1px, transparent 1px 7.5rem); }
-.video-bars { position: absolute; left: clamp(1rem, 4vw, 4rem); top: clamp(1rem, 3.5vw, 3.5rem); display: flex; gap: .625rem; }
-.video-bars span { display: block; height: clamp(.75rem, 1.4vw, 1.125rem); }
-.vb-light { width: clamp(5rem, 13vw, 11.25rem); background: var(--cream); }
-.vb-dark { width: clamp(2.5rem, 7vw, 6rem); background: var(--line); }
-.video-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; }
-.play { width: clamp(4.5rem, 10vw, 7.5rem); height: clamp(4.5rem, 10vw, 7.5rem); border-radius: 50%; display: flex; align-items: center; justify-content: center; background: transparent; color: var(--mute); border: 2px dashed #4a4843; cursor: not-allowed; }
-.play svg { width: 36%; height: 36%; }
-.soon-badge { background: var(--lime); color: var(--ink); font-size: .75rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; padding: .375rem .75rem; }
-.video-box figcaption { position: absolute; left: clamp(1rem, 4vw, 4rem); right: clamp(1rem, 4vw, 4rem); bottom: clamp(.875rem, 2.5vw, 2.5rem); display: flex; flex-wrap: wrap; justify-content: space-between; gap: .25rem 1.5rem; font-size: .8125rem; letter-spacing: .04em; color: var(--mute); }
+.demo-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; cursor: pointer; }
+/* Tabs: the two redaction bars in the corner. The chosen one is the cream bar, the other the dark one. */
+.video-tabs { position: absolute; left: clamp(.75rem, 3vw, 2.5rem); top: clamp(.75rem, 2.2vw, 1.75rem); display: flex; gap: .625rem; z-index: 2; }
+.vt { min-height: var(--tap); padding: 0 clamp(.875rem, 2vw, 1.5rem); border: 0; font-family: var(--mono); font-size: .8125rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; background: var(--line); color: var(--cream); cursor: pointer; }
+.vt[aria-pressed="true"] { background: var(--cream); color: var(--ink); }
+.vt:hover { background: var(--line-2); }
+.vt[aria-pressed="true"]:hover { background: var(--cream); }
+.play { position: absolute; left: 50%; top: 50%; translate: -50% -50%; z-index: 2; width: clamp(4.5rem, 10vw, 7.5rem); height: clamp(4.5rem, 10vw, 7.5rem); border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--lime); color: var(--ink); border: 0; cursor: pointer; box-shadow: 0 10px 40px rgba(0,0,0,.5); }
+.play[hidden] { display: none; }
+.play svg { width: 36%; height: 36%; margin-left: 6%; }
+.video-figure figcaption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .25rem 1.5rem; margin-top: .875rem; font-size: .8125rem; letter-spacing: .04em; color: var(--mute); }
 
 /* ---------- 3. Why it matters ---------- */
 .head-why { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2rem; align-items: end; margin-bottom: clamp(2.5rem, 6vw, 4rem); }

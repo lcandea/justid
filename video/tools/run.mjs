@@ -8,8 +8,9 @@
 //   node video/tools/run.mjs snapshot --flow send --lang es --aspect 9x16 --at 1,3.5,8
 //   node video/tools/run.mjs render   --flow send --lang es --aspect 9x16   -> video/out/justid-send-es-9x16.mp4
 //   node video/tools/run.mjs render-all                                       -> all flows × langs × aspects
-//   node video/tools/run.mjs compress [--flow …]   web copies of the renders -> video/out/web/: short side 720 px,
-//                                                   H.264 CRF 24, faststart, no audio, plus a poster JPG (frame 0)
+//   node video/tools/run.mjs compress [--flow …]   web copies of the renders -> landing/video/ (shipped with the site):
+//                                                   short side 720 px, H.264 CRF 24, faststart, no audio, plus a poster
+//                                                   JPG taken at config.json posterAt[flow][aspect] (default 0 s)
 // --flow / --lang / --aspect also accept "all".
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, statSync } from 'node:fs';
@@ -68,17 +69,18 @@ function render(c) {
   console.log(`✓ ${relative(ROOT, file)}  ${size.width}x${size.height} ${config.fps}fps ${res.duration.toFixed(2)}s, no audio`);
 }
 
-/** Web copy of a finished render: 720 px short side, small H.264 with faststart, and a poster from frame 0. @param {{ flow: string, lang: string, aspect: string }} c */
+/** Web copy of a finished render for the landing: 720 px short side, small H.264 with faststart, and a poster. @param {{ flow: string, lang: string, aspect: string }} c */
 function compress(c) {
   const name = `justid-${c.flow}-${c.lang}-${c.aspect}`;
   const src = join(OUT, `${name}.mp4`);
   if (!existsSync(src)) { console.warn(`skip ${name}: not rendered`); return; }
-  const web = join(OUT, 'web');
+  const web = join(ROOT, 'landing', 'video');
   mkdirSync(web, { recursive: true });
   const scale = c.aspect === '9x16' ? '720:-2' : '-2:720';
   run('ffmpeg', ['-y', '-v', 'error', '-i', src, '-vf', `scale=${scale}:flags=lanczos`, '-c:v', 'libx264', '-preset', 'slow',
     '-crf', '24', '-profile:v', 'high', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', '-an', join(web, `${name}.mp4`)]);
-  run('ffmpeg', ['-y', '-v', 'error', '-i', src, '-frames:v', '1', '-vf', `scale=${scale}:flags=lanczos`, '-q:v', '4', join(web, `${name}.jpg`)]);
+  const at = String(config.posterAt?.[c.flow]?.[c.aspect] ?? 0);
+  run('ffmpeg', ['-y', '-v', 'error', '-ss', at, '-i', src, '-frames:v', '1', '-vf', `scale=${scale}:flags=lanczos`, '-q:v', '4', join(web, `${name}.jpg`)]);
   const kb = (/** @type {string} */ f) => Math.round(statSync(f).size / 1024);
   console.log(`✓ ${relative(ROOT, join(web, name))}.mp4  ${kb(src)} KB -> ${kb(join(web, `${name}.mp4`))} KB (+ poster ${kb(join(web, `${name}.jpg`))} KB)`);
 }

@@ -34,7 +34,11 @@ npm run video:check   -- --flow send --lang es --aspect 9x16   # lint + layout a
 npm run video:snapshot -- --flow send --lang es --aspect 9x16 --at 1,4,7.5
 npm run video:render  -- --flow send --lang es --aspect 9x16
 npm run video:render:all                       # all 8 (capture both languages first)
+npm run video:compress                         # 720p web copies + posters -> landing/video/ (shipped)
 ```
+
+The landing plays the files in `landing/video/` (`landing/landing.js` picks flow × language × vertical/16:9).
+Poster frames are taken at `posterAt` in `config.json`: the moment the opening animation has landed.
 
 Needs Node 22+, ffmpeg/ffprobe on the PATH and Google Chrome (Playwright uses the installed Chrome, like the app's tests).
 HyperFrames and GSAP are pinned dev dependencies; GSAP is copied into each build, so renders need no network.

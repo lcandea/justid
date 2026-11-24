@@ -51,10 +51,25 @@ test('the primary calls to action go to the app and the request builder', async 
   await expect(page).toHaveURL(/\/app\/$/);
 });
 
-test('the video placeholder is disabled and labelled as coming soon', async ({ page }) => {
+test('the demo video follows the tab, the language and the screen shape', async ({ page, isMobile }) => {
   await page.goto('/');
-  await expect(page.locator('.play')).toBeDisabled();
-  await expect(page.locator('.soon-badge')).toBeVisible();
+  const video = page.locator('#demo-video');
+  const aspect = isMobile ? '9x16' : '16x9';
+  await page.locator('#video-box').scrollIntoViewIfNeeded();
+  await expect(video).toHaveAttribute('src', `landing/video/justid-send-es-${aspect}.mp4`);
+  await expect(video).toHaveAttribute('poster', `landing/video/justid-send-es-${aspect}.jpg`);
+  await page.locator('.vt[data-flow="request"]').click();
+  await expect(page.locator('.vt[data-flow="request"]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(video).toHaveAttribute('src', `landing/video/justid-request-es-${aspect}.mp4`);
+  await expect(page.locator('#video-flow')).toHaveText(/Enlace/);
+});
+
+test('with reduced motion the demo video waits for a tap', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await page.locator('#video-box').scrollIntoViewIfNeeded();
+  await expect(page.locator('#video-play')).toBeVisible();
+  expect(await page.locator('#demo-video').evaluate(v => /** @type {HTMLVideoElement} */ (v).paused)).toBe(true);
 });
 
 test('"Copiar el texto" copies the prompt and shows the Copiado state', async ({ page, context, browserName }) => {

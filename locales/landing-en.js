@@ -39,11 +39,16 @@ export default {
   // 2. Video
   'landing.video.eyebrow': 'Video',
   'landing.video.title': 'See how it works in 30 seconds',
-  'landing.video.soon': 'Coming soon: a short video of the whole process, from photo to PDF.',
-  'landing.video.play': 'Video coming soon',
-  'landing.video.badge': 'Coming soon',
-  'landing.video.flow': 'Photo → Cover → Watermark → PDF',
-  'landing.video.meta': '0:30 · no sound needed · subtitles',
+  'landing.video.note': 'Two short videos with the real app and the official specimen ID: sending your ID and asking someone for theirs.',
+  'landing.video.tabs_label': 'Choose the video',
+  'landing.video.tab_send': 'Send',
+  'landing.video.tab_request': 'Request',
+  'landing.video.play': 'Play the video',
+  'landing.video.flow_send': 'Photo → Cover → Watermark → PDF',
+  'landing.video.flow_request': 'Link → They choose → Watermarked copy',
+  'landing.video.aria_send': 'Video: how to send a copy of your ID with only the details needed',
+  'landing.video.aria_request': 'Video: how to ask someone for a copy of their ID with a link',
+  'landing.video.meta': '0:30 · no sound',
 
   // 3. Why it matters
   'landing.why.eyebrow': 'Why it matters',

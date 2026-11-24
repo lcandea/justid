@@ -39,11 +39,16 @@ export default {
   // 2. Video
   'landing.video.eyebrow': 'Vídeo',
   'landing.video.title': 'Mira cómo funciona en 30 segundos',
-  'landing.video.soon': 'Próximamente: un vídeo corto con el proceso completo, de la foto al PDF.',
-  'landing.video.play': 'Vídeo próximamente',
-  'landing.video.badge': 'Próximamente',
-  'landing.video.flow': 'Foto → Tapar → Marca de agua → PDF',
-  'landing.video.meta': '0:30 · sin sonido necesario · subtítulos',
+  'landing.video.note': 'Dos vídeos cortos con la app real y el DNI de muestra oficial: enviar tu DNI y pedírselo a alguien.',
+  'landing.video.tabs_label': 'Elige el vídeo',
+  'landing.video.tab_send': 'Enviar',
+  'landing.video.tab_request': 'Pedir',
+  'landing.video.play': 'Reproducir el vídeo',
+  'landing.video.flow_send': 'Foto → Tapar → Marca de agua → PDF',
+  'landing.video.flow_request': 'Enlace → La otra persona elige → Copia con marca de agua',
+  'landing.video.aria_send': 'Vídeo: cómo enviar una copia de tu DNI con solo los datos necesarios',
+  'landing.video.aria_request': 'Vídeo: cómo pedirle a alguien una copia de su DNI con un enlace',
+  'landing.video.meta': '0:30 · sin sonido',
 
   // 3. Why it matters
   'landing.why.eyebrow': 'Por qué importa',

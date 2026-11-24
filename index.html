@@ -101,21 +101,26 @@
       <p class="eyebrow"><span aria-hidden="true">02 — </span><span data-i18n="landing.video.eyebrow">Vídeo</span></p>
       <h2 id="video-h" data-i18n="landing.video.title">Mira cómo funciona en 30 segundos</h2>
     </div>
-    <p class="head-note" data-i18n="landing.video.soon">Próximamente: un vídeo corto con el proceso completo, de la foto al PDF.</p>
+    <p class="head-note" data-i18n="landing.video.note">Dos vídeos cortos con la app real y el DNI de muestra oficial: enviar tu DNI y pedírselo a alguien.</p>
   </div>
-  <!-- No video file exists yet: the play button is disabled and says so. Self-hosted only (the CSP blocks embeds). -->
-  <figure class="video-box">
+  <!-- Demo videos, self-hosted in landing/video/ (the CSP only allows this site). landing.js picks the file for the
+       chosen tab, the page language and the screen (vertical on phones, 16:9 above 40rem), and only sets the
+       source when the box is near the viewport. Made with the scripts in video/ (npm run video:compress). -->
+  <figure class="video-figure">
+    <div class="video-box" id="video-box">
     <div class="video-grid" aria-hidden="true"></div>
-    <div class="video-bars" aria-hidden="true"><span class="vb-light"></span><span class="vb-dark"></span></div>
-    <div class="video-center">
-      <button type="button" class="play" disabled aria-label="Vídeo próximamente" data-i18n-attr="aria-label:landing.video.play">
-        <svg aria-hidden="true" width="40" height="40" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"></path></svg>
-      </button>
-      <span class="soon-badge mono" data-i18n="landing.video.badge">Próximamente</span>
+    <video class="demo-video" id="demo-video" muted playsinline loop preload="none" poster="landing/video/justid-send-es-16x9.jpg"></video>
+    <div class="video-tabs" id="video-tabs" role="group" data-i18n-attr="aria-label:landing.video.tabs_label" aria-label="Elige el vídeo">
+      <button type="button" class="vt" data-flow="send" aria-pressed="true" data-i18n="landing.video.tab_send">Enviar</button>
+      <button type="button" class="vt" data-flow="request" aria-pressed="false" data-i18n="landing.video.tab_request">Pedir</button>
+    </div>
+    <button type="button" class="play" id="video-play" data-i18n-attr="aria-label:landing.video.play" aria-label="Reproducir el vídeo">
+      <svg aria-hidden="true" width="40" height="40" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"></path></svg>
+    </button>
     </div>
     <figcaption class="mono">
-      <span data-i18n="landing.video.flow">Foto → Tapar → Marca de agua → PDF</span>
-      <span data-i18n="landing.video.meta">0:30 · sin sonido necesario · subtítulos</span>
+      <span id="video-flow" data-i18n="landing.video.flow_send">Foto → Tapar → Marca de agua → PDF</span>
+      <span data-i18n="landing.video.meta">0:30 · sin sonido</span>
     </figcaption>
   </figure>
 </section>
