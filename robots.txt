@@ -1,0 +1,6 @@
+# JustID: everything is public. The developer zone editor carries <meta name="robots" content="noindex">;
+# it is not disallowed here because Google must be able to crawl it to read that tag.
+User-agent: *
+Allow: /
+
+Sitemap: https://justid.candea.es/sitemap.xml

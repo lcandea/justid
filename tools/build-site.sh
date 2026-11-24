@@ -6,6 +6,6 @@ set -eu
 cd "$(dirname "$0")/.."
 rm -rf _site
 mkdir _site
-cp -R index.html 404.html favicon.svg _headers app landing locales shared templates why _site/
+cp -R index.html 404.html favicon.svg robots.txt sitemap.xml _headers app landing locales shared templates why _site/
 echo "Published files:"
 find _site -type f | sort

@@ -2,8 +2,8 @@
 // Spanish strings of the landing page (index.html). Spread into locales/es.js; keys must match landing-en.js.
 // Highlighted words (redaction bars, accents) are separate keys: translations never contain HTML.
 export default {
-  'landing.meta.title': 'JustID — Comparte tu DNI, solo lo justo',
-  'landing.meta.description': 'Tapa los datos de tu DNI que no hacen falta, marca para qué es la copia y envíala en PDF. Todo ocurre en tu móvil: tu DNI no sale de tu dispositivo.',
+  'landing.meta.title': 'Compartir DNI de forma segura, solo lo justo — JustID',
+  'landing.meta.description': 'Comparte tu DNI de forma segura: tapa los datos que sobran, añade una marca de agua y envíalo por WhatsApp en PDF. Gratis y sin salir de tu móvil.',
   'landing.skip': 'Saltar al contenido',
   'landing.nav.label': 'Principal',
   'landing.nav.why': 'Por qué importa',

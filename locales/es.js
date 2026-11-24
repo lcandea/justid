@@ -9,6 +9,7 @@ export default {
   ...landing,
   ...why,
   'meta.title': 'JustID — Comparte tu DNI, solo lo justo',
+  'meta.app_description': 'Tapa los datos de tu DNI que sobran, añade una marca de agua y descárgalo en PDF. Gratis, sin registro y sin que tu DNI salga de tu móvil.',
   'meta.editor_title': 'JustID — Marcador de zonas',
   'brand.tagline': 'Solo lo justo',
   'lang.label': 'Idioma',

@@ -8,6 +8,7 @@ export default {
   ...landing,
   ...why,
   'meta.title': 'JustID — Share your ID, just enough',
+  'meta.app_description': 'Cover the parts of your ID you don’t need to share, add a watermark and download it as a PDF. Free, no sign-up, and your ID never leaves your phone.',
   'meta.editor_title': 'JustID — Zone editor',
   'brand.tagline': 'Just enough',
   'lang.label': 'Language',

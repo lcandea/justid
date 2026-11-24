@@ -2,8 +2,8 @@
 // English strings of the landing page (index.html). Spread into locales/en.js; keys must match landing-es.js.
 // Highlighted words (redaction bars, accents) are separate keys: translations never contain HTML.
 export default {
-  'landing.meta.title': 'JustID — Share your ID, just enough',
-  'landing.meta.description': 'Cover the parts of your ID you don’t need to share, state what the copy is for and send it as a PDF. Everything happens on your phone: your ID never leaves your device.',
+  'landing.meta.title': 'Share your ID safely, just enough — JustID',
+  'landing.meta.description': 'Share your ID safely: cover the data nobody needs, add a watermark and send it over WhatsApp as a PDF. Free, no sign-up, and it never leaves your phone.',
   'landing.skip': 'Skip to content',
   'landing.nav.label': 'Main',
   'landing.nav.why': 'Why it matters',
