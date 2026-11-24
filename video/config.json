@@ -1,0 +1,34 @@
+{
+  "$comment": "Scenario data for the demo videos. Capture (Playwright) and compositions both read this file. Language-specific values are keyed by lang.",
+  "langs": ["es", "en"],
+  "flows": ["send", "request"],
+  "aspects": {
+    "9x16": { "width": 1080, "height": 1920 },
+    "16x9": { "width": 1920, "height": 1080 }
+  },
+  "fps": 30,
+  "$posterAt": "Poster frame per flow and aspect (seconds): the earliest moment the hook's entrance animation has fully landed in every language, plus ~0.1 s margin, before the exit.",
+  "posterAt": { "send": { "9x16": 1.40, "16x9": 1.40 }, "request": { "9x16": 1.80, "16x9": 1.80 } },
+  "fixedDate": "2026-11-23T10:00:00+01:00",
+  "device": { "width": 390, "height": 844, "deviceScaleFactor": 3 },
+  "template": "dni_es_v4",
+  "redactionSeed": 1,
+  "send": {
+    "purpose": { "es": "Alquiler del piso", "en": "Flat rental" },
+    "recipient": { "es": "", "en": "" },
+    "spotlightFields": ["signature", "address", "parents_names"],
+    "toggleField": "birth_date",
+    "extraHidden": ["birth_date"]
+  },
+  "request": {
+    "from": { "es": "Inmobiliaria ABC", "en": "ABC Lettings" },
+    "purpose": { "es": "Alquiler del piso", "en": "Flat rental" },
+    "extraFields": ["address"],
+    "why": {
+      "es": "Para el contrato necesitamos tu domicilio actual",
+      "en": "We need your current address for the contract"
+    },
+    "delivery": { "kind": "email", "value": "hola@example.com" },
+    "acceptExtras": ["address"]
+  }
+}

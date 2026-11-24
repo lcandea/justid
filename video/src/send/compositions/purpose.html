@@ -1,0 +1,99 @@
+<template>
+  <!-- SEND 9–12.5 s · Purpose. The redacted card (hide's end state) drops a little while the purpose field morphs
+       in above it; the purpose is typed. The field leaves, the caption grows to three lines, and the watermark sweeps
+       across the card along a lime edge (the final render revealed over the un-watermarked one). The lock badge stays
+       docked. Exit: a cream redaction bar wipes the frame, taking the badge with it (share picks the bar up). -->
+  <style>
+    #root { position: absolute; inset: 0; }
+    #pur-glow { left: 200px; top: 500px; }
+    .pur-band { position: absolute; }
+    #pur-cap2 { opacity: 0; }
+    #pur-label { position: absolute; margin: 0; font-family: var(--mono); font-size: 30px; letter-spacing: .04em; color: var(--soft); }
+    /* The app's text input (shared/theme.css: panel ground, 1.5px line border, lime border + 1px ring on focus),
+       drawn at about 2.6× the app's size. */
+    #pur-input { position: absolute; background: var(--panel); border: 4px solid var(--lime); box-shadow: 0 0 0 3px var(--lime);
+      display: flex; align-items: center; padding: 0 34px; font-family: var(--sans); font-weight: 500; font-size: 48px; color: var(--cream); }
+    #pur-caret { display: inline-block; width: 4px; height: 56px; background: var(--lime); margin-left: 6px; }
+    #pur-card { position: absolute; box-shadow: 0 40px 90px rgba(0, 0, 0, .55); }
+    #pur-wm { clip-path: polygon(0% 0%, 0% 0%, -20% 100%, 0% 100%); }
+    #pur-skew { position: absolute; left: 0; top: 0; width: 100%; height: 100%; transform: skewX(-17.6deg); transform-origin: 0 0; pointer-events: none; }
+    #pur-edge { position: absolute; left: -4px; top: -2%; width: 8px; height: 104%; background: var(--lime); box-shadow: 0 0 24px 6px rgba(215, 255, 58, .55); opacity: 0; }
+    /* Same lock badge as photo.html / hide.html (copied: scene styles are scoped). */
+    .jv-lock { position: absolute; display: inline-flex; align-items: center; gap: 12px; padding: 10px 20px; border: 3px solid var(--lime);
+      background: var(--ink); color: var(--lime); font-family: var(--mono); font-size: 28px; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; z-index: 22; }
+    .jv-lock svg { width: 28px; height: 28px; flex: none; }
+    <!--if:9x16-->
+    .pur-band { left: 120px; top: 300px; width: 768px; }
+    #pur-label { left: 120px; top: 400px; }
+    #pur-input { left: 120px; top: 452px; width: 840px; height: 112px; }
+    #pur-card { left: 120px; top: 600px; width: 840px; }
+    #pur-lock { left: 120px; top: 1170px; }
+    <!--endif--><!--if:16x9-->
+    /* 16:9: field above the card on the left (x 192–920); captions and the docked lock badge on the right. */
+    .pur-band { left: 1000px; top: 300px; width: 728px; }
+    #pur-cap1, #pur-cap2 { font-size: 108px; }
+    #pur-label { left: 192px; top: 150px; }
+    #pur-input { left: 192px; top: 200px; width: 728px; height: 112px; }
+    #pur-card { left: 192px; top: 360px; width: 728px; }
+    #pur-lock { left: 1000px; top: 870px; }
+    <!--endif-->
+  </style>
+  <div id="root" class="stage" data-composition-id="purpose" data-width="{{W}}" data-height="{{H}}">
+    <div class="stage-grid"></div>
+    <div class="stage-glow" id="pur-glow"></div>
+    <p id="pur-label">{{t:send.purpose_title_app}}</p>
+    <div id="pur-input" data-purpose="{{cfg:send.purpose}}"><span id="pur-text"></span><span id="pur-caret"></span></div>
+    <div class="card" id="pur-card">
+      <img src="assets/cap/send-card-front-nowm.png" alt="">
+      <img id="pur-wm" src="assets/cap/send-card-front-final.png" alt="">
+      <div id="pur-skew"><div id="pur-edge"></div></div>
+    </div>
+    <div class="jv-lock" id="pur-lock"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5Zm-3 8V7a3 3 0 1 1 6 0v3H9Z"/></svg><span>{{t:common.lock_badge_app}}</span></div>
+    <div class="pur-band">
+      <h2 class="cap cap-m" id="pur-cap1">{{words:send.purpose_cap}}</h2>
+      <h2 class="cap cap-m" id="pur-cap2">{{words:send.watermark_cap}}</h2>
+    </div>
+    <div class="bar-wipe" id="pur-bar"></div>
+  </div>
+  <script>
+    (function () {
+      const root = document.querySelector('[data-composition-id="purpose"]');
+      const tl = gsap.timeline({ paused: true });
+      const D = window.JV_DATA;
+      // Where hide.html leaves the card, relative to this scene's card box.
+      const L = {
+        '9x16': { from: { x: 120, y: 500 }, to: { x: 120, y: 600, w: 840 } },
+        '16x9': { from: { x: 192, y: 310 }, to: { x: 192, y: 360, w: 728 } },
+      }[D.aspect];
+      const purpose = root.querySelector('#pur-input').dataset.purpose;
+
+      // 0.00 · Card drops into its place; the field morphs in above it (narrow → full width, blur → sharp).
+      tl.fromTo('#pur-card', { x: L.from.x - L.to.x, y: L.from.y - L.to.y }, { x: 0, y: 0, duration: 0.6, ease: 'expo.out' }, 0);
+      JV.wordsIn(tl, root, '#pur-cap1 .w', 0.05, 0.1, 0.2);
+      tl.fromTo('#pur-input', { scaleX: 0.25, opacity: 0, filter: 'blur(12px)' }, { scaleX: 1, opacity: 1, filter: 'blur(0px)', duration: 0.35, ease: 'power3.out', transformOrigin: '0% 50%' }, 0.15);
+      tl.fromTo('#pur-label', { opacity: 0, filter: 'blur(6px)' }, { opacity: 1, filter: 'blur(0px)', duration: 0.24, ease: 'power2.out' }, 0.22);
+
+      // 0.60 · Typing, then the typed purpose holds on screen.
+      JV.type(tl, root.querySelector('#pur-text'), purpose, 0.6, 18);
+      tl.fromTo('#pur-caret', { opacity: 1 }, { opacity: 0, duration: 0.05, immediateRender: false }, 1.7);
+
+      // 2.30 · The field has done its job and leaves upward; the caption swaps to the watermark line.
+      JV.blurOut(tl, '#pur-cap1', 2.28, 0.18);
+      tl.to(['#pur-label', '#pur-input'], { opacity: 0, y: -40, filter: 'blur(8px)', duration: 0.26, ease: 'power3.in' }, 2.3);
+      tl.fromTo('#pur-cap2', { opacity: 0 }, { opacity: 1, duration: 0.01 }, 2.42);
+      JV.wordsIn(tl, root, '#pur-cap2 .w', 2.42, 0.08, 0.2);
+
+      // 2.65 · The watermark sweeps across the card, then the watermarked card holds.
+      const sweep = 2.65, sweepDur = 1.0;
+      tl.fromTo('#pur-wm', { clipPath: 'polygon(0% 0%, 0% 0%, -20% 100%, 0% 100%)' },
+        { clipPath: 'polygon(0% 0%, 120% 0%, 100% 100%, 0% 100%)', duration: sweepDur, ease: 'power2.inOut' }, sweep);
+      tl.fromTo('#pur-edge', { opacity: 0 }, { opacity: 1, duration: 0.01 }, sweep);
+      tl.fromTo('#pur-edge', { x: 0 }, { x: L.to.w * 1.2, duration: sweepDur, ease: 'power2.inOut' }, sweep);
+      tl.to('#pur-edge', { opacity: 0, duration: 0.01 }, sweep + sweepDur);
+
+      // 5.12 · The cream redaction bar wipes the frame into the share scene.
+      JV.barWipe(tl, '#pur-bar', 5.12, 0.38);
+      window.__timelines["purpose"] = tl;
+    })();
+  </script>
+</template>

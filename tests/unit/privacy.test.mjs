@@ -37,10 +37,10 @@ test('every page ships the strict Content Security Policy', () => {
   }
 });
 
-test('no external resources referenced from pages (scripts, styles, images, fonts)', () => {
+test('no external resources referenced from pages (scripts, styles, images, fonts, video)', () => {
   for (const file of pages) {
     const html = readFileSync(file, 'utf8');
-    for (const m of html.matchAll(/<(script|link|img|iframe)\b[^>]*\b(src|href)="([^"]+)"/g)) {
+    for (const m of html.matchAll(/<(script|link|img|iframe|video|source)\b[^>]*\b(src|href|poster)="([^"]+)"/g)) {
       assert.doesNotMatch(m[3], /^(https?:)?\/\//, `${relative(ROOT, file)}: external ${m[1]} ${m[3]}`);
     }
   }

@@ -13,10 +13,20 @@
     "typecheck": "tsc -p tsconfig.json",
     "test:unit": "node --test tests/unit/*.test.mjs",
     "test:e2e": "playwright test",
-    "test": "npm run typecheck && npm run test:unit && npm run test:e2e"
+    "test": "npm run typecheck && npm run test:unit && npm run test:e2e",
+    "video:capture": "node video/capture/capture.mjs",
+    "video:build": "node video/tools/run.mjs build",
+    "video:check": "node video/tools/run.mjs check",
+    "video:snapshot": "node video/tools/run.mjs snapshot",
+    "video:preview": "node video/tools/run.mjs preview",
+    "video:render": "node video/tools/run.mjs render",
+    "video:render:all": "node video/tools/run.mjs render-all",
+    "video:compress": "node video/tools/run.mjs compress"
   },
   "devDependencies": {
     "@playwright/test": "1.65.0",
+    "gsap": "3.13.0",
+    "hyperframes": "0.9.84",
     "qrcode": "1.5.4",
     "typescript": "6.0.3",
     "wrangler": "4.158.0"

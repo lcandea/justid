@@ -1,7 +1,8 @@
 // @ts-check
 // Landing page behaviour: applies the chosen language to the static Spanish markup, mounts the
-// ES/EN switches, wires the "copy the AI prompt" button and makes the hero's specimen draggable. No network access (the CSP forbids it).
-import { applyI18n, mountLangSwitch, t } from '../app/js/ui/i18n.js';
+// ES/EN switches, wires the "copy the AI prompt" button, makes the hero's specimen draggable and runs the demo
+// videos. No network access (the CSP forbids it); the videos are files of this same site.
+import { applyI18n, getLang, mountLangSwitch, t } from '../app/js/ui/i18n.js';
 import { encodeRequest } from '../app/js/core/request.js';
 import { defaultFields } from '../app/js/core/request-builder.js';
 import { FAMILIES } from '../templates/index.js';
@@ -14,6 +15,7 @@ document.querySelectorAll('[data-lang-switch]').forEach(box => mountLangSwitch(/
 setupCopyButton();
 setupExampleRequest();
 setupSpecimenSlider();
+setupDemoVideo();
 window.addEventListener('langchange', setupExampleRequest);
 
 /** Select all the text of an element so the user can copy it by hand. @param {HTMLElement} node */
@@ -172,4 +174,79 @@ function setupSpecimenSlider() {
   });
   window.addEventListener('langchange', () => card.setAttribute('aria-valuetext', t('landing.hero.slider_value', { n: pos })));
   card.setAttribute('aria-valuetext', t('landing.hero.slider_value', { n: pos }));
+}
+
+/**
+ * Demo videos (landing/video/justid-<flow>-<lang>-<aspect>.mp4, made by the scripts in video/). Two tabs pick
+ * the flow; the file follows the page language and the screen: vertical below 40rem, 16:9 above. The source is
+ * only set once the box is near the viewport, so visitors who never scroll there download nothing but a poster.
+ * It plays muted while visible and pauses when scrolled away; with reduced motion it waits for a tap.
+ */
+function setupDemoVideo() {
+  const box = document.getElementById('video-box');
+  const video = /** @type {HTMLVideoElement | null} */ (document.getElementById('demo-video'));
+  const playBtn = document.getElementById('video-play');
+  const flowText = document.getElementById('video-flow');
+  if (!box || !video || !playBtn || !flowText) return;
+  const tabs = /** @type {HTMLButtonElement[]} */ ([...document.querySelectorAll('#video-tabs .vt')]);
+  const wide = window.matchMedia('(min-width: 40rem)');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let flow = 'send';
+  let near = false;      // the box is (almost) on screen: load the video
+  let visible = false;   // enough of it is on screen to play
+  let userPaused = false;
+
+  const file = () => `landing/video/justid-${flow}-${getLang() === 'en' ? 'en' : 'es'}-${wide.matches ? '16x9' : '9x16'}`;
+  const showPlay = () => { playBtn.hidden = !video.paused; };
+  const tryPlay = () => {
+    if (!near || userPaused || !visible || reduced.matches) return showPlay();
+    video.play().catch(() => {}).finally(showPlay);
+  };
+
+  const render = () => {
+    const base = file();
+    video.poster = `${base}.jpg`;
+    video.setAttribute('aria-label', t(`landing.video.aria_${flow}`));
+    flowText.textContent = t(`landing.video.flow_${flow}`);
+    for (const tab of tabs) tab.setAttribute('aria-pressed', String(tab.dataset.flow === flow));
+    if (near && !video.src.endsWith(`${base}.mp4`)) {
+      video.src = `${base}.mp4`;
+      video.load();
+    }
+    tryPlay();
+  };
+
+  for (const tab of tabs) {
+    tab.addEventListener('click', () => {
+      if (tab.dataset.flow === flow) return;
+      flow = tab.dataset.flow || 'send';
+      userPaused = false;
+      render();
+    });
+  }
+  playBtn.addEventListener('click', () => {
+    userPaused = false;
+    near = visible = true;
+    if (!video.src) render();
+    video.play().catch(() => {}).finally(showPlay);
+  });
+  video.addEventListener('click', () => {
+    if (video.paused) { userPaused = false; video.play().catch(() => {}).finally(showPlay); }
+    else { userPaused = true; video.pause(); }
+  });
+  video.addEventListener('pause', showPlay);
+  video.addEventListener('play', showPlay);
+  window.addEventListener('langchange', render);
+  wide.addEventListener('change', render);
+
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(([e]) => { if (e.isIntersecting && !near) { near = true; render(); } }, { rootMargin: '300px 0px' }).observe(box);
+    new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting;
+      if (visible) tryPlay(); else if (!video.paused) video.pause();
+    }, { threshold: 0.5 }).observe(box);
+  } else {
+    near = true;
+  }
+  render();
 }

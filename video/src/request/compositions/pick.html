@@ -1,0 +1,188 @@
+<template>
+  <!-- REQUEST 3–11 s · Pick. The requester builds the link in the real builder (captured full page, scrolled in
+       the phone): ticks on the usual fields, a tap on the extra "Domicilio", the reason typed into a rebuilt
+       textarea, a tap on "Crear enlace" and the real result section with a rebuilt link box (the capture shows a
+       localhost URL). Opens with the hook's lime bar leaving; exits with a vertical whip of the phone while the
+       caption stays (the chat scene picks it up). -->
+  <style>
+    #root { position: absolute; inset: 0; }
+    #pick-cam { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+    #pick-phone { --phone-scale: 1.64; }
+    #pick-ui { transform: scale(1.64); overflow: hidden; background: var(--ink); }
+    #pick-page { position: absolute; left: 0; top: 0; width: 390px; }
+    #pick-page > img { display: block; width: 390px; height: auto; }
+    /* Sticky app header: the top 53 CSS px of a viewport capture, laid over the scrolling full-page shot. */
+    #pick-head { position: absolute; left: 0; top: 0; width: 390px; height: 53px; overflow: hidden; z-index: 3; }
+    #pick-head > img { display: block; width: 390px; height: auto; }
+    /* Domicilio row before the tap: hides the ticked box and the amber "selected extra" edge. */
+    #pick-untick { position: absolute; left: 17px; top: 1959px; width: 42px; height: 66px; background: var(--ink); }
+    #pick-untick i { position: absolute; left: 1px; top: 22px; width: 22px; height: 22px; border-radius: 3px;
+      background: #3b3b3b; border: 1px solid #6a6a6a; }
+    /* Rebuilt textarea (theme.css form fields: panel ground, 1.5px line-2 border, .75rem .875rem padding). */
+    #pick-why { position: absolute; left: 18px; top: 2437px; width: 355px; height: 98px; box-sizing: border-box;
+      padding: 12px 14px; background: var(--panel); border: 1.5px solid var(--line-2); font-family: var(--sans);
+      font-size: 16px; line-height: 24px; color: var(--cream); }
+    #pick-caret { display: inline-block; width: 1.5px; height: 18px; margin-left: 1px; vertical-align: -3px; background: var(--lime); }
+    #pick-count { position: absolute; left: 290px; top: 2541px; width: 83px; height: 32px; background: var(--ink);
+      font-family: var(--mono); font-size: 15px; line-height: 32px; text-align: right; color: var(--mute); }
+    /* Result section (viewport capture at the same scroll), revealed top to bottom. */
+    #pick-result { position: absolute; left: 0; top: 0; width: 390px; height: 844px; opacity: 0; }
+    #pick-result > img { display: block; width: 390px; height: auto; }
+    /* Rebuilt link box (request.css #b-link: mono .875rem on cream) with the public URL. */
+    #pick-link { position: absolute; left: 18px; top: 520px; width: 355px; height: 48px; box-sizing: border-box;
+      padding: 0 14px; background: var(--cream); color: var(--ink); font-family: var(--mono); font-size: 14px;
+      line-height: 48px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #pick-link b { font-weight: 600; box-shadow: inset 0 -3px 0 var(--lime); }
+    #root .cap-band .cap { position: relative; font-size: 96px; }
+    #root .cap-band .sub { position: relative; margin-top: 26px; }
+    #pick-wipe { top: 0; height: 100%; }
+    #pick-tap { opacity: 0; }
+    <!--if:9x16-->
+    #root .cap-band { width: 768px; }
+    #pick-phone { left: 202px; top: 560px; }
+    <!--endif--><!--if:16x9-->
+    #pick-phone { left: 200px; top: 60px; }
+    #root .cap-band { left: 1000px; width: 720px; top: 360px; }
+    #root .cap-band .cap { font-size: 92px; }
+    <!--endif-->
+  </style>
+  <div id="root" class="stage" data-composition-id="pick" data-width="{{W}}" data-height="{{H}}">
+    <div class="stage-grid"></div>
+    <div id="pick-cam" data-layout-allow-overflow>
+      <div class="phone" id="pick-phone">
+        <div class="phone-screen">
+          <div class="phone-ui" id="pick-ui">
+            <div id="pick-page">
+              <img src="assets/cap/req-02-builder-filled-full.png" alt="">
+              <div id="pick-untick"><i></i></div>
+              <div id="pick-why"><span id="pick-why-text"></span><span id="pick-caret"></span></div>
+              <div id="pick-count">0/240</div>
+            </div>
+            <div id="pick-result"><img src="assets/cap/req-03-result.png" alt="">
+              <div id="pick-link"></div>
+            </div>
+            <div id="pick-head"><img src="assets/cap/req-02-builder-filled.png" alt=""></div>
+          </div>
+          <div class="phone-notch"></div>
+        </div>
+      </div>
+    </div>
+    <div class="cap-band" id="pick-caps">
+      <h2 class="cap" id="pick-cap1">{{words:request.pick_cap}}</h2>
+    </div>
+    <div class="cap-band" id="pick-caps2">
+      <h2 class="cap" id="pick-cap2">{{words:request.why_cap}}</h2>
+    </div>
+    <div class="cap-band" id="pick-caps3">
+      <h2 class="cap" id="pick-cap3">{{words:request.link_cap}}</h2>
+      <p class="sub" id="pick-sub3">{{words:request.link_sub}}</p>
+    </div>
+    <div class="tap" id="pick-tap"></div>
+    <div class="bar-wipe lime" id="pick-wipe" data-layout-ignore></div>
+  </div>
+  <script>
+    (function () {
+      const root = document.querySelector('[data-composition-id="pick"]');
+      const tl = gsap.timeline({ paused: true });
+      const wide = window.JV_DATA && JV_DATA.aspect === '16x9';
+      // Phone screen origin in the camera wrapper, and the screen's CSS→px scale.
+      const O = wide ? { x: 218, y: 78 } : { x: 220, y: 578 }, K = 1.64;
+      // Framing: the screen's centre line lands at X, its top edge at TOP (below the caption band in 9:16).
+      // 16:9: phone on the left half, its top just inside the frame, UI at 1.89 px/CSS px (text ≥ 26 px).
+      const X = wide ? 560 : 504, TOP = wide ? 90 : 612, Z = wide ? 1.15 : 1.2;
+      /** Camera state: zoom z, screen top at scene y `top`. */
+      const cam = (z, top) => ({ x: X - z * (O.x + K * 195), y: top - z * O.y, scale: z });
+      /** A screen point (CSS px of the 390×844 viewport) seen through a camera state → scene px. */
+      const pt = (c, x, y) => ({ x: c.x + c.scale * (O.x + K * x), y: c.y + c.scale * (O.y + K * y) });
+      const scroll = (sel, from, to, at, dur) =>
+        tl.fromTo(sel, { y: -from }, { y: -to, duration: dur, ease: 'power2.inOut', immediateRender: false }, at);
+      const cIn = cam(wide ? 0.88 : 1.0, TOP + 140), cMain = cam(Z, TOP);
+      // The link as the app builds it (manifest.requestLink, the part after the domain), ellipsized by CSS.
+      const buildLink = (el, bold) => {
+        const rl = JV_DATA.manifest.requestLink || '', i = rl.indexOf('#');
+        el.textContent = '{{t:common.url}}/' + rl.slice(0, i < 0 ? rl.length : i);
+        const tail = bold ? document.createElement('b') : document.createTextNode('');
+        tail.textContent = i < 0 ? '' : rl.slice(i);
+        el.append(tail);
+      };
+      buildLink(root.querySelector('#pick-link'), true);
+
+      // Positions come from the capture manifest (CSS px), so overlays stay aligned when captures are redone.
+      const files = JV_DATA.manifest.files;
+      const B = files['req-02-builder-filled-full.png'].boxes;
+      const box = k => B[k].page.css;
+      const res = files['req-03-result.png'];
+      const RS = res.scrollY, link = res.boxes.link.page.css;
+      const addr = box('extraField_address'), whyBox = box('why'), create = box('create');
+      /** Place an element at a CSS-px rect inside its (390-wide) parent. */
+      const place = (sel, r, dx = 0, dy = 0, dw = 0, dh = 0) => Object.assign(root.querySelector(sel).style,
+        { left: (r.x + dx) + 'px', top: (r.y + dy) + 'px', width: (r.w + dw) + 'px', height: (r.h + dh) + 'px' });
+      // Domicilio before the tap: covers the ticked box and the amber edge on the row's left 42 px.
+      place('#pick-untick', { x: addr.x, y: addr.y, w: 42, h: addr.h }, -0.5, 1, 0, -2);
+      place('#pick-why', whyBox);
+      // The counter line sits right under the textarea (theme.css .b-count), right-aligned to it.
+      place('#pick-count', { x: whyBox.x + whyBox.w - 83, y: whyBox.y + whyBox.h + 6, w: 83, h: 32 });
+      place('#pick-link', { x: link.x, y: link.y - RS, w: link.w, h: link.h });
+      // Scroll stops: each key element lands high in the framed part of the screen (below the sticky header).
+      const S0 = Math.round(box('fields').y + 219);                // the usual fields with their ticks
+      const S1 = Math.round(addr.y + addr.h / 2 - 250);             // Domicilio at screen y 250
+      const S2 = Math.round(whyBox.y - 147);                           // the reason's label and box
+      const S3 = RS;                                                // where the result capture was taken
+      const S4 = 270;                                               // result scrolled up to the link box
+      const tick = { x: addr.x + 11.5, y: addr.y + 33.8 - S1 }; // the ticked checkbox (measured on the capture)
+
+      // Initial state (also on seek-back).
+      tl.set('#pick-page', { y: -S0 }, 0);
+      tl.set('#pick-result', { opacity: 0, y: 0 }, 0);
+      tl.set('#pick-count', { textContent: '0/240' }, 0);
+
+      // 0–0.9: the hook's lime bar leaves to the right while the camera pushes in on the builder's field list.
+      tl.fromTo('#pick-wipe', { xPercent: 0 }, { xPercent: 110, duration: 0.42, ease: 'power3.out' }, 0);
+      tl.fromTo('#pick-cam', { ...cIn, transformOrigin: '0 0' }, { ...cMain, transformOrigin: '0 0', duration: 1.2, ease: 'expo.out' }, 0);
+      JV.wordsIn(tl, root, '#pick-cap1 .w', 0.15, 0.08, 0.18);
+      // Hold on the usual fields with their ticks (the push-in's long tail keeps it alive).
+
+      // 1.25–1.8: scroll to the extras; the tap comes in and ticks Domicilio (amber "Dato extra"); hold.
+      scroll('#pick-page', S0, S1, 1.25, 0.55);
+      const tp1 = pt(cMain, tick.x, tick.y);
+      const p1 = JV.tap(tl, root.querySelector('#pick-tap'), { x: tp1.x + 90, y: tp1.y + 120 }, tp1, 1.85, 0.42);
+      tl.fromTo('#pick-untick', { opacity: 1 }, { opacity: 0, duration: 0.01, ease: 'none', immediateRender: false }, p1 + 0.02);
+      tl.fromTo('#pick-tap', { opacity: 1 }, { opacity: 0, duration: 0.2, ease: 'power2.in', immediateRender: false }, p1 + 0.35);
+      JV.blurOut(tl, '#pick-cap1', 3.0, 0.2);
+
+      // 3.0–3.6: on to the reason; "…y explica por qué" while it is typed (the scenario's own text); hold.
+      scroll('#pick-page', S1, S2, 3.0, 0.6);
+      JV.wordsIn(tl, root, '#pick-cap2 .w', 3.15, 0.08, 0.18);
+      // Focus ring (theme.css textarea:focus-visible) while typing.
+      const T0 = 3.75;
+      tl.fromTo('#pick-why', { borderColor: '#3a3935', boxShadow: '0 0 0 0px rgba(215,255,58,0)' }, { borderColor: '#d7ff3a', boxShadow: '0 0 0 1px rgba(215,255,58,1)', duration: 0.12, ease: 'power2.out' }, T0 - 0.1);
+      tl.fromTo('#pick-caret', { opacity: 0 }, { opacity: 1, duration: 0.01, ease: 'none' }, T0 - 0.1);
+      const why = '{{cfg:request.why}}';
+      const tEnd = JV.type(tl, root.querySelector('#pick-why-text'), why, T0, 50);
+      const n = { v: 0 };
+      tl.fromTo(n, { v: 0 }, { v: why.length, duration: tEnd - T0, ease: 'none', immediateRender: false,
+        onUpdate: () => { root.querySelector('#pick-count').textContent = Math.round(n.v) + '/240'; } }, T0);
+
+      // 5.45–5.95: to the button; tap "Crear enlace"; the result section drops in below it.
+      const T1 = 5.45;
+      tl.fromTo('#pick-why', { borderColor: '#d7ff3a', boxShadow: '0 0 0 1px rgba(215,255,58,1)' }, { borderColor: '#3a3935', boxShadow: '0 0 0 0px rgba(215,255,58,0)', duration: 0.12, ease: 'power2.out', immediateRender: false }, T1);
+      tl.fromTo('#pick-caret', { opacity: 1 }, { opacity: 0, duration: 0.01, ease: 'none', immediateRender: false }, T1);
+      JV.blurOut(tl, '#pick-cap2', T1, 0.2);
+      scroll('#pick-page', S2, S3, T1, 0.5);
+      const tc = pt(cMain, create.x + create.w / 2, create.y + create.h / 2 - S3);
+      const p2 = JV.tap(tl, root.querySelector('#pick-tap'), { x: tc.x + 90, y: tc.y + 120 }, tc, T1 + 0.15, 0.45);
+      tl.fromTo('#pick-tap', { opacity: 1 }, { opacity: 0, duration: 0.2, ease: 'power2.in', immediateRender: false }, p2 + 0.35);
+      tl.fromTo('#pick-result', { opacity: 1, clipPath: 'inset(0px 0px 68% 0px)' }, { opacity: 1, clipPath: 'inset(0px 0px 0% 0px)', duration: 0.5, ease: 'expo.out', immediateRender: false }, p2 + 0.06);
+      // Scroll page and result together so the link box comes up under the caption; then hold on the link.
+      scroll('#pick-page', S3, S3 + S4, p2 + 0.2, 0.65);
+      scroll('#pick-result', 0, S4, p2 + 0.2, 0.65);
+      JV.wordsIn(tl, root, '#pick-cap3 .w', p2 + 0.05, 0.08, 0.18);
+      JV.wordsIn(tl, root, '#pick-sub3 .w', p2 + 0.45, 0.08, 0.18);
+      tl.fromTo('#pick-link', { backgroundColor: '#d7ff3a' }, { backgroundColor: '#f3f1ec', duration: 0.6, ease: 'power2.out' }, p2 + 0.6);
+
+      // 7.6–8.0: vertical whip: the phone leaves upward with blur; the caption stays for the chat scene.
+      tl.fromTo('#pick-cam', { ...cMain, filter: 'blur(0px)', transformOrigin: '0 0' }, { ...cMain, y: cMain.y - 1700, filter: 'blur(18px)', transformOrigin: '0 0', duration: 0.4, ease: 'power3.in', immediateRender: false }, 7.6);
+      window.__timelines["pick"] = tl;
+    })();
+  </script>
+</template>

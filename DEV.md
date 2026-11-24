@@ -41,6 +41,7 @@ There are no framework and no dependencies. JSDoc with `// @ts-check` gives the 
 | If you change… | Run | Updates |
 |---|---|---|
 | `app/js/core/redact.js`, default visibility in `templates/dni_es.js`, or the v4 zones | `npm run render-landing-specimen` | `landing/img/dni_es_v4_front_covered_{es,en}.webp`, the landing hero's covered card. It is real redaction output with the watermark baked in. Each run adds new random noise, so only commit it when something actually changed. |
+| the demo videos (`video/`) | `npm run video:render:all`, then `npm run video:compress` | `landing/video/*.mp4` and posters, played in the landing's video section. See [video/README.md](video/README.md). |
 | the scans in `img/` | `cd tools && uv run normalize_refs.py` | `templates/ref/*.webp` (reference pictures, used for identification and the specimen test mode) |
 | zones in the zone editor | export JSON, then `npm run import-template -- <file.json> [templates/<id>.js] [--overrides]` | the template version file |
 | the default hidden fields | (check) | the landing's "Se ve / Se tapa" lists in `index.html`, kept in sync by a unit test |

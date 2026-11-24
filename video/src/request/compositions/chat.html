@@ -1,0 +1,122 @@
+<template>
+  <!-- REQUEST 11–14.5 s · Chat. The link goes out as a message in a neutral, unbranded chat (rebuilt in HTML): the
+       app's own prefilled message, a link preview with the JustID logo and the domain. Opens holding the pick
+       scene's caption while the phone whips in from below; exits by zooming through the link preview (its ink
+       fill becomes the recipient's screen). -->
+  <style>
+    #root { position: absolute; inset: 0; }
+    #chat-cam { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+    #chat-phone { --phone-scale: 1.64; }
+    #chat-ui { transform: scale(1.64); background: #0b0b0a; font-family: var(--sans); color: var(--cream); }
+    /* Chat chrome: neutral greys, no messenger branding. */
+    #chat-head { position: absolute; left: 0; top: 0; width: 390px; height: 96px; box-sizing: border-box; padding: 52px 16px 0;
+      display: flex; align-items: center; gap: 12px; background: #1a1a18; border-bottom: 1px solid var(--line); }
+    #chat-back { font-size: 30px; line-height: 1; color: var(--soft); margin-top: -4px; }
+    #chat-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--line-2); color: var(--cream);
+      font-weight: 800; font-size: 16px; line-height: 34px; text-align: center; }
+    #chat-name { font-weight: 700; font-size: 17px; }
+    #chat-bubble { position: absolute; right: 12px; top: 112px; width: 300px; box-sizing: border-box; padding: 6px 6px 8px;
+      background: #262622; border-radius: 14px 14px 4px 14px; }
+    #chat-preview { background: var(--ink); border: 1px solid var(--line-2); border-radius: 9px; padding: 10px 12px; }
+    #chat-preview .logo-v { font-size: 22px; }
+    #chat-domain { margin-top: 4px; font-family: var(--mono); font-size: 14.5px; color: var(--mute); }
+    #chat-text { margin: 8px 6px 0; font-size: 15px; line-height: 20px; }
+    #chat-url { margin: 4px 6px 0; font-size: 15px; line-height: 20px; color: var(--lime); text-decoration: underline;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #chat-meta { margin: 4px 6px 0; text-align: right; font-family: var(--mono); font-size: 14.5px; color: var(--mute); }
+    #chat-ticks { color: var(--mute); letter-spacing: -3px; margin-left: 6px; }
+    #chat-compose { position: absolute; left: 12px; right: 12px; bottom: 26px; height: 42px; border-radius: 21px; background: #1a1a18; border: 1px solid var(--line); }
+    #root .cap-band .cap { position: relative; font-size: 96px; }
+    #root .cap-band .sub { position: relative; margin-top: 26px; }
+    #chat-tap { opacity: 0; }
+    <!--if:9x16-->
+    #root .cap-band { width: 768px; }
+    #chat-phone { left: 202px; top: 560px; }
+    <!--endif--><!--if:16x9-->
+    #chat-phone { left: 200px; top: 60px; }
+    #root .cap-band { left: 1000px; width: 720px; top: 360px; }
+    #root .cap-band .cap { font-size: 92px; }
+    <!--endif-->
+  </style>
+  <div id="root" class="stage" data-composition-id="chat" data-width="{{W}}" data-height="{{H}}">
+    <div class="stage-grid"></div>
+    <div id="chat-cam" data-layout-allow-overflow>
+      <div class="phone" id="chat-phone">
+        <div class="phone-screen">
+          <div class="phone-ui" id="chat-ui">
+            <div id="chat-head"><span id="chat-back">‹</span><span id="chat-avatar">{{t:request.chat_name}}</span><span id="chat-name">{{t:request.chat_name}}</span></div>
+            <div id="chat-bubble">
+              <div id="chat-preview"><div class="logo-v"><span>Just</span><span class="logo-id">ID</span></div><div id="chat-domain">{{t:common.url}}</div></div>
+              <p id="chat-text">{{t:request.builder_message_app}}</p>
+              <p id="chat-url"></p>
+              <div id="chat-meta">{{t:request.chat_time}}<span id="chat-ticks">✓✓</span></div>
+            </div>
+            <div id="chat-compose"></div>
+          </div>
+          <div class="phone-notch"></div>
+        </div>
+      </div>
+    </div>
+    <!-- The pick scene's last caption, held across the seam, then replaced. -->
+    <div class="cap-band" id="chat-carry">
+      <h2 class="cap" id="chat-cap0">{{words:request.link_cap}}</h2>
+      <p class="sub" id="chat-sub0">{{words:request.link_sub}}</p>
+    </div>
+    <div class="cap-band">
+      <h2 class="cap" id="chat-cap">{{words:request.chat_cap}}</h2>
+    </div>
+    <div class="tap" id="chat-tap"></div>
+  </div>
+  <script>
+    (function () {
+      const root = document.querySelector('[data-composition-id="chat"]');
+      const tl = gsap.timeline({ paused: true });
+      const wide = window.JV_DATA && JV_DATA.aspect === '16x9';
+      const O = wide ? { x: 218, y: 78 } : { x: 220, y: 578 }, K = 1.64;
+      // 9:16: the phone sits a little left so the outgoing bubble clears TikTok's right rail (x ≤ 780 below y 840).
+      const X = wide ? 560 : 440, TOP = wide ? 90 : 612, Z = wide ? 1.15 : 1.2;
+      const cam = (z, top) => ({ x: X - z * (O.x + K * 195), y: top - z * O.y, scale: z });
+      const pt = (c, x, y) => ({ x: c.x + c.scale * (O.x + K * x), y: c.y + c.scale * (O.y + K * y) });
+      const cMain = cam(Z, TOP);
+      // The link as the app builds it (manifest.requestLink, the part after the domain), ellipsized by CSS.
+      const buildLink = (el, bold) => {
+        const rl = JV_DATA.manifest.requestLink || '', i = rl.indexOf('#');
+        el.textContent = '{{t:common.url}}/' + rl.slice(0, i < 0 ? rl.length : i);
+        const tail = bold ? document.createElement('b') : document.createTextNode('');
+        tail.textContent = i < 0 ? '' : rl.slice(i);
+        el.append(tail);
+      };
+      buildLink(root.querySelector('#chat-url'), false);
+      // The avatar shows the initial only.
+      const av = root.querySelector('#chat-avatar'); av.textContent = av.textContent.trim().charAt(0);
+
+      // 0–0.5: the phone whips in from below (the pick scene left upward), landing blurred and sharpening.
+      tl.fromTo('#chat-cam', { ...cMain, y: cMain.y + 1700, filter: 'blur(18px)', transformOrigin: '0 0' },
+        { ...cMain, filter: 'blur(0px)', transformOrigin: '0 0', duration: 0.5, ease: 'expo.out' }, 0);
+      // Held caption from the pick scene leaves; "Envíaselo" lands.
+      JV.blurOut(tl, '#chat-carry', 0.75, 0.2);
+      JV.wordsIn(tl, root, '#chat-cap .w', 0.9, 0.07, 0.2);
+      // The message is sent: the bubble grows from its tail corner; the ticks turn lime (delivered and read).
+      tl.fromTo('#chat-bubble', { scale: 0.6, opacity: 0, transformOrigin: '100% 100%' }, { scale: 1, opacity: 1, duration: 0.5, ease: 'expo.out' }, 0.4);
+      tl.fromTo('#chat-ticks', { color: '#a8a49b' }, { color: '#d7ff3a', duration: 0.2, ease: 'power2.out' }, 1.2);
+      // Hold: the message (and the link inside it) is read; the tap approaches near the end of the hold.
+
+      // 2.25–2.7: a tap on the link preview, then the camera zooms through it.
+      // Preview card centre in the screen's CSS px (bubble right 12, width 300, top 112; card ~62 tall).
+      // Aim at the middle of the card, right of its logo and domain: its ink fill is what fills the frame.
+      const pc = { x: 390 - 12 - 150 + 10, y: 112 + 6 + 30 };
+      const tp = pt(cMain, pc.x, pc.y);
+      // The indicator appears close to the card and moves in a short way (no long trip across the screen).
+      const press = JV.tap(tl, root.querySelector('#chat-tap'), { x: tp.x + 70, y: tp.y + 110 }, tp, 2.25, 0.4);
+      tl.fromTo('#chat-tap', { opacity: 1 }, { opacity: 0, duration: 0.12, ease: 'power2.in', immediateRender: false }, press + 0.12);
+      JV.blurOut(tl, '#chat-cap', press + 0.05, 0.22);
+      tl.fromTo('#chat-preview', { borderColor: '#3a3935' }, { borderColor: '#d7ff3a', duration: 0.08, ease: 'none' }, press);
+      // Zoom through: the preview's centre stays put while the camera scales ~14x (strong ease-in), blurring at the end.
+      const Z2 = 22, c = pt(cMain, pc.x, pc.y);
+      const wx = O.x + K * pc.x, wy = O.y + K * pc.y; // wrapper-local point under the tap
+      tl.fromTo('#chat-cam', { ...cMain, filter: 'blur(0px)', transformOrigin: '0 0' },
+        { x: c.x - wx * Z2, y: c.y - wy * Z2, scale: Z2, filter: 'blur(6px)', transformOrigin: '0 0', duration: 0.65, ease: 'power3.in', immediateRender: false }, press + 0.1);
+      window.__timelines["chat"] = tl;
+    })();
+  </script>
+</template>

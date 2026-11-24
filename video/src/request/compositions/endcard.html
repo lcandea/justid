@@ -1,0 +1,58 @@
+<template>
+  <!-- REQUEST 26–30 s · End card: the send film's lockup (logo uncovered by a lime redaction bar), the request
+       claim in two lines, URL box and trust line; the last line holds over 2 s. -->
+  <style>
+    #root { position: absolute; inset: 0; }
+    #endcard-lockup { position: absolute; left: 0; width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; }
+    #endcard-logo { font-size: 190px; position: relative; }
+    #endcard-bar { position: absolute; left: -4%; top: 8%; width: 108%; height: 84%; background: var(--lime); }
+    #endcard-claim { position: relative; margin-top: 70px; font-size: 86px; text-align: center; max-width: 860px; }
+    #endcard-url { position: relative; margin-top: 60px; font-family: var(--mono); font-size: 46px; color: var(--cream); padding: 16px 30px; border: 3px solid var(--lime); }
+    #endcard-trust { position: relative; margin: 46px 0 0; font-family: var(--mono); font-size: 30px; color: var(--soft); letter-spacing: .03em; }
+    <!--if:9x16-->
+    /* Left-aligned in the 9:16 safe column (TikTok's rail narrows it to x 120–780 below y 840). */
+    #endcard-lockup { top: 400px; left: 120px; width: 660px; align-items: flex-start; text-align: left; }
+    #endcard-logo { font-size: 170px; }
+    #endcard-claim { max-width: 660px; font-size: 84px; text-align: left; }
+    #endcard-trust { max-width: 660px; line-height: 1.4; }
+    #endcard-trust span { display: block; }
+    <!--endif--><!--if:16x9-->
+    #endcard-lockup { top: 150px; }
+    #endcard-logo { font-size: 170px; }
+    #endcard-claim { max-width: 1500px; font-size: 92px; }
+    <!--endif-->
+  </style>
+  <div id="root" class="stage" data-composition-id="endcard" data-width="{{W}}" data-height="{{H}}">
+    <div class="stage-grid"></div>
+    <div id="endcard-lockup">
+      <div class="logo-v" id="endcard-logo"><span>Just</span><span class="logo-id">ID</span><div id="endcard-bar"></div></div>
+      <h2 class="cap" id="endcard-claim"><span id="endcard-a">{{words:request.end_claim_a}}</span><br><span id="endcard-b">{{words:request.end_claim_b}}</span></h2>
+      <div id="endcard-url">{{t:common.url}}</div>
+      <p id="endcard-trust">{{t:common.trust}}</p>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const root = document.querySelector('[data-composition-id="endcard"]');
+      const tl = gsap.timeline({ paused: true });
+      // 9:16: the trust line breaks deliberately before its last "·" part (it is too long for one line at 30 px).
+      if (window.JV_DATA && JV_DATA.aspect === '9x16') {
+        const p = root.querySelector('#endcard-trust'), parts = p.textContent.split(' · ');
+        if (parts.length > 1) {
+          const a = document.createElement('span'), b = document.createElement('span');
+          a.textContent = parts.slice(0, -1).join(' · ') + ' ·'; b.textContent = parts[parts.length - 1];
+          p.textContent = ''; p.append(a, b);
+        }
+      }
+      // The lime redaction bar covers the logo, then pulls away to the right: the brand is "uncovered".
+      tl.fromTo('#endcard-bar', { scaleX: 0, transformOrigin: '0% 50%' }, { scaleX: 1, duration: 0.25, ease: 'power3.out' }, 0);
+      tl.fromTo('#endcard-logo > span', { opacity: 0 }, { opacity: 1, duration: 0.01 }, 0.25);
+      tl.fromTo('#endcard-bar', { scaleX: 1, transformOrigin: '100% 50%' }, { scaleX: 0, transformOrigin: '100% 50%', duration: 0.38, ease: 'expo.inOut', immediateRender: false }, 0.32);
+      const t = JV.wordsIn(tl, root, '#endcard-claim .w', 0.6, 0.07, 0.18);
+      // URL and trust line land right after the claim and hold to the end (≥ 2.5 s).
+      tl.fromTo('#endcard-url', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.35, ease: 'expo.out' }, t - 0.05);
+      tl.fromTo('#endcard-trust', { opacity: 0, filter: 'blur(6px)' }, { opacity: 1, filter: 'blur(0px)', duration: 0.25, ease: 'power2.out' }, t + 0.05);
+      window.__timelines["endcard"] = tl;
+    })();
+  </script>
+</template>

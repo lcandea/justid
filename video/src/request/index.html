@@ -1,0 +1,29 @@
+<!doctype html>
+<!-- JustID demo: REQUEST flow. Template: built by video/tools/build.mjs into video/.build/request-<lang>-<aspect>/. -->
+<html lang="{{LANG}}" class="is-{{ASPECT}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width={{W}}, height={{H}}">
+<link rel="stylesheet" href="assets/app/theme.css">
+<link rel="stylesheet" href="assets/shared/video.css">
+<script src="assets/vendor/gsap.min.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/shared/lib.js"></script>
+<style>:root { --W: {{W}}px; --H: {{H}}px; }</style>
+</head>
+<body>
+<div id="root" data-composition-id="main" data-start="0" data-duration="30" data-fps="{{FPS}}" data-width="{{W}}" data-height="{{H}}">
+  <!-- One scene per beat, back to back on one lane. -->
+  <div id="hook" data-composition-id="hook" data-composition-src="compositions/hook.html" data-start="0" data-duration="3" data-track-index="1" data-track-kind="graphics" data-width="{{W}}" data-height="{{H}}"></div>
+  <div id="pick" data-composition-id="pick" data-composition-src="compositions/pick.html" data-start="3" data-duration="8" data-track-index="1" data-track-kind="graphics" data-width="{{W}}" data-height="{{H}}"></div>
+  <div id="chat" data-composition-id="chat" data-composition-src="compositions/chat.html" data-start="11" data-duration="3.5" data-track-index="1" data-track-kind="graphics" data-width="{{W}}" data-height="{{H}}"></div>
+  <div id="recipient" data-composition-id="recipient" data-composition-src="compositions/recipient.html" data-start="14.5" data-duration="7.5" data-track-index="1" data-track-kind="graphics" data-width="{{W}}" data-height="{{H}}"></div>
+  <div id="receive" data-composition-id="receive" data-composition-src="compositions/receive.html" data-start="22" data-duration="4" data-track-index="1" data-track-kind="graphics" data-width="{{W}}" data-height="{{H}}"></div>
+  <div id="endcard" data-composition-id="endcard" data-composition-src="compositions/endcard.html" data-start="26" data-duration="4" data-track-index="1" data-track-kind="graphics" data-width="{{W}}" data-height="{{H}}"></div>
+</div>
+<script>
+  window.__timelines = window.__timelines || {};
+  window.__timelines["main"] = gsap.timeline({ paused: true });
+</script>
+</body>
+</html>

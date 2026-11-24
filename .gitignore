@@ -11,3 +11,12 @@ _site/
 
 # Real photos for the detector benchmark: never committed (see tools/mark-corners.html)
 tests/private/
+
+# Demo video work files (video/capture/capture.mjs and the HyperFrames build)
+video/.cache/
+video/.build/
+video/out/
+
+# Third-party agent skills (HyperFrames): reinstall from skills-lock.json with `npx skills add heygen-com/hyperframes --full-depth`
+.agents/
+.claude/skills/
