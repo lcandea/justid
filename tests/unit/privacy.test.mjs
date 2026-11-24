@@ -7,7 +7,7 @@ import { ROOT, walk } from './helpers.mjs';
 import { relative } from 'node:path';
 
 const shipped = [...walk('app', '.js'), ...walk('landing', '.js'), ...walk('locales', '.js'), ...walk('templates', '.js')];
-const pages = [...walk('app', '.html'), `${ROOT}/index.html`, `${ROOT}/404.html`, `${ROOT}/why/index.html`];
+const pages = [...walk('app', '.html'), `${ROOT}/index.html`, `${ROOT}/404.html`, `${ROOT}/why/index.html`, `${ROOT}/guia/index.html`];
 
 test('no network APIs anywhere in the shipped JavaScript', () => {
   const apiNames = [/\bfetch\s*\(/, /XMLHttpRequest/, /WebSocket/, /EventSource/, /sendBeacon/, /RTCPeerConnection/,
@@ -76,6 +76,6 @@ test('the deployed _headers file sends the strict CSP and anti-framing headers o
 test('the build script publishes only the public folders', () => {
   const script = readFileSync(`${ROOT}/tools/build-site.sh`, 'utf8');
   const cp = script.match(/^cp -R (.+) _site\/$/m)?.[1].split(/\s+/) || [];
-  assert.deepEqual(cp.sort(), ['404.html', '_headers', 'app', 'favicon.svg', 'index.html', 'landing', 'locales', 'robots.txt',
+  assert.deepEqual(cp.sort(), ['404.html', '_headers', 'app', 'favicon.svg', 'guia', 'index.html', 'landing', 'locales', 'robots.txt',
     'shared', 'sitemap.xml', 'templates', 'why']);
 });

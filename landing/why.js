@@ -1,6 +1,6 @@
 // @ts-check
-// The /why page (why/index.html): applies the chosen language to the static Spanish markup and
-// mounts the ES/EN switches. No network access (the CSP forbids it).
+// The /why page (why/index.html) and the /guia/ guide (guia/index.html): apply the chosen language to the
+// static Spanish markup and mount the ES/EN switches. No network access (the CSP forbids it).
 import { applyI18n, mountLangSwitch } from '../app/js/ui/i18n.js';
 
 applyI18n();

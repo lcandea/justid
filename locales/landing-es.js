@@ -213,6 +213,7 @@ export default {
   'landing.footer.source': 'Código fuente',
   'landing.footer.license': 'Licencia MIT',
   'landing.footer.why': 'Por qué así',
+  'landing.footer.guide': 'Guía para compartir el DNI',
   'landing.footer.disclaimer_a': 'JustID es un proyecto independiente y de código abierto.',
   'landing.footer.disclaimer_b': 'No está afiliado a la Policía Nacional, al Ministerio del Interior ni a ningún organismo público.',
 };

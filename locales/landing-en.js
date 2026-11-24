@@ -213,6 +213,7 @@ export default {
   'landing.footer.source': 'Source code',
   'landing.footer.license': 'MIT licence',
   'landing.footer.why': 'Why this way',
+  'landing.footer.guide': 'Guide to sharing your ID',
   'landing.footer.disclaimer_a': 'JustID is an independent, open-source project.',
   'landing.footer.disclaimer_b': 'It is not affiliated with the Policía Nacional, the Ministry of the Interior or any public body.',
 };

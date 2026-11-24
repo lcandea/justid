@@ -32,8 +32,8 @@ test('every sitemap URL is on the site and maps to a page in the repository', ()
   }
 });
 
-test('the landing and /why have a canonical URL, Open Graph and a large Twitter card', () => {
-  for (const [file, url] of [['index.html', `${SITE}/`], ['why/index.html', `${SITE}/why/`]]) {
+test('the landing, /why and /guia have a canonical URL, Open Graph and a large Twitter card', () => {
+  for (const [file, url] of [['index.html', `${SITE}/`], ['why/index.html', `${SITE}/why/`], ['guia/index.html', `${SITE}/guia/`]]) {
     const html = read(file);
     const meta = (/** @type {string} */ p) => html.match(new RegExp(`<meta (?:property|name)="${p}" content="([^"]+)"`))?.[1];
     assert.match(html, new RegExp(`<link rel="canonical" href="${url}">`), `${file}: canonical`);
@@ -54,7 +54,7 @@ test('the landing and /why have a canonical URL, Open Graph and a large Twitter 
 });
 
 test('the only inline scripts on any page are JSON-LD data blocks', () => {
-  const pages = [...walk('app', '.html'), `${ROOT}/index.html`, `${ROOT}/404.html`, `${ROOT}/why/index.html`];
+  const pages = [...walk('app', '.html'), `${ROOT}/index.html`, `${ROOT}/404.html`, `${ROOT}/why/index.html`, `${ROOT}/guia/index.html`];
   for (const file of pages) {
     for (const m of readFileSync(file, 'utf8').matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)) {
       if (/\bsrc="/.test(m[1])) continue;

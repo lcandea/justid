@@ -2,11 +2,13 @@
 // English UI strings. Keys must match locales/es.js exactly (checked by tests).
 import landing from './landing-en.js';
 import why from './why-en.js';
+import guide from './guide-en.js';
 
-// Landing page strings live in landing-en.js, the /why page strings in why-en.js.
+// Landing page strings live in landing-en.js, the /why page strings in why-en.js, the /guia/ page strings in guide-en.js.
 export default {
   ...landing,
   ...why,
+  ...guide,
   'meta.title': 'JustID — Share your ID, just enough',
   'meta.app_description': 'Cover the parts of your ID you don’t need to share, add a watermark and download it as a PDF. Free, no sign-up, and your ID never leaves your phone.',
   'meta.editor_title': 'JustID — Zone editor',
