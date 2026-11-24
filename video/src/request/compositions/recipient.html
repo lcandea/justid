@@ -1,5 +1,5 @@
 <template>
-  <!-- REQUEST 9.5–14.5 s · Recipient. Carmen's phone opens the link (real capture): who asks, for what, which fields
+  <!-- REQUEST 14.5–22 s · Recipient. Carmen's phone opens the link (real capture): who asks, for what, which fields
        and the requester's reason. A tap accepts the extra (the accepted state is the real capture, revealed only
        inside the row). Then the card: the app hides every field not requested (real redaction patches) and the
        watermark naming the requester sweeps across (real final render). Opens from the chat's zoom-through; the
@@ -102,34 +102,34 @@
       const cB = cam(box(key.x, key.y, key.w, key.h), wide ? 1.05 : 1.06); // pushed in, still all inside the safe band
 
       // 0–0.55: arrival from the chat's zoom-through: big and blurred, settling on the request panel.
-      tl.fromTo('#recipient-cam', { ...cIn, filter: 'blur(10px)', transformOrigin: '0 0' }, { ...cA, filter: 'blur(0px)', transformOrigin: '0 0', duration: 0.6, ease: 'expo.out' }, 0);
-      JV.wordsIn(tl, root, '#recipient-cap1 .w', 0.2, 0.07, 0.16);
+      tl.fromTo('#recipient-cam', { ...cIn, filter: 'blur(10px)', transformOrigin: '0 0' }, { ...cA, filter: 'blur(0px)', transformOrigin: '0 0', duration: 0.8, ease: 'expo.out' }, 0);
+      JV.wordsIn(tl, root, '#recipient-cap1 .w', 0.3, 0.08, 0.18);
 
-      // 1.1–1.55: down to the extra and the reason; tap "accept" (the row turns green: "Aceptado: se mostrará").
-      tl.fromTo('#recipient-cam', { ...cA, transformOrigin: '0 0' }, { ...cB, transformOrigin: '0 0', duration: 0.5, ease: 'power2.inOut', immediateRender: false }, 1.3);
-      JV.blurOut(tl, '#recipient-cap1', 1.86);
-      JV.wordsIn(tl, root, '#recipient-cap2 .w', 1.98, 0.07, 0.16);
+      // 0.9–2.8: hold to read the request (who, what for, the extra, the reason) while the camera eases in slowly.
+      tl.fromTo('#recipient-cam', { ...cA, transformOrigin: '0 0' }, { ...cB, transformOrigin: '0 0', duration: 1.9, ease: 'power1.inOut', immediateRender: false }, 0.9);
+      // 2.55–3.0: the tap comes in and accepts the extra (the row turns green: "Aceptado: se mostrará"); hold.
       const ta = pt(cB, acc.x + 28.5, acc.y + 25);
-      const press = JV.tap(tl, root.querySelector('#recipient-tap'), { x: ta.x + 90, y: ta.y + 120 }, ta, 1.5, 0.42);
-      tl.fromTo('#recipient-acc', { opacity: 0 }, { opacity: 1, duration: 0.08, ease: 'none' }, press + 0.02);
-      tl.fromTo('#recipient-tap', { opacity: 1 }, { opacity: 0, duration: 0.15, ease: 'power2.in', immediateRender: false }, press + 0.35);
+      const press = JV.tap(tl, root.querySelector('#recipient-tap'), { x: ta.x + 90, y: ta.y + 120 }, ta, 2.55, 0.42);
+      tl.fromTo('#recipient-acc', { opacity: 0 }, { opacity: 1, duration: 0.1, ease: 'none' }, press + 0.02);
+      tl.fromTo('#recipient-tap', { opacity: 1 }, { opacity: 0, duration: 0.2, ease: 'power2.in', immediateRender: false }, press + 0.4);
+      JV.blurOut(tl, '#recipient-cap1', 2.98, 0.2);
+      JV.wordsIn(tl, root, '#recipient-cap2 .w', 3.1, 0.08, 0.18);
 
-      // 2.4–2.9: the phone drops away; the card rises into its place.
-      JV.blurOut(tl, '#recipient-cap2', 3.15);
-      tl.fromTo('#recipient-cam', { ...cB, opacity: 1, filter: 'blur(0px)', transformOrigin: '0 0' }, { ...cB, y: cB.y + 900, opacity: 0, filter: 'blur(12px)', transformOrigin: '0 0', duration: 0.32, ease: 'power3.in', immediateRender: false }, 2.95);
-      tl.fromTo('#recipient-card', { y: 700, rotation: 4 }, { y: 0, rotation: 0, duration: 0.6, ease: 'expo.out' }, 3.1);
-      tl.fromTo('#recipient-card', { opacity: 0 }, { opacity: 1, duration: 0.12, ease: 'none' }, 3.1);
+      // 4.55–5.5: the phone drops away; the card rises into its place; hidden fields pixelate.
+      JV.blurOut(tl, '#recipient-cap2', 5.05, 0.2);
+      tl.fromTo('#recipient-cam', { ...cB, opacity: 1, filter: 'blur(0px)', transformOrigin: '0 0' }, { ...cB, y: cB.y + 900, opacity: 0, filter: 'blur(12px)', transformOrigin: '0 0', duration: 0.42, ease: 'power3.in', immediateRender: false }, 4.55);
+      tl.fromTo('#recipient-card', { y: 700, rotation: 4 }, { y: 0, rotation: 0, duration: 0.75, ease: 'expo.out' }, 4.75);
+      tl.fromTo('#recipient-card', { opacity: 0 }, { opacity: 1, duration: 0.15, ease: 'none' }, 4.75);
       // Only the requested fields stay: everything else is pixelated (the app's real output), field by field.
-      tl.fromTo('#recipient-card .patch', { opacity: 0, scale: 1.25 }, { opacity: 1, scale: 1, duration: 0.16, ease: 'power3.out', stagger: 0.035 }, 3.35);
-      // The watermark naming the requester sweeps across (final render revealed behind a lime scan line).
-      tl.fromTo('#recipient-final', { clipPath: 'inset(0% 100% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.5, ease: 'power2.inOut' }, 3.6);
-      tl.fromTo('#recipient-scan', { opacity: 0 }, { opacity: 1, duration: 0.01, ease: 'none' }, 3.6);
-      tl.fromTo('#recipient-scan', { x: 0 }, { x: 700, duration: 0.5, ease: 'power2.inOut' }, 3.6);
-      tl.fromTo('#recipient-scan', { opacity: 1 }, { opacity: 0, duration: 0.12, ease: 'power2.out', immediateRender: false }, 4.1);
-      JV.wordsIn(tl, root, '#recipient-cap3 .w', 3.45, 0.08, 0.18);
-      tl.fromTo('#recipient-wm-pill', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.3, ease: 'expo.out' }, 3.5);
-      // Caption and pill leave just before the seam; the card stays (the receive scene carries it).
-      JV.blurOut(tl, ['#recipient-cap3', '#recipient-wm-pill'], 4.8, 0.18);
+      tl.fromTo('#recipient-card .patch', { opacity: 0, scale: 1.25 }, { opacity: 1, scale: 1, duration: 0.2, ease: 'power3.out', stagger: 0.05 }, 5.15);
+      // The watermark naming the requester sweeps across (final render revealed behind a lime scan line), then holds.
+      tl.fromTo('#recipient-final', { clipPath: 'inset(0% 100% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.6, ease: 'power2.inOut' }, 5.6);
+      tl.fromTo('#recipient-scan', { opacity: 0 }, { opacity: 1, duration: 0.01, ease: 'none' }, 5.6);
+      tl.fromTo('#recipient-scan', { x: 0 }, { x: 700, duration: 0.6, ease: 'power2.inOut' }, 5.6);
+      tl.fromTo('#recipient-scan', { opacity: 1 }, { opacity: 0, duration: 0.15, ease: 'power2.out', immediateRender: false }, 6.2);
+      JV.wordsIn(tl, root, '#recipient-cap3 .w', 5.3, 0.08, 0.18);
+      tl.fromTo('#recipient-wm-pill', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35, ease: 'expo.out' }, 5.55);
+      // Card, caption and pill stay through the seam: the receive scene starts on the same frame and carries them.
       window.__timelines["recipient"] = tl;
     })();
   </script>

@@ -1,5 +1,5 @@
 <template>
-  <!-- REQUEST 7.5–9.5 s · Chat. The link goes out as a message in a neutral, unbranded chat (rebuilt in HTML): the
+  <!-- REQUEST 11–14.5 s · Chat. The link goes out as a message in a neutral, unbranded chat (rebuilt in HTML): the
        app's own prefilled message, a link preview with the JustID logo and the domain. Opens holding the pick
        scene's caption while the phone whips in from below; exits by zooming through the link preview (its ink
        fill becomes the recipient's screen). -->
@@ -78,31 +78,32 @@
       // The avatar shows the initial only.
       const av = root.querySelector('#chat-avatar'); av.textContent = av.textContent.trim().charAt(0);
 
-      // 0–0.35: the phone whips in from below (the pick scene left upward), landing blurred and sharpening.
+      // 0–0.5: the phone whips in from below (the pick scene left upward), landing blurred and sharpening.
       tl.fromTo('#chat-cam', { ...cMain, y: cMain.y + 1700, filter: 'blur(18px)', transformOrigin: '0 0' },
-        { ...cMain, filter: 'blur(0px)', transformOrigin: '0 0', duration: 0.38, ease: 'expo.out' }, 0);
+        { ...cMain, filter: 'blur(0px)', transformOrigin: '0 0', duration: 0.5, ease: 'expo.out' }, 0);
       // Held caption from the pick scene leaves; "Envíaselo" lands.
-      JV.blurOut(tl, '#chat-carry', 0.3);
-      JV.wordsIn(tl, root, '#chat-cap .w', 0.42, 0.07, 0.18);
+      JV.blurOut(tl, '#chat-carry', 0.75, 0.2);
+      JV.wordsIn(tl, root, '#chat-cap .w', 0.9, 0.07, 0.2);
       // The message is sent: the bubble grows from its tail corner; the ticks turn lime (delivered and read).
-      tl.fromTo('#chat-bubble', { scale: 0.6, opacity: 0, transformOrigin: '100% 100%' }, { scale: 1, opacity: 1, duration: 0.4, ease: 'expo.out' }, 0.3);
-      tl.fromTo('#chat-ticks', { color: '#a8a49b' }, { color: '#d7ff3a', duration: 0.15, ease: 'power2.out' }, 0.95);
+      tl.fromTo('#chat-bubble', { scale: 0.6, opacity: 0, transformOrigin: '100% 100%' }, { scale: 1, opacity: 1, duration: 0.5, ease: 'expo.out' }, 0.4);
+      tl.fromTo('#chat-ticks', { color: '#a8a49b' }, { color: '#d7ff3a', duration: 0.2, ease: 'power2.out' }, 1.2);
+      // Hold: the message (and the link inside it) is read; the tap approaches near the end of the hold.
 
-      // 1.0–1.45: a tap on the link preview, then the camera zooms through it.
+      // 2.25–2.7: a tap on the link preview, then the camera zooms through it.
       // Preview card centre in the screen's CSS px (bubble right 12, width 300, top 112; card ~62 tall).
       // Aim at the middle of the card, right of its logo and domain: its ink fill is what fills the frame.
       const pc = { x: 390 - 12 - 150 + 10, y: 112 + 6 + 30 };
       const tp = pt(cMain, pc.x, pc.y);
       // The indicator appears close to the card and moves in a short way (no long trip across the screen).
-      const press = JV.tap(tl, root.querySelector('#chat-tap'), { x: tp.x + 70, y: tp.y + 110 }, tp, 1.0, 0.32);
+      const press = JV.tap(tl, root.querySelector('#chat-tap'), { x: tp.x + 70, y: tp.y + 110 }, tp, 2.25, 0.4);
       tl.fromTo('#chat-tap', { opacity: 1 }, { opacity: 0, duration: 0.12, ease: 'power2.in', immediateRender: false }, press + 0.12);
-      JV.blurOut(tl, '#chat-cap', press + 0.05, 0.2);
+      JV.blurOut(tl, '#chat-cap', press + 0.05, 0.22);
       tl.fromTo('#chat-preview', { borderColor: '#3a3935' }, { borderColor: '#d7ff3a', duration: 0.08, ease: 'none' }, press);
       // Zoom through: the preview's centre stays put while the camera scales ~14x (strong ease-in), blurring at the end.
       const Z2 = 22, c = pt(cMain, pc.x, pc.y);
       const wx = O.x + K * pc.x, wy = O.y + K * pc.y; // wrapper-local point under the tap
       tl.fromTo('#chat-cam', { ...cMain, filter: 'blur(0px)', transformOrigin: '0 0' },
-        { x: c.x - wx * Z2, y: c.y - wy * Z2, scale: Z2, filter: 'blur(6px)', transformOrigin: '0 0', duration: 0.5, ease: 'power3.in', immediateRender: false }, press + 0.1);
+        { x: c.x - wx * Z2, y: c.y - wy * Z2, scale: Z2, filter: 'blur(6px)', transformOrigin: '0 0', duration: 0.65, ease: 'power3.in', immediateRender: false }, press + 0.1);
       window.__timelines["chat"] = tl;
     })();
   </script>

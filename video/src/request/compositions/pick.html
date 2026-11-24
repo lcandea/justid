@@ -1,5 +1,5 @@
 <template>
-  <!-- REQUEST 2–7.5 s · Pick. The requester builds the link in the real builder (captured full page, scrolled in
+  <!-- REQUEST 3–11 s · Pick. The requester builds the link in the real builder (captured full page, scrolled in
        the phone): ticks on the usual fields, a tap on the extra "Domicilio", the reason typed into a rebuilt
        textarea, a tap on "Crear enlace" and the real result section with a rebuilt link box (the capture shows a
        localhost URL). Opens with the hook's lime bar leaving; exits with a vertical whip of the phone while the
@@ -124,48 +124,52 @@
       tl.set('#pick-result', { opacity: 0, y: 0 }, 0);
       tl.set('#pick-count', { textContent: '0/240' }, 0);
 
-      // 0–0.6: the hook's lime bar leaves to the right while the camera pushes in on the builder's field list.
-      tl.fromTo('#pick-wipe', { xPercent: 0 }, { xPercent: 110, duration: 0.32, ease: 'power3.out' }, 0);
-      tl.fromTo('#pick-cam', { ...cIn, transformOrigin: '0 0' }, { ...cMain, transformOrigin: '0 0', duration: 0.7, ease: 'expo.out' }, 0);
-      JV.wordsIn(tl, root, '#pick-cap1 .w', 0.12, 0.07, 0.16);
+      // 0–0.9: the hook's lime bar leaves to the right while the camera pushes in on the builder's field list.
+      tl.fromTo('#pick-wipe', { xPercent: 0 }, { xPercent: 110, duration: 0.42, ease: 'power3.out' }, 0);
+      tl.fromTo('#pick-cam', { ...cIn, transformOrigin: '0 0' }, { ...cMain, transformOrigin: '0 0', duration: 1.2, ease: 'expo.out' }, 0);
+      JV.wordsIn(tl, root, '#pick-cap1 .w', 0.15, 0.08, 0.18);
+      // Hold on the usual fields with their ticks (the push-in's long tail keeps it alive).
 
-      // 0.55–1.0: scroll to the extras; the extra "Domicilio" (amber "Dato extra") gets ticked.
-      scroll('#pick-page', S0, S1, 0.55, 0.45);
-      const p1 = JV.tap(tl, root.querySelector('#pick-tap'), { x: pt(cMain, tick.x, tick.y).x + 90, y: pt(cMain, tick.x, tick.y).y + 120 }, pt(cMain, tick.x, tick.y), 0.85, 0.42);
+      // 1.25–1.8: scroll to the extras; the tap comes in and ticks Domicilio (amber "Dato extra"); hold.
+      scroll('#pick-page', S0, S1, 1.25, 0.55);
+      const tp1 = pt(cMain, tick.x, tick.y);
+      const p1 = JV.tap(tl, root.querySelector('#pick-tap'), { x: tp1.x + 90, y: tp1.y + 120 }, tp1, 1.85, 0.42);
       tl.fromTo('#pick-untick', { opacity: 1 }, { opacity: 0, duration: 0.01, ease: 'none', immediateRender: false }, p1 + 0.02);
-      tl.fromTo('#pick-tap', { opacity: 1 }, { opacity: 0, duration: 0.15, ease: 'power2.in', immediateRender: false }, p1 + 0.3);
-      JV.blurOut(tl, '#pick-cap1', 1.72);
+      tl.fromTo('#pick-tap', { opacity: 1 }, { opacity: 0, duration: 0.2, ease: 'power2.in', immediateRender: false }, p1 + 0.35);
+      JV.blurOut(tl, '#pick-cap1', 3.0, 0.2);
 
-      // 1.7–2.2: on to the reason; "…y explica por qué" while it is typed (the scenario's own text).
-      scroll('#pick-page', S1, S2, 1.7, 0.5);
-      JV.wordsIn(tl, root, '#pick-cap2 .w', 1.9, 0.07, 0.16);
+      // 3.0–3.6: on to the reason; "…y explica por qué" while it is typed (the scenario's own text); hold.
+      scroll('#pick-page', S1, S2, 3.0, 0.6);
+      JV.wordsIn(tl, root, '#pick-cap2 .w', 3.15, 0.08, 0.18);
       // Focus ring (theme.css textarea:focus-visible) while typing.
-      tl.fromTo('#pick-why', { borderColor: '#3a3935', boxShadow: '0 0 0 0px rgba(215,255,58,0)' }, { borderColor: '#d7ff3a', boxShadow: '0 0 0 1px rgba(215,255,58,1)', duration: 0.12, ease: 'power2.out' }, 2.15);
-      tl.fromTo('#pick-caret', { opacity: 0 }, { opacity: 1, duration: 0.01, ease: 'none' }, 2.15);
+      const T0 = 3.75;
+      tl.fromTo('#pick-why', { borderColor: '#3a3935', boxShadow: '0 0 0 0px rgba(215,255,58,0)' }, { borderColor: '#d7ff3a', boxShadow: '0 0 0 1px rgba(215,255,58,1)', duration: 0.12, ease: 'power2.out' }, T0 - 0.1);
+      tl.fromTo('#pick-caret', { opacity: 0 }, { opacity: 1, duration: 0.01, ease: 'none' }, T0 - 0.1);
       const why = '{{cfg:request.why}}';
-      const tEnd = JV.type(tl, root.querySelector('#pick-why-text'), why, 2.25, 54);
+      const tEnd = JV.type(tl, root.querySelector('#pick-why-text'), why, T0, 50);
       const n = { v: 0 };
-      tl.fromTo(n, { v: 0 }, { v: why.length, duration: tEnd - 2.25, ease: 'none', immediateRender: false,
-        onUpdate: () => { root.querySelector('#pick-count').textContent = Math.round(n.v) + '/240'; } }, 2.25);
+      tl.fromTo(n, { v: 0 }, { v: why.length, duration: tEnd - T0, ease: 'none', immediateRender: false,
+        onUpdate: () => { root.querySelector('#pick-count').textContent = Math.round(n.v) + '/240'; } }, T0);
 
-      // 3.25–3.65: to the button; tap "Crear enlace"; the result section drops in below it.
-      tl.fromTo('#pick-why', { borderColor: '#d7ff3a', boxShadow: '0 0 0 1px rgba(215,255,58,1)' }, { borderColor: '#3a3935', boxShadow: '0 0 0 0px rgba(215,255,58,0)', duration: 0.12, ease: 'power2.out', immediateRender: false }, 3.25);
-      tl.fromTo('#pick-caret', { opacity: 1 }, { opacity: 0, duration: 0.01, ease: 'none', immediateRender: false }, 3.25);
-      scroll('#pick-page', S2, S3, 3.25, 0.4);
+      // 5.45–5.95: to the button; tap "Crear enlace"; the result section drops in below it.
+      const T1 = 5.45;
+      tl.fromTo('#pick-why', { borderColor: '#d7ff3a', boxShadow: '0 0 0 1px rgba(215,255,58,1)' }, { borderColor: '#3a3935', boxShadow: '0 0 0 0px rgba(215,255,58,0)', duration: 0.12, ease: 'power2.out', immediateRender: false }, T1);
+      tl.fromTo('#pick-caret', { opacity: 1 }, { opacity: 0, duration: 0.01, ease: 'none', immediateRender: false }, T1);
+      JV.blurOut(tl, '#pick-cap2', T1, 0.2);
+      scroll('#pick-page', S2, S3, T1, 0.5);
       const tc = pt(cMain, create.x + create.w / 2, create.y + create.h / 2 - S3);
-      const p2 = JV.tap(tl, root.querySelector('#pick-tap'), { x: tc.x + 90, y: tc.y + 120 }, tc, 3.38, 0.4);
-      JV.blurOut(tl, '#pick-cap2', p2 - 0.12);
-      tl.fromTo('#pick-tap', { opacity: 1 }, { opacity: 0, duration: 0.15, ease: 'power2.in', immediateRender: false }, p2 + 0.3);
-      tl.fromTo('#pick-result', { opacity: 1, clipPath: 'inset(0px 0px 68% 0px)' }, { opacity: 1, clipPath: 'inset(0px 0px 0% 0px)', duration: 0.4, ease: 'expo.out', immediateRender: false }, p2 + 0.06);
-      // Scroll page and result together so the link box comes up under the caption.
-      scroll('#pick-page', S3, S3 + S4, p2 + 0.2, 0.5);
-      scroll('#pick-result', 0, S4, p2 + 0.2, 0.5);
-      JV.wordsIn(tl, root, '#pick-cap3 .w', p2 + 0.05, 0.08, 0.16);
-      JV.wordsIn(tl, root, '#pick-sub3 .w', p2 + 0.45, 0.07, 0.16);
-      tl.fromTo('#pick-link', { backgroundColor: '#d7ff3a' }, { backgroundColor: '#f3f1ec', duration: 0.5, ease: 'power2.out' }, p2 + 0.55);
+      const p2 = JV.tap(tl, root.querySelector('#pick-tap'), { x: tc.x + 90, y: tc.y + 120 }, tc, T1 + 0.15, 0.45);
+      tl.fromTo('#pick-tap', { opacity: 1 }, { opacity: 0, duration: 0.2, ease: 'power2.in', immediateRender: false }, p2 + 0.35);
+      tl.fromTo('#pick-result', { opacity: 1, clipPath: 'inset(0px 0px 68% 0px)' }, { opacity: 1, clipPath: 'inset(0px 0px 0% 0px)', duration: 0.5, ease: 'expo.out', immediateRender: false }, p2 + 0.06);
+      // Scroll page and result together so the link box comes up under the caption; then hold on the link.
+      scroll('#pick-page', S3, S3 + S4, p2 + 0.2, 0.65);
+      scroll('#pick-result', 0, S4, p2 + 0.2, 0.65);
+      JV.wordsIn(tl, root, '#pick-cap3 .w', p2 + 0.05, 0.08, 0.18);
+      JV.wordsIn(tl, root, '#pick-sub3 .w', p2 + 0.45, 0.08, 0.18);
+      tl.fromTo('#pick-link', { backgroundColor: '#d7ff3a' }, { backgroundColor: '#f3f1ec', duration: 0.6, ease: 'power2.out' }, p2 + 0.6);
 
-      // 5.2–5.5: vertical whip: the phone leaves upward with blur; the caption stays for the chat scene.
-      tl.fromTo('#pick-cam', { ...cMain, filter: 'blur(0px)', transformOrigin: '0 0' }, { ...cMain, y: cMain.y - 1700, filter: 'blur(18px)', transformOrigin: '0 0', duration: 0.3, ease: 'power3.in', immediateRender: false }, 5.2);
+      // 7.6–8.0: vertical whip: the phone leaves upward with blur; the caption stays for the chat scene.
+      tl.fromTo('#pick-cam', { ...cMain, filter: 'blur(0px)', transformOrigin: '0 0' }, { ...cMain, y: cMain.y - 1700, filter: 'blur(18px)', transformOrigin: '0 0', duration: 0.4, ease: 'power3.in', immediateRender: false }, 7.6);
       window.__timelines["pick"] = tl;
     })();
   </script>
