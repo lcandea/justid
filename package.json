@@ -20,7 +20,8 @@
     "video:snapshot": "node video/tools/run.mjs snapshot",
     "video:preview": "node video/tools/run.mjs preview",
     "video:render": "node video/tools/run.mjs render",
-    "video:render:all": "node video/tools/run.mjs render-all"
+    "video:render:all": "node video/tools/run.mjs render-all",
+    "video:compress": "node video/tools/run.mjs compress"
   },
   "devDependencies": {
     "@playwright/test": "1.65.0",
