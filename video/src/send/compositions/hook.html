@@ -36,17 +36,17 @@
       const root = document.querySelector('[data-composition-id="hook"]');
       const tl = gsap.timeline({ paused: true });
       // The whole line is on screen at frame 0 (thumbnail); "entero?" settles with a punch.
-      tl.fromTo('#hook-b .w', { scale: 1.25, filter: 'blur(4px)' }, { scale: 1, filter: 'blur(0px)', duration: 0.3, ease: 'expo.out', transformOrigin: '0% 60%' }, 0);
-      // Cards drift up into place (one move, long-tailed), fanned.
-      tl.fromTo('#hook-front', { y: 120, rotation: -9 }, { y: 0, rotation: -5, duration: 1.1, ease: 'expo.out' }, 0);
-      tl.fromTo('#hook-back', { y: 220, rotation: 2 }, { y: 0, rotation: 6, duration: 1.2, ease: 'expo.out' }, 0);
-      // Amber rings snap on, one per field, then the sub line names them.
-      tl.fromTo('#hook-cards .zone-ring', { opacity: 0, scale: 1.4 }, { opacity: 1, scale: 1, duration: 0.18, ease: 'power3.out', stagger: 0.12 }, 0.45);
-      JV.wordsIn(tl, root, '#hook-sub', 0.45, 0, 0.2);
+      tl.fromTo('#hook-b .w', { scale: 1.25, filter: 'blur(4px)' }, { scale: 1, filter: 'blur(0px)', duration: 0.4, ease: 'expo.out', transformOrigin: '0% 60%' }, 0);
+      // Cards drift up into place (one long-tailed move that keeps the hold alive), fanned.
+      tl.fromTo('#hook-front', { y: 120, rotation: -9 }, { y: 0, rotation: -5, duration: 1.8, ease: 'expo.out' }, 0);
+      tl.fromTo('#hook-back', { y: 220, rotation: 2 }, { y: 0, rotation: 6, duration: 2.0, ease: 'expo.out' }, 0);
+      // The sub line names the fields while their amber rings snap on, one per field.
+      JV.wordsIn(tl, root, '#hook-sub', 0.3, 0, 0.22);
+      tl.fromTo('#hook-cards .zone-ring', { opacity: 0, scale: 1.4 }, { opacity: 1, scale: 1, duration: 0.22, ease: 'power3.out', stagger: 0.18 }, 0.55);
       // Exit: a hard push toward the camera into the next scene (cut on the fastest frame).
       // Anchored at the top edge so the growing cards never reach the sub line above them.
-      tl.to('#hook-cards', { scale: 1.25, y: 40, filter: 'blur(6px)', duration: 0.3, ease: 'power3.in', transformOrigin: '50% 0%' }, 1.7);
-      JV.blurOut(tl, '.cap-band', 1.78, 0.2);
+      tl.to('#hook-cards', { scale: 1.25, y: 40, filter: 'blur(6px)', duration: 0.36, ease: 'power3.in', transformOrigin: '50% 0%' }, 2.64);
+      JV.blurOut(tl, '.cap-band', 2.78, 0.22);
       window.__timelines["hook"] = tl;
     })();
   </script>

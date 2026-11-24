@@ -122,43 +122,43 @@
       setWarp(0);
 
       // 0.00 · The phone arrives, still carrying the hook's push (large and blurred → settled).
-      tl.fromTo('#photo-phone', { scale: 1.14, y: -60, filter: 'blur(8px)' }, { scale: 1, y: 0, filter: 'blur(0px)', duration: 0.45, ease: 'expo.out', transformOrigin: '50% 40%' }, 0);
-      JV.wordsIn(tl, root, '#photo-cap1 .w', 0.02, 0.07, 0.16);
+      tl.fromTo('#photo-phone', { scale: 1.14, y: -60, filter: 'blur(8px)' }, { scale: 1, y: 0, filter: 'blur(0px)', duration: 0.6, ease: 'expo.out', transformOrigin: '50% 40%' }, 0);
+      JV.wordsIn(tl, root, '#photo-cap1 .w', 0.05, 0.09, 0.2);
 
-      // 0.50 · Shutter.
-      tl.fromTo('#photo-flash', { opacity: 0 }, { opacity: 0.85, duration: 0.05, ease: 'none' }, 0.5);
-      tl.to('#photo-flash', { opacity: 0, duration: 0.2, ease: 'power2.out' }, 0.56);
+      // 0.80 · Shutter.
+      tl.fromTo('#photo-flash', { opacity: 0 }, { opacity: 0.85, duration: 0.06, ease: 'none' }, 0.8);
+      tl.to('#photo-flash', { opacity: 0, duration: 0.26, ease: 'power2.out' }, 0.87);
 
-      // 0.62 · Detection: handles fly from the frame edges onto the four corners, the outline draws, the message shows.
+      // 1.05 · Detection: handles fly from the frame edges onto the four corners, the outline draws, the message shows.
       const start = [[24, 200], [366, 200], [366, 660], [24, 660]];
       ['#photo-h1', '#photo-h2', '#photo-h3', '#photo-h4'].forEach((id, i) => {
         tl.fromTo(id, { x: start[i][0], y: start[i][1], opacity: 0, scale: 1.6 },
-          { x: q[i][0], y: q[i][1], opacity: 1, scale: 1, duration: 0.32, ease: 'expo.out' }, 0.62 + i * 0.04);
+          { x: q[i][0], y: q[i][1], opacity: 1, scale: 1, duration: 0.42, ease: 'expo.out' }, 1.05 + i * 0.06);
       });
-      tl.fromTo('#photo-poly', { attr: { 'stroke-dashoffset': per }, opacity: 0 }, { attr: { 'stroke-dashoffset': 0 }, opacity: 1, duration: 0.3, ease: 'power2.out' }, 0.72);
-      tl.fromTo('#photo-top', { opacity: 0 }, { opacity: 1, duration: 0.12, ease: 'power2.out' }, 0.9);
-      tl.fromTo('#photo-msgmask', { clipPath: 'inset(0% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 100%)', duration: 0.3, ease: 'power2.inOut' }, 0.85);
+      tl.fromTo('#photo-poly', { attr: { 'stroke-dashoffset': per }, opacity: 0 }, { attr: { 'stroke-dashoffset': 0 }, opacity: 1, duration: 0.4, ease: 'power2.out' }, 1.2);
+      tl.fromTo('#photo-top', { opacity: 0 }, { opacity: 1, duration: 0.16, ease: 'power2.out' }, 1.45);
+      tl.fromTo('#photo-msgmask', { clipPath: 'inset(0% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 100%)', duration: 0.4, ease: 'power2.inOut' }, 1.35);
 
-      // 1.20 · Caption swap.
-      JV.blurOut(tl, '#photo-cap1', 1.2, 0.15);
-      tl.fromTo('#photo-cap2', { opacity: 0 }, { opacity: 1, duration: 0.01 }, 1.3);
-      JV.wordsIn(tl, root, '#photo-cap2 .w', 1.3, 0.08, 0.16);
+      // 2.10 · Detection holds; then the caption swaps.
+      JV.blurOut(tl, '#photo-cap1', 2.1, 0.18);
+      tl.fromTo('#photo-cap2', { opacity: 0 }, { opacity: 1, duration: 0.01 }, 2.25);
+      JV.wordsIn(tl, root, '#photo-cap2 .w', 2.25, 0.1, 0.2);
 
-      // 1.25 · The flat card takes over the photo's card exactly on the detected quad, then straightens and lifts out.
-      tl.fromTo('#photo-warp', { opacity: 0 }, { opacity: 1, duration: 0.08, ease: 'none' }, 1.25);
-      tl.to(['#photo-quad', '.photo-h'], { opacity: 0, duration: 0.1, ease: 'power2.in' }, 1.3);
+      // 2.20 · The flat card takes over the photo's card exactly on the detected quad, then straightens and lifts out.
+      tl.fromTo('#photo-warp', { opacity: 0 }, { opacity: 1, duration: 0.1, ease: 'none' }, 2.2);
+      tl.to(['#photo-quad', '.photo-h'], { opacity: 0, duration: 0.14, ease: 'power2.in' }, 2.26);
       const warp = { t: 0 };
-      tl.fromTo(warp, { t: 0 }, { t: 1, duration: 0.6, ease: 'power3.inOut', immediateRender: false, onUpdate: () => setWarp(warp.t) }, 1.3);
+      tl.fromTo(warp, { t: 0 }, { t: 1, duration: 0.8, ease: 'power3.inOut', immediateRender: false, onUpdate: () => setWarp(warp.t) }, 2.26);
       // The phone falls out of frame fast (blur, shrink, fade) so the straightened card is the only subject.
-      tl.to('#photo-phone', { y: D.size.height - L.phone.y + 200, scale: 0.9, opacity: 0, filter: 'blur(18px)', duration: 0.32, ease: 'power3.in' }, 1.28);
+      tl.to('#photo-phone', { y: D.size.height - L.phone.y + 200, scale: 0.9, opacity: 0, filter: 'blur(18px)', duration: 0.4, ease: 'power3.in' }, 2.24);
 
-      // 1.92 · Version recognised.
-      tl.fromTo('#photo-chip', { clipPath: 'inset(0% 100% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.26, ease: 'power3.out' }, 1.92);
-      // 2.15 · The claim: everything happens on the phone. The app's lock badge stamps in and stays docked.
-      tl.fromTo('#photo-lock', { opacity: 0, scale: 1.4, filter: 'blur(8px)' }, { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 0.3, ease: 'expo.out', transformOrigin: '0% 50%' }, 2.15);
+      // 3.15 · Version recognised.
+      tl.fromTo('#photo-chip', { clipPath: 'inset(0% 100% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.34, ease: 'power3.out' }, 3.15);
+      // 3.60 · The claim: everything happens on the phone. The app's lock badge stamps in and stays docked.
+      tl.fromTo('#photo-lock', { opacity: 0, scale: 1.4, filter: 'blur(8px)' }, { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 0.4, ease: 'expo.out', transformOrigin: '0% 50%' }, 3.6);
 
-      // 2.80 · Clear everything but the card and the lock badge for the hide scene.
-      JV.blurOut(tl, ['#photo-chip', '#photo-cap2'], 2.8, 0.18);
+      // 4.78 · Clear everything but the card and the lock badge for the hide scene.
+      JV.blurOut(tl, ['#photo-chip', '#photo-cap2'], 4.78, 0.2);
       window.__timelines["photo"] = tl;
     })();
   </script>

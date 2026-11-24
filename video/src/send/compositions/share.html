@@ -128,42 +128,42 @@
       const waC = { x: thumb.x + 90, y: L.sheet.y + 340 + 58 };
 
       // 0.00 · The cream bar leaves to the right, revealing step 4.
-      tl.fromTo('#share-bar', { xPercent: 0 }, { xPercent: 110, duration: 0.3, ease: 'power3.out' }, 0);
-      JV.wordsIn(tl, root, '#share-cap1 .w', 0.1, 0.08, 0.16);
+      tl.fromTo('#share-bar', { xPercent: 0 }, { xPercent: 110, duration: 0.4, ease: 'power3.out' }, 0);
+      JV.wordsIn(tl, root, '#share-cap1 .w', 0.12, 0.1, 0.2);
 
-      // 0.15 · Tap "Compartir PDF".
-      const press = JV.tap(tl, '#share-tap', { x: btnC.x + 200, y: btnC.y + 240 }, btnC, 0.15, 0.25);
-      tl.fromTo('#share-btn', { backgroundColor: '#f3f1ec' }, { backgroundColor: '#d7ff3a', duration: 0.06, ease: 'none' }, press);
-      tl.fromTo('#share-btn', { opacity: 1, filter: 'blur(0px)' }, { opacity: 0, filter: 'blur(8px)', duration: 0.15, ease: 'power3.in', immediateRender: false }, press + 0.1);
-      tl.to('#share-tap', { opacity: 0, duration: 0.12 }, press + 0.18);
+      // 0.35 · Tap "Compartir PDF".
+      const press = JV.tap(tl, '#share-tap', { x: btnC.x + 200, y: btnC.y + 240 }, btnC, 0.35, 0.4);
+      tl.fromTo('#share-btn', { backgroundColor: '#f3f1ec' }, { backgroundColor: '#d7ff3a', duration: 0.08, ease: 'none' }, press);
+      tl.fromTo('#share-btn', { opacity: 1, filter: 'blur(0px)' }, { opacity: 0, filter: 'blur(8px)', duration: 0.2, ease: 'power3.in', immediateRender: false }, press + 0.12);
+      tl.to('#share-tap', { opacity: 0, duration: 0.16 }, press + 0.22);
 
-      // 0.53 · The cards fly onto an A4 page at real size (carry across), the page builds behind them and holds as the hero.
-      const fly = press + 0.08;
-      tl.fromTo('#share-page', { opacity: 0, scale: 0.9, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, duration: 0.32, ease: 'expo.out' }, fly + 0.08);
-      tl.fromTo('#share-front', { x: 0, y: 0, scale: 1 }, { x: onPage[0].x - L.front.x, y: onPage[0].y - L.front.y, scale: s, duration: 0.4, ease: 'power3.inOut', transformOrigin: '0 0' }, fly);
-      tl.fromTo('#share-back', { x: 0, y: 0, scale: 1 }, { x: onPage[1].x - L.back.x, y: onPage[1].y - L.back.y, scale: s, duration: 0.4, ease: 'power3.inOut', transformOrigin: '0 0' }, fly + 0.03);
+      // 0.90 · The cards fly onto an A4 page at real size (carry across); the page builds behind them and holds as the hero.
+      const fly = press + 0.1;
+      tl.fromTo('#share-page', { opacity: 0, scale: 0.9, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, duration: 0.42, ease: 'expo.out' }, fly + 0.1);
+      tl.fromTo('#share-front', { x: 0, y: 0, scale: 1 }, { x: onPage[0].x - L.front.x, y: onPage[0].y - L.front.y, scale: s, duration: 0.55, ease: 'power3.inOut', transformOrigin: '0 0' }, fly);
+      tl.fromTo('#share-back', { x: 0, y: 0, scale: 1 }, { x: onPage[1].x - L.back.x, y: onPage[1].y - L.back.y, scale: s, duration: 0.55, ease: 'power3.inOut', transformOrigin: '0 0' }, fly + 0.05);
 
-      // 1.80 · Share sheet slides up; the page drops into its thumbnail slot.
-      const up = 1.8; // the page holds as the hero from ~0.95 to here
-      tl.fromTo('#share-sheet', { y: H - L.sheet.y + 60 }, { y: 0, duration: 0.32, ease: 'expo.out' }, up);
-      tl.fromTo('#share-doc', { x: 0, y: 0, scale: 1 }, { x: thumb.x - L.page.x * z, y: thumb.y - L.page.y * z, scale: z, duration: 0.3, ease: 'power3.inOut', transformOrigin: '0 0' }, up);
+      // 3.00 · After the hero hold (~1.5 s on the finished page), the share sheet slides up and the page drops into its slot.
+      const up = 3.0;
+      tl.fromTo('#share-sheet', { y: H - L.sheet.y + 60 }, { y: 0, duration: 0.42, ease: 'expo.out' }, up);
+      tl.fromTo('#share-doc', { x: 0, y: 0, scale: 1 }, { x: thumb.x - L.page.x * z, y: thumb.y - L.page.y * z, scale: z, duration: 0.4, ease: 'power3.inOut', transformOrigin: '0 0' }, up);
 
-      // 1.85 · Tap WhatsApp (while the sheet settles).
-      const press2 = JV.tap(tl, '#share-tap', { x: waC.x + 70, y: waC.y + 160 }, waC, up + 0.14, 0.18);
-      JV.blurOut(tl, '#share-cap1', press2 - 0.15, 0.15);
+      // 3.25 · Tap WhatsApp as the sheet settles.
+      const press2 = JV.tap(tl, '#share-tap', { x: waC.x + 70, y: waC.y + 160 }, waC, up + 0.22, 0.28);
+      JV.blurOut(tl, '#share-cap1', press2 - 0.18, 0.18);
 
-      // 2.15 · Sent: the sheet drops away and the file appears as a sent message.
+      // 3.60 · Sent: the sheet drops away and the file appears as a sent message, which holds.
       const drop = H - L.sheet.y + 60, docY = thumb.y - L.page.y * z;
-      tl.fromTo('#share-sheet', { y: 0 }, { y: drop, duration: 0.24, ease: 'power3.in', immediateRender: false }, press2 + 0.08);
-      tl.fromTo('#share-doc', { y: docY }, { y: docY + drop, duration: 0.24, ease: 'power3.in', immediateRender: false }, press2 + 0.08);
-      tl.to('#share-doc', { opacity: 0, duration: 0.01 }, press2 + 0.34); // gone with the sheet
-      tl.to('#share-tap', { opacity: 0, duration: 0.1 }, press2 + 0.12);
-      tl.fromTo('#share-msg', { opacity: 0, scale: 0.6, y: 120, transformOrigin: '100% 100%' }, { opacity: 1, scale: 1, y: 0, duration: 0.32, ease: 'expo.out' }, press2 + 0.24);
-      tl.fromTo('#share-cap2', { opacity: 0 }, { opacity: 1, duration: 0.01 }, press2 + 0.03);
-      JV.wordsIn(tl, root, '#share-cap2 .w', press2 + 0.03, 0.08, 0.16);
+      tl.fromTo('#share-sheet', { y: 0 }, { y: drop, duration: 0.3, ease: 'power3.in', immediateRender: false }, press2 + 0.1);
+      tl.fromTo('#share-doc', { y: docY }, { y: docY + drop, duration: 0.3, ease: 'power3.in', immediateRender: false }, press2 + 0.1);
+      tl.to('#share-doc', { opacity: 0, duration: 0.01 }, press2 + 0.42); // gone with the sheet
+      tl.to('#share-tap', { opacity: 0, duration: 0.14 }, press2 + 0.14);
+      tl.fromTo('#share-msg', { opacity: 0, scale: 0.6, y: 120, transformOrigin: '100% 100%' }, { opacity: 1, scale: 1, y: 0, duration: 0.42, ease: 'expo.out' }, press2 + 0.28);
+      tl.fromTo('#share-cap2', { opacity: 0 }, { opacity: 1, duration: 0.01 }, press2 + 0.04);
+      JV.wordsIn(tl, root, '#share-cap2 .w', press2 + 0.04, 0.1, 0.2);
 
-      // 3.32 · Out to ink for the end card.
-      JV.blurOut(tl, ['#share-msg', '#share-cap2'], 3.32, 0.18);
+      // 5.28 · Out to ink for the end card.
+      JV.blurOut(tl, ['#share-msg', '#share-cap2'], 5.28, 0.22);
       window.__timelines["share"] = tl;
     })();
   </script>

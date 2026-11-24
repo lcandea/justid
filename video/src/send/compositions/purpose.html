@@ -66,31 +66,31 @@
       const purpose = root.querySelector('#pur-input').dataset.purpose;
 
       // 0.00 · Card drops into its place; the field morphs in above it (narrow → full width, blur → sharp).
-      tl.fromTo('#pur-card', { x: L.from.x - L.to.x, y: L.from.y - L.to.y }, { x: 0, y: 0, duration: 0.45, ease: 'expo.out' }, 0);
-      JV.wordsIn(tl, root, '#pur-cap1 .w', 0.04, 0.08, 0.16);
-      tl.fromTo('#pur-input', { scaleX: 0.25, opacity: 0, filter: 'blur(12px)' }, { scaleX: 1, opacity: 1, filter: 'blur(0px)', duration: 0.26, ease: 'power3.out', transformOrigin: '0% 50%' }, 0.1);
-      tl.fromTo('#pur-label', { opacity: 0, filter: 'blur(6px)' }, { opacity: 1, filter: 'blur(0px)', duration: 0.18, ease: 'power2.out' }, 0.16);
+      tl.fromTo('#pur-card', { x: L.from.x - L.to.x, y: L.from.y - L.to.y }, { x: 0, y: 0, duration: 0.6, ease: 'expo.out' }, 0);
+      JV.wordsIn(tl, root, '#pur-cap1 .w', 0.05, 0.1, 0.2);
+      tl.fromTo('#pur-input', { scaleX: 0.25, opacity: 0, filter: 'blur(12px)' }, { scaleX: 1, opacity: 1, filter: 'blur(0px)', duration: 0.35, ease: 'power3.out', transformOrigin: '0% 50%' }, 0.15);
+      tl.fromTo('#pur-label', { opacity: 0, filter: 'blur(6px)' }, { opacity: 1, filter: 'blur(0px)', duration: 0.24, ease: 'power2.out' }, 0.22);
 
-      // 0.40 · Typing, then the typed purpose holds on screen.
-      JV.type(tl, root.querySelector('#pur-text'), purpose, 0.4, 26);
-      tl.fromTo('#pur-caret', { opacity: 1 }, { opacity: 0, duration: 0.05, immediateRender: false }, 1.15);
+      // 0.60 · Typing, then the typed purpose holds on screen.
+      JV.type(tl, root.querySelector('#pur-text'), purpose, 0.6, 18);
+      tl.fromTo('#pur-caret', { opacity: 1 }, { opacity: 0, duration: 0.05, immediateRender: false }, 1.7);
 
-      // 1.40 · The field has done its job and leaves upward; the caption swaps to the watermark line.
-      JV.blurOut(tl, '#pur-cap1', 1.38, 0.15);
-      tl.to(['#pur-label', '#pur-input'], { opacity: 0, y: -40, filter: 'blur(8px)', duration: 0.2, ease: 'power3.in' }, 1.4);
-      tl.fromTo('#pur-cap2', { opacity: 0 }, { opacity: 1, duration: 0.01 }, 1.5);
-      JV.wordsIn(tl, root, '#pur-cap2 .w', 1.5, 0.06, 0.16);
+      // 2.30 · The field has done its job and leaves upward; the caption swaps to the watermark line.
+      JV.blurOut(tl, '#pur-cap1', 2.28, 0.18);
+      tl.to(['#pur-label', '#pur-input'], { opacity: 0, y: -40, filter: 'blur(8px)', duration: 0.26, ease: 'power3.in' }, 2.3);
+      tl.fromTo('#pur-cap2', { opacity: 0 }, { opacity: 1, duration: 0.01 }, 2.42);
+      JV.wordsIn(tl, root, '#pur-cap2 .w', 2.42, 0.08, 0.2);
 
-      // 1.65 · The watermark sweeps across the card.
-      const sweep = 1.65, sweepDur = 0.75;
+      // 2.65 · The watermark sweeps across the card, then the watermarked card holds.
+      const sweep = 2.65, sweepDur = 1.0;
       tl.fromTo('#pur-wm', { clipPath: 'polygon(0% 0%, 0% 0%, -20% 100%, 0% 100%)' },
         { clipPath: 'polygon(0% 0%, 120% 0%, 100% 100%, 0% 100%)', duration: sweepDur, ease: 'power2.inOut' }, sweep);
       tl.fromTo('#pur-edge', { opacity: 0 }, { opacity: 1, duration: 0.01 }, sweep);
       tl.fromTo('#pur-edge', { x: 0 }, { x: L.to.w * 1.2, duration: sweepDur, ease: 'power2.inOut' }, sweep);
       tl.to('#pur-edge', { opacity: 0, duration: 0.01 }, sweep + sweepDur);
 
-      // 3.18 · The cream redaction bar wipes the frame into the share scene.
-      JV.barWipe(tl, '#pur-bar', 3.18, 0.32);
+      // 5.12 · The cream redaction bar wipes the frame into the share scene.
+      JV.barWipe(tl, '#pur-bar', 5.12, 0.38);
       window.__timelines["purpose"] = tl;
     })();
   </script>
